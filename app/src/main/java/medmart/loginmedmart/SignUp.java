@@ -8,13 +8,11 @@ import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.basgeekball.awesomevalidation.utility.RegexTemplate;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
@@ -55,16 +53,10 @@ public class SignUp extends AppCompatActivity {
             addusercall.enqueue(new Callback<HashMap<String,String>>() {
                 @Override
                 public void onResponse(Call<HashMap<String,String>> call, Response<HashMap<String,String>> response) {
-                    if(response.body().get("response").contentEquals("success")){
-                       Intent intent=new Intent();
-                       intent.putExtra("username",jsonObject.get("usenrname"));
-                       intent.putExtra("password",jsonObject.get("password"));
-                       setResult(2,intent);
-                       finish();
-                       System.out.println("cricket");
+                    if (response.body().get("response").contentEquals("success")) {
+                        Utility.login(jsonObject.get("username"), jsonObject.get("password"), getApplicationContext());
                     }
                 }
-
                 @Override
                 public void onFailure(Call<HashMap<String,String>> call, Throwable t) {
                             Toast.makeText(getApplicationContext(),"Failure to Signup",Toast.LENGTH_LONG);
@@ -103,7 +95,7 @@ public class SignUp extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(intent);
             }
         });

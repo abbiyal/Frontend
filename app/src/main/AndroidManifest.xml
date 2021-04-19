@@ -12,9 +12,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginMedMart">
-        <activity android:name=".Stub"></activity>
+        <activity android:name=".ForgotPassword.ForgetPasswordSuccessMessage"></activity>
+        <activity android:name=".ForgotPassword.SetNewPassword" />
+        <activity android:name=".ForgotPassword.VerifyOtp" />
+        <activity android:name=".ForgotPassword.ForgetPassword" />
+        <activity android:name=".Stub" />
         <activity android:name=".SignUp" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
