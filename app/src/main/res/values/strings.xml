@@ -7,8 +7,8 @@
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_username">Please enter valid username</string>
+    <string name="invalid_password">Please enter 5 digit password</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_home">HomeActivity</string>
     <!--
@@ -16,4 +16,7 @@
     values-round/strings.xml for round devices.
     -->
     <string name="hello_world">Hello Square World!</string>
+    <string name="invalid_name">Please enter valid name</string>
+    <string name="invalid_phone">Please enter valid phone number</string>
+    <string name="invalid_confrim_password">Password does not match</string>
 </resources>
