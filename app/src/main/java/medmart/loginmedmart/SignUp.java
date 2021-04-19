@@ -3,19 +3,25 @@ package medmart.loginmedmart;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.media.MediaCodec;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.basgeekball.awesomevalidation.utility.RegexTemplate;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SignUp extends AppCompatActivity {
     private AwesomeValidation awesomeValidation;
@@ -41,9 +47,24 @@ public class SignUp extends AppCompatActivity {
                 R.id.login_password, R.string.invalid_confrim_password);
     }
 
-    private void RegisterUser()  {
+    private void RegisterUser(HashMap<String,String> jsonObject)  {
         if (awesomeValidation.validate()) {
             // todo after sign up validation
+            RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<String> addUserCall=retrofitInterface.addUser(jsonObject);
+            addUserCall.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    System.out.println(jsonObject.get("username"));
+                    System.out.println(jsonObject.get("password"));
+                            MainActivity.getInstance().login(jsonObject.get("username"),jsonObject.get("password"));
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(),"Encountered a Problem !!",Toast.LENGTH_LONG);
+                }
+            });
         }
     }
 
@@ -59,7 +80,17 @@ public class SignUp extends AppCompatActivity {
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RegisterUser();
+                String username=((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString();
+                String password=((TextInputLayout)findViewById(R.id.login_password)).getEditText().getText().toString();
+                String phone=((TextInputLayout) findViewById(R.id.phone_number)).getEditText().getText().toString();
+                String name=((TextInputLayout) findViewById(R.id.Name)).getEditText().getText().toString();
+                HashMap<String, String> jsonObject=new HashMap<>();
+                jsonObject.put("username",username);
+                jsonObject.put("password",password);
+                jsonObject.put("phone",phone);
+                jsonObject.put("name",name);
+                jsonObject.put("role","ROLE_USER");
+                RegisterUser(jsonObject);
             }
         });
 

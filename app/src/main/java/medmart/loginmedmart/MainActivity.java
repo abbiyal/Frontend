@@ -21,6 +21,12 @@ import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    private static MainActivity mainActivity;
+
+    public static MainActivity getInstance(){
+        return mainActivity;
+    }
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +39,11 @@ public class MainActivity extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view) {
                 //OnCLick Stuff
-                login();
+                EditText username= findViewById(R.id.login_username);
+                EditText password=findViewById(R.id.login_password);
+                String user=username.getText().toString();
+                String psswd=password.getText().toString();
+                login(user,psswd);
             }
         });
 
@@ -48,11 +58,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    protected void login(){
-        EditText username= findViewById(R.id.login_username);
-        EditText password=findViewById(R.id.login_password);
-        String user=username.getText().toString();
-        String psswd=password.getText().toString();
+    public void login(String user,String psswd){
+        System.out.println("here");
         LoginCredentials loginCredentials=new LoginCredentials(user,psswd);
         RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<Jwt> jwtCall=retrofitInterface.getAccessToken(loginCredentials);
@@ -81,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("jwt",body.getJwt());
         editor.putString("roles",body.getRoles());
         editor.apply();
+        System.out.println("before intent");
+        Intent intent=new Intent(this,Stub.class);
+        startActivity(intent);
     }
 
 }
