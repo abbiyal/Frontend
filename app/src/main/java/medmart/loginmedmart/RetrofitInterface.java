@@ -12,5 +12,5 @@ public interface RetrofitInterface {
     Call<Jwt> getAccessToken(@Body LoginCredentials login);
 
     @POST("/api/signup")
-    Call<String> addUser(@Body HashMap<String, String> user);
+    Call<HashMap<String,String>> addUser(@Body HashMap<String, String> user);
 }

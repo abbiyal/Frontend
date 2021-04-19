@@ -51,18 +51,23 @@ public class SignUp extends AppCompatActivity {
         if (awesomeValidation.validate()) {
             // todo after sign up validation
             RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-            Call<String> addUserCall=retrofitInterface.addUser(jsonObject);
-            addUserCall.enqueue(new Callback<String>() {
+            Call<HashMap<String,String>> addusercall=retrofitInterface.addUser(jsonObject);
+            addusercall.enqueue(new Callback<HashMap<String,String>>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-                    System.out.println(jsonObject.get("username"));
-                    System.out.println(jsonObject.get("password"));
-                            MainActivity.getInstance().login(jsonObject.get("username"),jsonObject.get("password"));
+                public void onResponse(Call<HashMap<String,String>> call, Response<HashMap<String,String>> response) {
+                    if(response.body().get("response").contentEquals("success")){
+                       Intent intent=new Intent();
+                       intent.putExtra("username",jsonObject.get("usenrname"));
+                       intent.putExtra("password",jsonObject.get("password"));
+                       setResult(2,intent);
+                       finish();
+                       System.out.println("cricket");
+                    }
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(),"Encountered a Problem !!",Toast.LENGTH_LONG);
+                public void onFailure(Call<HashMap<String,String>> call, Throwable t) {
+                            Toast.makeText(getApplicationContext(),"Failure to Signup",Toast.LENGTH_LONG);
                 }
             });
         }

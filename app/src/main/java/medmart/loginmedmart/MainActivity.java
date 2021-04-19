@@ -57,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    public void login(String user,String psswd){
+    public String login(String user,String psswd){
         System.out.println("here");
         LoginCredentials loginCredentials=new LoginCredentials(user,psswd);
         RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
@@ -66,20 +65,20 @@ public class MainActivity extends AppCompatActivity {
         jwtCall.enqueue(new Callback<Jwt>() {
             @Override
             public void onResponse(Call<Jwt> call, Response<Jwt> response) {
-                    System.out.println(call.request().toString());
-                    parseData(response.body());
+                System.out.println(call.request().toString());
+                parseData(response.body());
             }
 
             @Override
             public void onFailure(Call<Jwt> call, Throwable t) {
-                    System.out.println(call.toString());
-                    System.out.println(t.getMessage());
+                System.out.println(call.toString());
+                System.out.println(t.getMessage());
             }
         });
+        return "success";
 
     }
-
-    private void parseData(Jwt body) {
+    protected void parseData(Jwt body) {
         System.out.println(body);
         Context context=getApplicationContext();
         Toast.makeText(context,body.getJwt(), Toast.LENGTH_LONG).show();
@@ -93,4 +92,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==2){
+            System.out.println(login(data.getStringExtra("username"),data.getStringExtra("password")));
+        }
+    }
 }
