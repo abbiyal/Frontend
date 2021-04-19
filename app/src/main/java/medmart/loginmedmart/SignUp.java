@@ -57,7 +57,7 @@ public class SignUp extends AppCompatActivity {
                 public void onResponse(Call<String> call, Response<String> response) {
                     System.out.println(jsonObject.get("username"));
                     System.out.println(jsonObject.get("password"));
-                            MainActivity.getInstance().login(jsonObject.get("username"),jsonObject.get("password"));
+//                            MainActivity.getInstance().login(jsonObject.get("username"),jsonObject.get("password"));
                 }
 
                 @Override
