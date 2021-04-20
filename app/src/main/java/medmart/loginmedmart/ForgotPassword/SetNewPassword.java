@@ -7,6 +7,7 @@ import android.os.BaseBundle;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -29,6 +30,8 @@ public class SetNewPassword extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_set_new_password);
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
@@ -59,15 +62,16 @@ public class SetNewPassword extends AppCompatActivity {
                             if(response.body().get("response").contentEquals("success")){
                                 Intent intent = new Intent(getApplicationContext(), ForgetPasswordSuccessMessage.class);
                                 startActivity(intent);
+                                finish();
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG);
+                                Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG);
+                            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
                         }
                     });
                     // if success then let it go to next activity.. code written nd if not do as required
