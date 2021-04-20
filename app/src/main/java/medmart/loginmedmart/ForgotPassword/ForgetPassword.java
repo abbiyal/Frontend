@@ -7,13 +7,21 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.HashMap;
+
 import medmart.loginmedmart.LoginActivity;
 import medmart.loginmedmart.R;
+import medmart.loginmedmart.RetrofitInstance;
+import medmart.loginmedmart.RetrofitInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ForgetPassword extends AppCompatActivity {
 
@@ -38,9 +46,34 @@ public class ForgetPassword extends AppCompatActivity {
             public void onClick(View v) {
                 //Todo Check Email existence
                     if (awesomeValidation.validate()) {
-                        Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
-                        intent.putExtra("Email", ((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString());
-                        startActivity(intent);
+                        RetrofitInterface retrofitInstance=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+                        HashMap<String,String> requestObject=new HashMap<>();
+                        String email=((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString();
+                        requestObject.put("email",email);
+                        Call<HashMap<String,String>> forgotCall=retrofitInstance.sendToken(requestObject);
+
+                        forgotCall.enqueue(new Callback<HashMap<String, String>>() {
+                            @Override
+                            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                                if(response.body().get("response").contentEquals("success")) {
+                                    Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
+                                    intent.putExtra("Email", ((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString());
+                                    startActivity(intent);
+                                }
+                                else if(response.body().get("response").contentEquals("No User Found")){
+                                    Toast.makeText(getApplicationContext(),"User Not Found",Toast.LENGTH_LONG);
+                                }
+                                else if(response.body().get("response").contentEquals("Connetion Error !!")){
+                                    Toast.makeText(getApplicationContext(),"Connection Error Retry",Toast.LENGTH_LONG);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                                        System.out.println("Connection Error !!!");
+                            }
+                        });
+
                     }
             }
         });

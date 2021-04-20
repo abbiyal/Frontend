@@ -28,6 +28,10 @@ public class Utility {
             @Override
             public void onResponse(Call<Jwt> call, Response<Jwt> response) {
                 System.out.println(call.request().toString());
+                if(response.body().getJwt().contentEquals("null")){
+                    Toast.makeText(context,"Invalid Username or Password",Toast.LENGTH_LONG).show();
+                }
+                else
                 parseData(response.body(),context);
             }
 

@@ -13,4 +13,15 @@ public interface RetrofitInterface {
 
     @POST("/api/signup")
     Call<HashMap<String,String>> addUser(@Body HashMap<String, String> user);
+
+    @POST("/api/forgot/sendtoken")
+    Call<HashMap<String,String>> sendToken(@Body HashMap<String,String> email);
+
+    @POST("/api/forgot/verifytoken")
+    Call<HashMap<String,String>> verifyOtp(@Body HashMap<String,String> otp);
+
+    @POST("/api/forgot/updatepassword")
+    Call<HashMap<String,String>> updatePassword(@Body HashMap<String,String> password);
+
+
 }
