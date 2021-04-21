@@ -1,10 +1,11 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.UtilityClasses;
 
 import java.util.HashMap;
 
+import medmart.loginmedmart.LoginSignUpActivites.Jwt;
+import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface RetrofitInterface {

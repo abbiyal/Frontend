@@ -1,4 +1,4 @@
-package medmart.loginmedmart.ForgotPassword;
+package medmart.loginmedmart.ForgotPasswordActivities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,10 +16,10 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
-import medmart.loginmedmart.LoginActivity;
+import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
 import medmart.loginmedmart.R;
-import medmart.loginmedmart.RetrofitInstance;
-import medmart.loginmedmart.RetrofitInterface;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

@@ -1,4 +1,4 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.LoginSignUpActivites;
 
 import com.google.gson.annotations.SerializedName;
 

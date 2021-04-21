@@ -1,4 +1,4 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.LoginSignUpActivites;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -18,6 +17,10 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
+import medmart.loginmedmart.R;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import medmart.loginmedmart.UtilityClasses.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,7 +52,7 @@ public class SignUp extends AppCompatActivity {
     private void RegisterUser(HashMap<String,String> jsonObject)  {
         if (awesomeValidation.validate()) {
             // todo after sign up validation
-            RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
             Call<HashMap<String,String>> addusercall=retrofitInterface.addUser(jsonObject);
             addusercall.enqueue(new Callback<HashMap<String,String>>() {
                 @Override

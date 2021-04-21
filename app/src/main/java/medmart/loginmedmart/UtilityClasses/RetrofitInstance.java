@@ -1,4 +1,4 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.UtilityClasses;
 
 import java.util.concurrent.TimeUnit;
 

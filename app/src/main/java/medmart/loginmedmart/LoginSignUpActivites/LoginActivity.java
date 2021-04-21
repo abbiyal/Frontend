@@ -1,18 +1,19 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.LoginSignUpActivites;
 
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import medmart.loginmedmart.ForgotPassword.ForgetPassword;
+import medmart.loginmedmart.ForgotPasswordActivities.ForgetPassword;
+import medmart.loginmedmart.R;
+import medmart.loginmedmart.UtilityClasses.Utility;
 
 
 public class LoginActivity extends AppCompatActivity {

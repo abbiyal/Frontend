@@ -1,4 +1,4 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.LoginSignUpActivites;
 
 public class LoginCredentials {
 

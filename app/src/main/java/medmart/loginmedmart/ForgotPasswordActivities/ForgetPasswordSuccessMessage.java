@@ -1,4 +1,4 @@
-package medmart.loginmedmart.ForgotPassword;
+package medmart.loginmedmart.ForgotPasswordActivities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
-import medmart.loginmedmart.LoginActivity;
+import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
 import medmart.loginmedmart.R;
 
 public class ForgetPasswordSuccessMessage extends AppCompatActivity {

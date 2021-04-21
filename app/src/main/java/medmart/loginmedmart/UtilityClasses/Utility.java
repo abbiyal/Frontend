@@ -1,21 +1,18 @@
-package medmart.loginmedmart;
+package medmart.loginmedmart.UtilityClasses;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import medmart.loginmedmart.Jwt;
-import medmart.loginmedmart.LoginCredentials;
-import medmart.loginmedmart.RetrofitInstance;
-import medmart.loginmedmart.RetrofitInterface;
+import medmart.loginmedmart.LoginSignUpActivites.Jwt;
+import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
 import medmart.loginmedmart.Stub;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
-import static androidx.core.content.ContextCompat.startActivity;
 
 public class Utility {
 
