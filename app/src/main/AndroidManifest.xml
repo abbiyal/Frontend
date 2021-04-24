@@ -12,20 +12,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginMedMart">
+        <activity android:name=".HomeActivity.HomePage"></activity>
         <activity android:name=".ForgotPasswordActivities.ForgetPasswordSuccessMessage">
             android:screenOrientation="portrait"
         </activity>
-        <activity android:name=".ForgotPasswordActivities.SetNewPassword"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ForgotPasswordActivities.VerifyOtp"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ForgotPasswordActivities.ForgetPassword"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".Stub"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".LoginSignUpActivites.SignUp"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".LoginSignUpActivites.LoginActivity"
+        <activity
+            android:name=".ForgotPasswordActivities.SetNewPassword"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ForgotPasswordActivities.VerifyOtp"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ForgotPasswordActivities.ForgetPassword"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Stub"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".LoginSignUpActivites.SignUp"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".LoginSignUpActivites.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
