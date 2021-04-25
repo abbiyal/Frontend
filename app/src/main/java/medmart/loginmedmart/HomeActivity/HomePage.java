@@ -2,6 +2,7 @@ package medmart.loginmedmart.HomeActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,7 +20,7 @@ import medmart.loginmedmart.R;
 
 public class HomePage extends AppCompatActivity {
 
-    RecyclerView catagoryRecycler;
+    RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
 
     RecyclerView shopRecycler;
@@ -36,7 +37,7 @@ public class HomePage extends AppCompatActivity {
         window.setStatusBarColor(ContextCompat.getColor(this,R.color.TopBar_Home));
         setContentView(R.layout.activity_home_page);
 
-        catagoryRecycler = findViewById(R.id.catagory_recyclerview);
+        categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
 
         shopRecycler = findViewById(R.id.shop_recyclerview);
@@ -63,8 +64,8 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void PopulateCataegoryRecycler() {
-        catagoryRecycler.setHasFixedSize(true);
-        catagoryRecycler.setLayoutManager(new LinearLayoutManager(this,
+        categoryRecycler.setHasFixedSize(true);
+        categoryRecycler.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
 
         ArrayList<CategoryCard> categoryCards = new ArrayList<>();
@@ -74,6 +75,6 @@ public class HomePage extends AppCompatActivity {
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryAdapter = new CategoryAdapter(categoryCards);
-        catagoryRecycler.setAdapter(categoryAdapter);
+        categoryRecycler.setAdapter(categoryAdapter);
     }
 }

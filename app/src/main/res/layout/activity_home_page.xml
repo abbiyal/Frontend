@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#C2DFFF"
     tools:context=".HomeActivity.HomePage">
 
 
@@ -12,7 +13,7 @@
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/TopBar_Home"
+        android:background="@color/teal_700"
         android:paddingLeft="20dp"
         android:paddingTop="20dp"
         android:paddingRight="20dp">
@@ -47,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/cart"
-        android:background="@color/TopBar_Home">
+        android:background="@color/teal_700">
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,16 +74,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/topbar"
-        android:background="@color/TopBar_Home">
+        android:background="@color/teal_700">
 
-        <TextView
+        <EditText
             android:id="@+id/search_text"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_margin="15dp"
-            android:background="@color/white"
+            android:background="@drawable/round_corner_edittext"
             android:paddingLeft="3dp"
-            android:text="Search for Medicines"
+            android:textColor="@color/black"
+            android:maxLines="1"
+            android:hint="Search for Medicines"
+            android:textColorHint="@color/black"
+            android:inputType="text"
             android:textSize="20sp" />
 
 
@@ -93,7 +98,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="20dp"
-            android:src="@drawable/ic_baseline_search_24" />
+            android:src="@drawable/search_icon" />
     </RelativeLayout>
 
 
@@ -119,9 +124,9 @@
     <!--            />-->
     <!--    </LinearLayout>-->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -149,8 +154,7 @@
                     android:layout_height="180dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:nestedScrollingEnabled="false" />
+                    android:layout_marginEnd="20dp" />
 
             </LinearLayout>
 
@@ -172,12 +176,10 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/shop_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="600dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:nestedScrollingEnabled="false"
-                    android:scrollbars="none" />
+                    android:layout_marginEnd="20dp" />
 
             </LinearLayout>
 
