@@ -44,7 +44,6 @@ public class SetNewPassword extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (awesomeValidation.validate()) {
-                    // todo change password in backend
                     RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
                     HashMap<String,String> map=new HashMap<>();
                     String email = getIntent().getStringExtra("email");

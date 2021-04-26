@@ -19,6 +19,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 
     private ArrayList<SearchCard> searchCards;
 
+    public SearchAdapter() {
+        searchCards = new ArrayList<>();
+    }
+
     public void SetContent(ArrayList<SearchCard> searchCards) {
         this.searchCards = searchCards;
         notifyDataSetChanged();

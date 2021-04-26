@@ -1,12 +1,18 @@
 package medmart.loginmedmart.UtilityClasses;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
+import medmart.loginmedmart.SearchActivity.HelperClasses.SearchCard;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.QueryMap;
 
 public interface RetrofitInterface {
     @POST("/api/login")
@@ -23,6 +29,9 @@ public interface RetrofitInterface {
 
     @POST("/api/forgot/updatepassword")
     Call<HashMap<String,String>> updatePassword(@Body HashMap<String,String> password);
+
+    @GET("/med-inventory/search")
+    Call<List<ProductCatalogue>> getSearchResults(@Header("Authorization") String token, @QueryMap Map<String,String> params);
 
 
 }

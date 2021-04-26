@@ -41,7 +41,7 @@ public class ForgetPassword extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Todo Check Email existence
+
                     if (awesomeValidation.validate()) {
                         RetrofitInterface retrofitInstance=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
                         HashMap<String,String> requestObject=new HashMap<>();

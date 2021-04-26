@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -14,12 +15,21 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.HelperClasses.SearchAdapter;
 import medmart.loginmedmart.SearchActivity.HelperClasses.SearchCard;
+import medmart.loginmedmart.UtilityClasses.ProductCatalogue;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Search extends AppCompatActivity {
     EditText searchText;
@@ -47,8 +57,8 @@ public class Search extends AppCompatActivity {
         SetSearchUi(query);
 
 
-        searchText.setText(query);
-//        CallSearch(query);
+
+        CallSearch(query);
         SetOnEditorAction();
 
         searchRecycler = findViewById(R.id.rv_search_result);
@@ -59,7 +69,7 @@ public class Search extends AppCompatActivity {
         searchAdapter = new SearchAdapter();
         searchRecycler.setAdapter(searchAdapter);
 
-        NotifyRecycler(GenerateSampleData());
+//        NotifyRecycler(GenerateSampleData());
 
     }
 
@@ -70,6 +80,53 @@ public class Search extends AppCompatActivity {
 
     private void CallSearch(String query) {
         // todo query to the backend
+        System.out.println("hello");
+        HashMap<String ,String> params=new HashMap<>();
+        params.put("keyword",query);
+        SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences("Login_Cookie",MODE_PRIVATE);
+        String jwt="Bearer "+ sharedPreferences.getString("jwt","No JWT FOUND");
+        System.out.println(jwt);
+        RetrofitInterface retrofitInterface=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<List<ProductCatalogue>> searchCall=retrofitInterface.getSearchResults(jwt,params);
+        searchCall.enqueue(new Callback<List<ProductCatalogue>>() {
+            @Override
+            public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
+                List<ProductCatalogue> results=response.body();
+                ArrayList<SearchCard> searchResults=new ArrayList<>();
+                for(int i=0;i<results.size();i++){
+                    String sizeString="";
+                    switch(results.get(i).getType()){
+                        case "GEL":
+                            sizeString=results.get(i).getSize()+getString(R.string.Gel_Size);
+                            break;
+                        case "POWDER":
+                            sizeString=results.get(i).getSize()+getString(R.string.Powder_Size);
+                            break;
+                        case "SYRUP":
+                        case "SPRAY":
+                            sizeString=results.get(i).getSize()+getString(R.string.Syrup_Spray_Size);
+                            break;
+                        case "TABLET":
+                            sizeString=results.get(i).getSize()+getString(R.string.Tablet_Size);
+                            break;
+                        default:
+                            sizeString=results.get(i).getSize()+" UNITS";
+                    }
+                    searchResults.add(new SearchCard(R.drawable.crocin,
+                            results.get(i).getProductName(),results.get(i).getCompanyName(),
+                            sizeString));
+                }
+
+                NotifyRecycler(searchResults);
+            }
+
+            @Override
+            public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(),"connection Error !!!",Toast.LENGTH_LONG).show();
+            }
+        });
+
+
     }
 
     private void NotifyRecycler(ArrayList<SearchCard> searchResult) {

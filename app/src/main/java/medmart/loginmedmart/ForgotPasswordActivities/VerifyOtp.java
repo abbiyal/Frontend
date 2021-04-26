@@ -42,7 +42,6 @@ public class VerifyOtp extends AppCompatActivity {
         verifyCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo verification process
                 RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
                 HashMap<String,String> otp=new HashMap<>();
                 Call<HashMap<String,String>> verifyOtpCall=retrofitInterface.verifyOtp(otp);

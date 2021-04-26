@@ -51,7 +51,6 @@ public class SignUp extends AppCompatActivity {
 
     private void RegisterUser(HashMap<String,String> jsonObject)  {
         if (awesomeValidation.validate()) {
-            // todo after sign up validation
             RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
             Call<HashMap<String,String>> addusercall=retrofitInterface.addUser(jsonObject);
             addusercall.enqueue(new Callback<HashMap<String,String>>() {

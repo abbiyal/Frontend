@@ -22,4 +22,8 @@
     <string name="sample_medicine_name">Crocin 650mg Advance</string>
     <string name="sample_medicine_company">By CIPLA</string>
     <string name="sample_medicine_size">15 TABLET(S) IN STRIP</string>
+    <string name="Syrup_Spray_Size">IN BOTTLE</string>
+    <string name="Powder_Size">POWDER IN BOTTLE</string>
+    <string name="Gel_Size">GEL IN TUBE</string>
+    <string name="Tablet_Size">TABLET(S) IN STRIP</string>
 </resources>
