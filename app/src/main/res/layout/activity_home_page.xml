@@ -97,7 +97,8 @@
             android:layout_height="30dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="25dp"
+            android:onClick="CallSearch"
             android:src="@drawable/search_icon" />
     </RelativeLayout>
 
@@ -152,9 +153,7 @@
                     android:id="@+id/catagory_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="180dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp" />
+                    android:layout_marginTop="20dp"/>
 
             </LinearLayout>
 
@@ -176,10 +175,10 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/shop_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="600dp"
-                    android:layout_marginStart="20dp"
+                    android:layout_height="620dp"
+                    android:layout_marginStart="10dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp" />
+                    android:layout_marginEnd="10dp" />
 
             </LinearLayout>
 

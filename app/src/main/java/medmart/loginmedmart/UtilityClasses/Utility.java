@@ -7,11 +7,6 @@ import android.widget.Toast;
 
 import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
-import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
-import medmart.loginmedmart.Stub;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
 

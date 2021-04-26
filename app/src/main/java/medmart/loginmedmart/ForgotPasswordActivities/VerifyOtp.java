@@ -23,11 +23,6 @@ import retrofit2.Response;
 
 public class VerifyOtp extends AppCompatActivity {
 
-    public void Abort(View view) {
-        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-        startActivity(intent);
-    }
-
     public void ResendOtp(View view) {
         // todo make call to resend otp function
     }

@@ -19,4 +19,7 @@
     <string name="invalid_name">Please enter valid name</string>
     <string name="invalid_phone">Please enter valid phone number</string>
     <string name="invalid_confrim_password">Password does not match</string>
+    <string name="sample_medicine_name">Crocin 650mg Advance</string>
+    <string name="sample_medicine_company">By CIPLA</string>
+    <string name="sample_medicine_size">15 TABLET(S) IN STRIP</string>
 </resources>

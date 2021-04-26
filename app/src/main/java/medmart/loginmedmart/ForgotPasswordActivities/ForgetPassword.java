@@ -25,13 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ForgetPassword extends AppCompatActivity {
-
     private AwesomeValidation awesomeValidation;
-
-    public void GoBack(View view) {
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
