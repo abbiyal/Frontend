@@ -79,7 +79,6 @@ public class Search extends AppCompatActivity {
     }
 
     private void CallSearch(String query) {
-        // todo query to the backend
         System.out.println("hello");
         HashMap<String ,String> params=new HashMap<>();
         params.put("keyword",query);
