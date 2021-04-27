@@ -1,11 +1,17 @@
 package medmart.loginmedmart.HomeActivity;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,6 +21,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,8 +32,9 @@ import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
 
-public class HomePage extends AppCompatActivity {
+public class HomePage<shopRecycler> extends AppCompatActivity {
 
+    private int LOCATION_PERMISSION_CODE = 1;
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
 
@@ -50,16 +58,63 @@ public class HomePage extends AppCompatActivity {
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(ContextCompat.getColor(this,R.color.teal_700));
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_home_page);
         search = findViewById(R.id.search_text);
         SetOnEditorAction();
-
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
 
+        GetLocationPermission();
+
+
         shopRecycler = findViewById(R.id.shop_recyclerview);
         PopulateShopRecycler();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // todo after getting permission
+            } else {
+                //
+                GetLocationPermission();
+            }
+        }
+    }
+
+    private void GetLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // todo permission alrdy granted
+            Toast.makeText(this, "alrdy granted", Toast.LENGTH_LONG).show();
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // todo if alrdy denied once (show dialog if says no end app)
+                new AlertDialog.Builder(this)
+                        .setTitle("Permission Nedeed")
+                        .setMessage("Write why we need and if click cancel end app")
+                        .setPositiveButton("Postivie button messege", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(HomePage.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("negative button message", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                finish();
+                            }
+                        })
+                        .create().show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+            }
+        }
     }
 
     private void SetOnEditorAction() {

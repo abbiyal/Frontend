@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import medmart.loginmedmart.ForgotPasswordActivities.ForgetPassword;
+import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.Utility;
 
@@ -34,6 +35,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getSupportActionBar().hide();
+
+        if (Utility.GetDataFromCache(this, "isLogged", "false").contentEquals("true")) {
+            Intent intent = new Intent(this, HomePage.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+
         setContentView(R.layout.activity_login);
 
         Button login = (Button)findViewById(R.id.login_button);
