@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginMedMart">
-        <activity android:name=".SearchActivity.Search"></activity>
+        <activity android:name=".ProfileActivity.ProfileActivity"></activity>
+        <activity android:name=".SearchActivity.Search" />
         <activity android:name=".HomeActivity.HomePage" />
         <activity android:name=".ForgotPasswordActivities.ForgetPasswordSuccessMessage">
             android:screenOrientation="portrait"

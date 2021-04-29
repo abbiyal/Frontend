@@ -5,6 +5,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -60,6 +63,9 @@ public class HomePage extends AppCompatActivity {
 
         shopRecycler = findViewById(R.id.shop_recyclerview);
         PopulateShopRecycler();
+
+
+
     }
 
     private void SetOnEditorAction() {
@@ -119,4 +125,6 @@ public class HomePage extends AppCompatActivity {
         categoryAdapter = new CategoryAdapter(categoryCards);
         categoryRecycler.setAdapter(categoryAdapter);
     }
+
+
 }

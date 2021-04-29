@@ -1,6 +1,8 @@
 package medmart.loginmedmart.UtilityClasses;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Toast;
@@ -56,4 +58,22 @@ public class Utility {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
+
+
+    new AlertDialog.Builder(this)
+            .setTitle("Device Location is not enabled")
+                .setMessage("Please enable device location to ensure accurate address and faster delivery")
+                .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            //TOdo Pankaj: ENable location
+        }
+    })
+            .setNegativeButton("Enter Location Manually", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            //Todo Enter manually location
+        }
+    })
+            .create().show();
 }
