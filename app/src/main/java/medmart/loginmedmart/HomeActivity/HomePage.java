@@ -12,7 +12,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -39,6 +42,8 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
 
     private int LOCATION_PERMISSION_CODE_FIRST = 1;
     private int LOCATION_PERMISSION_CODE_SECOND = 2;
+    private boolean mLocationPermission = false;
+
     LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
@@ -69,6 +74,9 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         SetOnEditorAction();
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
+        if (CheckGPSStatus()) {
+            // todo read and send to backend then populate view
+        }
 
         new AlertDialog.Builder(this)
                 .setTitle("Device Location is not enabled")
@@ -76,7 +84,7 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
                 .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST);
+                        mLocationPermission = Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST);
                         dialog.dismiss();
                     }
                 })
@@ -92,6 +100,11 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         PopulateShopRecycler();
     }
 
+    private boolean CheckGPSStatus() {
+        LocationManager locationManager = (LocationManager)this.getSystemService(this.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -99,8 +112,33 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_CODE_FIRST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // todo after getting permission
+                mLocationPermission = true;
             } else {
                 //
+                mLocationPermission = false;
+                Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_SECOND);
+            }
+        } else if (requestCode == LOCATION_PERMISSION_CODE_SECOND) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // todo after getting permission
+                mLocationPermission = true;
+            } else {
+                //
+                mLocationPermission = false;
+                new AlertDialog.Builder(this)
+                        .setMessage("It looks like you have turned off permissions required for this feature. It can be enabled under Phone" +
+                                "Settings > Apps > Medmart > Permissions")
+                        .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                                dialog.dismiss();
+                            }
+                        })
+                        .create().show();
             }
         }
     }

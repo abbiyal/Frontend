@@ -1,11 +1,7 @@
 package medmart.loginmedmart.UtilityClasses;
 
-<<<<<<< HEAD
 import android.Manifest;
 import android.app.Activity;
-=======
-import android.app.AlertDialog;
->>>>>>> 56086f0e9c3d93f03803db7e474f749d69ca3a43
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -82,13 +78,11 @@ public class Utility {
         return sharedPreferences.getString(key, defaultString);
     }
 
-    public static void GetLocationPermission(DialogInterface.OnClickListener context, int code) {
+    public static boolean GetLocationPermission(Activity context, int code) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // todo permission alrdy granted
-            Toast.makeText(context, "alrdy granted", Toast.LENGTH_LONG).show();
+            return true;
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // todo if alrdy denied once (show dialog if says no end app)
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 new AlertDialog.Builder(context)
                         .setTitle("Location Permission Denied")
                         .setMessage("Medmart usses this permission to detect your current location and " +
@@ -96,7 +90,7 @@ public class Utility {
                         .setPositiveButton("RETRY", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         code);
                                 dialog.dismiss();
                             }
@@ -104,14 +98,15 @@ public class Utility {
                         .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // todo handle denial
+                                dialog.dismiss();
                             }
                         })
                         .create().show();
             } else {
-                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, code);
+                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, code);
             }
         }
-    }
 
+        return false;
+    }
 }
