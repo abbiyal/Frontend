@@ -1,14 +1,13 @@
 package medmart.loginmedmart.HomeActivity;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,6 +33,7 @@ import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
+import medmart.loginmedmart.UtilityClasses.Utility;
 
 public class HomePage<shopRecycler> extends AppCompatActivity {
 
@@ -70,6 +70,23 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
 
+        new AlertDialog.Builder(this)
+                .setTitle("Device Location is not enabled")
+                .setMessage("Please enable device location to ensure accurate address and faster delivery")
+                .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Enter Location Manually", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Todo Enter manually location
+                    }
+                })
+                .create().show();
 
         shopRecycler = findViewById(R.id.shop_recyclerview);
         PopulateShopRecycler();
@@ -93,8 +110,6 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         search.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
-                System.out.println("on editor one");
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                     CallSearch(v);
                     return true;
@@ -145,4 +160,6 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         categoryAdapter = new CategoryAdapter(categoryCards);
         categoryRecycler.setAdapter(categoryAdapter);
     }
+
+
 }

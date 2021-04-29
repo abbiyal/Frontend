@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.chaos.view.PinView;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
@@ -24,7 +25,31 @@ import retrofit2.Response;
 public class VerifyOtp extends AppCompatActivity {
 
     public void ResendOtp(View view) {
-        // todo make call to resend otp function
+        RetrofitInterface retrofitInstance=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        HashMap<String,String> requestObject=new HashMap<>();
+        String email=getIntent().getStringExtra("Email");
+        requestObject.put("email",email);
+        Call<HashMap<String,String>> forgotCall=retrofitInstance.sendToken(requestObject);
+
+        forgotCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                if(response.body().get("response").contentEquals("success")) {
+                    Toast.makeText(getApplicationContext(),"OTP SENT !!",Toast.LENGTH_LONG);
+                }
+                else if(response.body().get("response").contentEquals("No User Found")){
+                    Toast.makeText(getApplicationContext(),"User Not Found",Toast.LENGTH_LONG);
+                }
+                else if(response.body().get("response").contentEquals("Connetion Error !!")){
+                    Toast.makeText(getApplicationContext(),"Connection Error Retry",Toast.LENGTH_LONG);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                System.out.println("Connection Error !!!");
+            }
+        });
     }
 
     @Override

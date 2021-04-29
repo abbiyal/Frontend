@@ -33,5 +33,11 @@ public interface RetrofitInterface {
     @GET("/med-inventory/search")
     Call<List<ProductCatalogue>> getSearchResults(@Header("Authorization") String token, @QueryMap Map<String,String> params);
 
+    @GET("/api/updateName")
+    Call<HashMap<String,String>> updateName(@Header("Authorization") String token, @QueryMap Map<String,String> params);
+
+    @GET("/api/updatePhone")
+    Call<HashMap<String,String>> updatePhone(@Header("Authorization") String token, @QueryMap Map<String,String> params);
+
 
 }

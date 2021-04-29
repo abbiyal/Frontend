@@ -1,7 +1,11 @@
 package medmart.loginmedmart.UtilityClasses;
 
+<<<<<<< HEAD
 import android.Manifest;
 import android.app.Activity;
+=======
+import android.app.AlertDialog;
+>>>>>>> 56086f0e9c3d93f03803db7e474f749d69ca3a43
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -78,7 +82,7 @@ public class Utility {
         return sharedPreferences.getString(key, defaultString);
     }
 
-    public static void GetLocationPermission(Context context, int code) {
+    public static void GetLocationPermission(DialogInterface.OnClickListener context, int code) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // todo permission alrdy granted
             Toast.makeText(context, "alrdy granted", Toast.LENGTH_LONG).show();
@@ -109,4 +113,5 @@ public class Utility {
             }
         }
     }
+
 }
