@@ -78,7 +78,7 @@ public class Utility {
         return sharedPreferences.getString(key, defaultString);
     }
 
-    public static boolean GetLocationPermission(Activity context, int code) {
+    public static boolean GetLocationPermission(Activity context, int codeFirst, int codeSecond) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             return true;
         } else {
@@ -91,7 +91,7 @@ public class Utility {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        code);
+                                        codeSecond);
                                 dialog.dismiss();
                             }
                         })
@@ -103,7 +103,7 @@ public class Utility {
                         })
                         .create().show();
             } else {
-                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, code);
+                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, codeFirst);
             }
         }
 
