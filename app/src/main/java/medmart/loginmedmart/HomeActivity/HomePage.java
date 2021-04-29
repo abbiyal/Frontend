@@ -12,6 +12,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,6 +23,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
@@ -34,7 +37,9 @@ import medmart.loginmedmart.SearchActivity.Search;
 
 public class HomePage<shopRecycler> extends AppCompatActivity {
 
-    private int LOCATION_PERMISSION_CODE = 1;
+    private int LOCATION_PERMISSION_CODE_FIRST = 1;
+    private int LOCATION_PERMISSION_CODE_SECOND = 2;
+    LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
 
@@ -65,8 +70,6 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
 
-        GetLocationPermission();
-
 
         shopRecycler = findViewById(R.id.shop_recyclerview);
         PopulateShopRecycler();
@@ -76,43 +79,11 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == LOCATION_PERMISSION_CODE) {
+        if (requestCode == LOCATION_PERMISSION_CODE_FIRST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // todo after getting permission
             } else {
                 //
-                GetLocationPermission();
-            }
-        }
-    }
-
-    private void GetLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // todo permission alrdy granted
-            Toast.makeText(this, "alrdy granted", Toast.LENGTH_LONG).show();
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // todo if alrdy denied once (show dialog if says no end app)
-                new AlertDialog.Builder(this)
-                        .setTitle("Permission Nedeed")
-                        .setMessage("Write why we need and if click cancel end app")
-                        .setPositiveButton("Postivie button messege", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(HomePage.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNegativeButton("negative button message", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                finish();
-                            }
-                        })
-                        .create().show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
             }
         }
     }
