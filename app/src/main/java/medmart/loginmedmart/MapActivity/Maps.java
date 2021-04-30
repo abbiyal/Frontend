@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -81,6 +82,42 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         currentLocation = findViewById(R.id.currentlocation);
+        Intent intent = getIntent();
+
+        double userLongitude = intent.getDoubleExtra("userlongitude", mDefaultLocation.longitude);
+        double userLatitude = intent.getDoubleExtra("userlatitude", mDefaultLocation.latitude);
+        mCurrentLocation = new LatLng(userLatitude, userLongitude);
+        Button confirmLocation = findViewById(R.id.confirm_button);
+        confirmLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Utility.StoreDataInCache(getApplicationContext(), "userlongitude",
+                        String.valueOf(mCurrentLocation.longitude));
+                Utility.StoreDataInCache(getApplicationContext(), "userlatitude",
+                        String.valueOf(mCurrentLocation.latitude));
+                Geocoder geocoder;
+                List<Address> addresses = null;
+                geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+
+                try {
+                    addresses = geocoder.getFromLocation(mCurrentLocation.latitude,
+                            mCurrentLocation.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (addresses != null) {
+                    String address = addresses.get(0).getAddressLine(0);
+                    Utility.StoreDataInCache(getApplicationContext(), "usercity", addresses.get(0).getLocality());
+                    Utility.StoreDataInCache(getApplicationContext(), "useraddress", address);
+                }
+
+                Intent intent1 = new Intent(getApplicationContext(), HomePage.class);
+                intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent1.putExtra("class", "map");
+                startActivity(intent1);
+                finish();
+            }
+        });
 
         String apiKey = getString(R.string.google_maps_key);
         Places.initialize(getApplicationContext(), apiKey);
@@ -99,6 +136,14 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
      */
 
     public void Back(View view) {
+        Intent intent = new Intent(this, PlacesSearch.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void ChangeLocation(View view) {
+        Intent intent = new Intent(getApplicationContext(), PlacesSearch.class);
+        startActivity(intent);
         finish();
     }
 
@@ -107,11 +152,11 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        marker = mMap.addMarker(new MarkerOptions().position(mDefaultLocation).title("Marker in Chandigarh"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+        marker = mMap.addMarker(new MarkerOptions().position(mCurrentLocation));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
 //        mMap.getUiSettings().setZoomControlsEnabled(true)
-        currentLocation.setText(mDefaultLocationName);
-
+//        currentLocation.setText(mDefaultLocationName)
+        SetUiWithLastLocation();
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
@@ -179,15 +224,9 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         }
         if (addresses != null) {
             String address = addresses.get(0).getAddressLine(0);
-//            System.out.println(address);
-//            String city = addresses.get(0).getLocality();
-//            String state = addresses.get(0).getAdminArea();
-//            String country = addresses.get(0).getCountryName();
-//            String postalCode = addresses.get(0).getPostalCode();
-//            String knownName = addresses.get(0).getSubLocality();
-//            System.out.println(city);
-//            System.out.println(knownName);
             currentLocation.setText(address);
+            Utility.StoreDataInCache(getApplicationContext(), "usercity", addresses.get(0).getLocality());
+            Utility.StoreDataInCache(getApplicationContext(), "useraddress", address);
         } else {
             currentLocation.setText("Unknown Location");
         }

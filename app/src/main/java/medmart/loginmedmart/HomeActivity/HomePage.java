@@ -38,20 +38,27 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
 import medmart.loginmedmart.MapActivity.Maps;
+import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
 import medmart.loginmedmart.UtilityClasses.Utility;
@@ -62,50 +69,13 @@ public class HomePage extends AppCompatActivity {
     private int LOCATION_PERMISSION_CODE_SECOND = 2;
     private boolean dialogBox = true;
     private boolean mLocationPermission = false;
-    private static HomePage homeIstance;
-
-    public static HomePage GetInstance() {
-        if (homeIstance == null) {
-            homeIstance = new HomePage();
-        }
-
-        return homeIstance;
-    }
-
-    public void SearchFragment() {
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-
-        // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME));
-
-        // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(@NotNull Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("Place selection", "Place: " + place.getName() + ", " + place.getLatLng());
-            }
-
-
-            @Override
-            public void onError(@NotNull Status status) {
-                // TODO: Handle the error.
-                Log.i("Place selection", "An error occurred: " + status);
-            }
-        });
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
+    private LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
+    private String mDefaultLocationName = "Chandigarh";
+    private LatLng mCurrentLocation;
+    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
+
 
     RecyclerView shopRecycler;
     ShopAdapter shopAdapter;
@@ -117,6 +87,11 @@ public class HomePage extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         search.getText().clear();
+    }
+
+    public void ChangeAddress(View view) {
+        Intent intent = new Intent(getApplicationContext(), PlacesSearch.class);
+        startActivity(intent);
     }
 
     @Override
@@ -131,10 +106,17 @@ public class HomePage extends AppCompatActivity {
         setContentView(R.layout.activity_home_page);
         search = findViewById(R.id.search_text);
         SetOnEditorAction();
+        TextView currentAddress = findViewById(R.id.current_address);
+        currentAddress.setText(Utility.GetDataFromCache(this, "useraddress", mDefaultLocationName));
+
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
+        Intent intent = getIntent();
 
-        CheckLocationPermission();
+        if (intent.getExtras().containsKey("class") && intent.getStringExtra("class").contentEquals("login")) {
+            Toast.makeText(this, "here but why", Toast.LENGTH_LONG).show();
+            CheckLocationPermission();
+        }
 
         shopRecycler = findViewById(R.id.shop_recyclerview);
         PopulateShopRecycler();

@@ -85,11 +85,12 @@
                     android:layout_width="330dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:ellipsize="end"
+                    android:onClick="ChangeLocation"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:text="Chudiala "
                     android:textColor="@color/black"
-                    android:scrollHorizontally="true"
-                    android:ellipsize="end"
-                    android:singleLine="true"
                     android:textSize="20sp" />
 
                 <TextView
@@ -97,6 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="7dp"
+                    android:onClick="ChangeLocation"
                     android:paddingTop="5dp"
                     android:text="CHANGE"
                     android:textColor="@color/teal_700"
@@ -112,14 +114,15 @@
             android:background="@color/teal_700" />
 
         <Button
+            android:id="@+id/confirm_button"
             android:layout_width="350dp"
             android:layout_height="55dp"
+            android:layout_gravity="center"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:backgroundTint="@color/teal_700"
+            android:gravity="center"
             android:text="CONFIRM"
             android:textColor="@color/white" />
 

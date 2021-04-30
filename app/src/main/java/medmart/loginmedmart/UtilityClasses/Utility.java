@@ -42,6 +42,7 @@ import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
 import medmart.loginmedmart.MapActivity.Maps;
+import medmart.loginmedmart.MapActivity.PlacesSearch;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -57,6 +58,7 @@ public class Utility {
 //        Intent intent = new Intent(context, HomePage.class);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        context.startActivity(intent);
+//        return;
         LoginCredentials loginCredentials = new LoginCredentials(user, psswd);
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<Jwt> jwtCall = retrofitInterface.getAccessToken(loginCredentials);
@@ -145,6 +147,7 @@ public class Utility {
                 new android.app.AlertDialog.Builder(context)
                         .setTitle("Device Location is not enabled")
                         .setMessage("Please enable device location to ensure accurate address and faster delivery")
+                        .setCancelable(false)
                         .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -157,7 +160,8 @@ public class Utility {
                             public void onClick(DialogInterface dialog, int which) {
                                 //Todo Enter manually location
                                 dialog.dismiss();
-                                HomePage.GetInstance().SearchFragment();
+                                Intent intent = new Intent(context, PlacesSearch.class);
+                                context.startActivity(intent);
                             }
                         })
                         .create().show();

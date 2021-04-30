@@ -38,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if (Utility.GetDataFromCache(this, "isLogged", "false").contentEquals("true")) {
             Intent intent = new Intent(this, HomePage.class);
+            intent.putExtra("class", "login");
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
