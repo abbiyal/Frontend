@@ -5,17 +5,43 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
+import medmart.loginmedmart.MapActivity.Maps;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,6 +49,8 @@ import retrofit2.Response;
 import static android.content.Context.MODE_PRIVATE;
 
 public class Utility {
+
+    private static int REQUEST_CHECK_SETTINGS = 3;
 
     public static void login(String user, String psswd, Context context) {
 //        System.out.println("here");
@@ -90,9 +118,9 @@ public class Utility {
                         .setPositiveButton("RETRY", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
                                 ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         codeSecond);
-                                dialog.dismiss();
                             }
                         })
                         .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener() {
@@ -108,5 +136,66 @@ public class Utility {
         }
 
         return false;
+    }
+
+    public static void CheckGPSStatus(Activity context, boolean dialogBox) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            if (dialogBox) {
+                new android.app.AlertDialog.Builder(context)
+                        .setTitle("Device Location is not enabled")
+                        .setMessage("Please enable device location to ensure accurate address and faster delivery")
+                        .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                TurnOnGps(context);
+                            }
+                        })
+                        .setNegativeButton("Enter Location Manually", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Todo Enter manually location
+                                dialog.dismiss();
+                                HomePage.GetInstance().SearchFragment();
+                            }
+                        })
+                        .create().show();
+            } else {
+                TurnOnGps(context);
+            }
+        }
+    }
+
+    private static void TurnOnGps(Activity activity) {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(activity).checkLocationSettings(builder.build());
+
+        result.addOnSuccessListener(activity, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+            }
+        });
+
+        result.addOnFailureListener(activity, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    try {
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(activity,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                    }
+                }
+            }
+        });
     }
 }

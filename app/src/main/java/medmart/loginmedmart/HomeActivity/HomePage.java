@@ -1,6 +1,7 @@
 package medmart.loginmedmart.HomeActivity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,6 +17,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -35,23 +38,70 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
+import medmart.loginmedmart.MapActivity.Maps;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
 import medmart.loginmedmart.UtilityClasses.Utility;
 
-public class HomePage<shopRecycler> extends AppCompatActivity {
+public class HomePage extends AppCompatActivity {
 
     private int LOCATION_PERMISSION_CODE_FIRST = 1;
     private int LOCATION_PERMISSION_CODE_SECOND = 2;
-    private  int REQUEST_CHECK_SETTINGS = 3;
+    private boolean dialogBox = true;
     private boolean mLocationPermission = false;
+    private static HomePage homeIstance;
+
+    public static HomePage GetInstance() {
+        if (homeIstance == null) {
+            homeIstance = new HomePage();
+        }
+
+        return homeIstance;
+    }
+
+    public void SearchFragment() {
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NotNull Place place) {
+                // TODO: Get info about the selected place.
+                Log.i("Place selection", "Place: " + place.getName() + ", " + place.getLatLng());
+            }
+
+
+            @Override
+            public void onError(@NotNull Status status) {
+                // TODO: Handle the error.
+                Log.i("Place selection", "An error occurred: " + status);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     RecyclerView categoryRecycler;
@@ -93,79 +143,10 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
     private void CheckLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermission = true;
-            CheckGPSStatus();
+            Utility.CheckGPSStatus(this, dialogBox);
         } else {
             mLocationPermission = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
         }
-    }
-
-    private void CheckGPSStatus() {
-        LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // todo gps is on
-
-        } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("Device Location is not enabled")
-                    .setMessage("Please enable device location to ensure accurate address and faster delivery")
-                    .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // todo make gps on
-                            dialog.dismiss();
-                            TurnOnGps();
-                        }
-                    })
-                    .setNegativeButton("Enter Location Manually", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //Todo Enter manually location
-                        }
-                    })
-                    .create().show();
-        }
-    }
-
-    private void TurnOnGps() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-
-        Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
-
-        result.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                Toast.makeText(HomePage.this, "locations turned on", Toast.LENGTH_LONG).show();
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                // ...
-            }
-        });
-
-        result.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(HomePage.this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                        Toast.makeText(HomePage.this, "error occured", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -175,7 +156,7 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_CODE_FIRST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermission = true;
-                CheckGPSStatus();
+                Utility.CheckGPSStatus(this, dialogBox);
             } else {
                 //
                 mLocationPermission = false;
@@ -194,11 +175,11 @@ public class HomePage<shopRecycler> extends AppCompatActivity {
                         .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
                                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 Uri uri = Uri.fromParts("package", getPackageName(), null);
                                 intent.setData(uri);
                                 startActivity(intent);
-                                dialog.dismiss();
                             }
                         })
                         .create().show();
