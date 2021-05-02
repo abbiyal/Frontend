@@ -4,21 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/white">
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:orientation="vertical"-->
+    <!--        android:background="@color/white">-->
 
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        tools:context=".MapsActivity">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="600dp"
-            tools:context=".MapsActivity">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -32,101 +37,106 @@
             <ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginStart="360dp"
-                android:layout_marginTop="550dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginBottom="10dp"
                 android:onClick="PickCurrentPlace"
                 android:src="@drawable/ic_geolocate"
                 app:tint="@color/teal_700" />
 
+        </RelativeLayout>
 
-        </fragment>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    </fragment>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:text="Select delivery location"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/teal_700" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:text="Your Location"
+            android:textColor="@color/teal_700" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/currentlocation"
+                android:layout_width="330dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="20dp"
-                android:text="Select delivery location"
+                android:ellipsize="end"
+                android:onClick="ChangeLocation"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Chudiala "
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
-        </LinearLayout>
-
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/teal_700" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="20dp"
-                android:text="Your Location"
-                android:textColor="@color/teal_700" />
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="7dp"
+                android:onClick="ChangeLocation"
+                android:paddingTop="5dp"
+                android:text="CHANGE"
+                android:textColor="@color/teal_700"
+                android:textSize="15sp" />
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/currentlocation"
-                    android:layout_width="330dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:ellipsize="end"
-                    android:onClick="ChangeLocation"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:text="Chudiala "
-                    android:textColor="@color/black"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="7dp"
-                    android:onClick="ChangeLocation"
-                    android:paddingTop="5dp"
-                    android:text="CHANGE"
-                    android:textColor="@color/teal_700"
-                    android:textSize="15sp" />
-
-            </RelativeLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/teal_700" />
-
-        <Button
-            android:id="@+id/confirm_button"
-            android:layout_width="350dp"
-            android:layout_height="55dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:backgroundTint="@color/teal_700"
-            android:gravity="center"
-            android:text="CONFIRM"
-            android:textColor="@color/white" />
-
-
+        </RelativeLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/teal_700" />
+
+    <Button
+        android:id="@+id/confirm_button"
+        android:layout_width="350dp"
+        android:layout_height="55dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="@color/teal_700"
+        android:gravity="center"
+        android:text="CONFIRM"
+        android:textColor="@color/white" />
+
+
+    <!--    </LinearLayout>-->
 
 </LinearLayout>

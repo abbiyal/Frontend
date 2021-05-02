@@ -19,8 +19,9 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
     private RecyclerView.ViewHolder holder;
     private int position;
 
-    public ShopAdapter(ArrayList<ShopCard> shopCards) {
+    public void SetContent(ArrayList<ShopCard> shopCards) {
         this.shopCards = shopCards;
+        notifyDataSetChanged();
     }
 
     @NonNull

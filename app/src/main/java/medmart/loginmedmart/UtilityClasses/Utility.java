@@ -34,6 +34,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -140,7 +142,7 @@ public class Utility {
         return false;
     }
 
-    public static void CheckGPSStatus(Activity context, boolean dialogBox) {
+    public static void CheckGPSStatus(Activity context, boolean dialogBox, int activityCode) {
         LocationManager locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (dialogBox) {
@@ -152,13 +154,12 @@ public class Utility {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                TurnOnGps(context);
+                                TurnOnGps(context, activityCode);
                             }
                         })
                         .setNegativeButton("Enter Location Manually", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //Todo Enter manually location
                                 dialog.dismiss();
                                 Intent intent = new Intent(context, PlacesSearch.class);
                                 context.startActivity(intent);
@@ -166,12 +167,12 @@ public class Utility {
                         })
                         .create().show();
             } else {
-                TurnOnGps(context);
+                TurnOnGps(context, activityCode);
             }
         }
     }
 
-    private static void TurnOnGps(Activity activity) {
+    private static void TurnOnGps(Activity activity, int activityCode) {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
@@ -185,6 +186,13 @@ public class Utility {
         result.addOnSuccessListener(activity, new OnSuccessListener<LocationSettingsResponse>() {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                if (activityCode == 1) {
+                    // todo homepage ativity
+                    HomePage.GetInstance().GetDeviceLocation();
+                }
+                else if (activityCode == 2) {
+                    Maps.GetInstance().GetDeviceLocation();
+                }
             }
         });
 
@@ -201,5 +209,20 @@ public class Utility {
                 }
             }
         });
+    }
+
+    public static List<Address> GetCurrentAddressFromLatLng(Context context, @NotNull LatLng mCurrentLocation) {
+        Geocoder geocoder;
+        List<Address> addresses = null;
+        geocoder = new Geocoder(context, Locale.getDefault());
+
+        try {
+            addresses = geocoder.getFromLocation(mCurrentLocation.latitude,
+                    mCurrentLocation.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return addresses;
     }
 }

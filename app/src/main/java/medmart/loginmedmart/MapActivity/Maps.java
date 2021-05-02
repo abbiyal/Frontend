@@ -1,11 +1,10 @@
 package medmart.loginmedmart.MapActivity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -25,11 +24,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,10 +37,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.common.base.Stopwatch;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,10 +62,21 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     private String mDefaultLocationName = "Chandigarh";
     private LatLng mCurrentLocation;
     private PlacesClient mPlacesClient;
+    private static int REQUEST_CHECK_SETTINGS = 3;
     private boolean dialogBox = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private final int DEFAULT_ZOOM = 15;
+    private int ACTIVITY_CODE = 2;
     TextView currentLocation;
+    private static  Maps mapInstance;
+
+    public static Maps GetInstance() {
+        if (mapInstance == null) {
+            mapInstance = new Maps();
+        }
+
+        return mapInstance;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +99,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         double userLatitude = intent.getDoubleExtra("userlatitude", mDefaultLocation.latitude);
         mCurrentLocation = new LatLng(userLatitude, userLongitude);
         Button confirmLocation = findViewById(R.id.confirm_button);
+
         confirmLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,16 +107,10 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                         String.valueOf(mCurrentLocation.longitude));
                 Utility.StoreDataInCache(getApplicationContext(), "userlatitude",
                         String.valueOf(mCurrentLocation.latitude));
-                Geocoder geocoder;
-                List<Address> addresses = null;
-                geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
-                try {
-                    addresses = geocoder.getFromLocation(mCurrentLocation.latitude,
-                            mCurrentLocation.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                List<Address> addresses = Utility.GetCurrentAddressFromLatLng(getApplicationContext(),
+                        mCurrentLocation);
+
                 if (addresses != null) {
                     String address = addresses.get(0).getAddressLine(0);
                     Utility.StoreDataInCache(getApplicationContext(), "usercity", addresses.get(0).getLocality());
@@ -144,7 +150,6 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     public void ChangeLocation(View view) {
         Intent intent = new Intent(getApplicationContext(), PlacesSearch.class);
         startActivity(intent);
-        finish();
     }
 
     @Override
@@ -153,10 +158,10 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         // Add a marker in Sydney and move the camera
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         marker = mMap.addMarker(new MarkerOptions().position(mCurrentLocation));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
-//        mMap.getUiSettings().setZoomControlsEnabled(true)
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 //        currentLocation.setText(mDefaultLocationName)
-        SetUiWithLastLocation();
+        SetUiWithCurrentLocation();
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
@@ -169,7 +174,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onCameraIdle() {
                 mCurrentLocation = mMap.getCameraPosition().target;
-                SetUiWithLastLocation();
+                SetUiWithCurrentLocation();
             }
         });
     }
@@ -177,56 +182,47 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     private void CheckLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            Utility.CheckGPSStatus(this, dialogBox);
         } else {
             mLocationPermissionGranted = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void GetDeviceLocation() {
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mFusedLocationProviderClient.getLastLocation()
-                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                // Got last known location. In some rare situations this can be null.
-                                if (location != null) {
-                                    // Logic to handle location object
-                                    mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
-                                    marker.setPosition(mCurrentLocation);
-                                    SetUiWithLastLocation();
-                                    // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                } else {
-                                    // todo hndle if location is null
-                                }
-                            }
-                        });
+                Toast.makeText(this, "Please Wait", Toast.LENGTH_LONG).show();
+
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                Task<Location> task = mFusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                        cancellationTokenSource.getToken());
+                task.addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
+                            marker.setPosition(mCurrentLocation);
+                            SetUiWithCurrentLocation();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Couldn't get Location Please try again", Toast.LENGTH_SHORT).show();
+                            cancellationTokenSource.cancel();
+                        }
+                    }
+                });
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
 
-    private void SetUiWithLastLocation() {
-        Geocoder geocoder;
-        List<Address> addresses = null;
-        geocoder = new Geocoder(this, Locale.getDefault());
+    private void SetUiWithCurrentLocation() {
+        List<Address> addresses = Utility.GetCurrentAddressFromLatLng(this, mCurrentLocation);
 
-        try {
-            addresses = geocoder.getFromLocation(mCurrentLocation.latitude,
-                    mCurrentLocation.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         if (addresses != null) {
             String address = addresses.get(0).getAddressLine(0);
             currentLocation.setText(address);
-            Utility.StoreDataInCache(getApplicationContext(), "usercity", addresses.get(0).getLocality());
-            Utility.StoreDataInCache(getApplicationContext(), "useraddress", address);
         } else {
             currentLocation.setText("Unknown Location");
         }
@@ -239,16 +235,16 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         if (requestCode == LOCATION_PERMISSION_CODE_FIRST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionGranted = true;
-                Utility.CheckGPSStatus(this, dialogBox);
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
             } else {
                 //
                 mLocationPermissionGranted = false;
-                Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+                mLocationPermissionGranted = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
             }
         } else if (requestCode == LOCATION_PERMISSION_CODE_SECOND) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // todo after getting permission
                 mLocationPermissionGranted = true;
+                GetDeviceLocation();
             } else {
                 //
                 mLocationPermissionGranted = false;
@@ -280,9 +276,26 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         CheckLocationPermission();
 
         if (mLocationPermissionGranted) {
-            GetDeviceLocation();
-        } else {
-            Toast.makeText(this, "Please grant permission first", Toast.LENGTH_LONG).show();
+            LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
+
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
+            } else {
+                GetDeviceLocation();
+            }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                GetDeviceLocation();
+            }
+
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

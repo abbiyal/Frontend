@@ -29,6 +29,19 @@ public class PlacesSearch extends AppCompatActivity {
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME);
+
+        // Start the autocomplete intent.
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                .setCountry("in")
+                .build(this);
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -46,15 +59,7 @@ public class PlacesSearch extends AppCompatActivity {
         mPlaceClient = Places.createClient(this);
 
         // Set the fields to specify which types of place data to
-        // return after the user has made a selection.
-        List<Place.Field> fields = Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME);
-
-        // Start the autocomplete intent.
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .setCountry("in")
-                .build(this);
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
-
+        // return after the user has made a selection
     }
 
     @Override
@@ -66,13 +71,14 @@ public class PlacesSearch extends AppCompatActivity {
                 intent.putExtra("userlongitude", place.getLatLng().longitude);
                 intent.putExtra("userlatitude", place.getLatLng().latitude);
                 startActivity(intent);
-                finish();
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
+                finish();
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
+                finish();
             }
-            finish();
+
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);

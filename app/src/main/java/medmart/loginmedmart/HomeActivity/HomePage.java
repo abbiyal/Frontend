@@ -11,8 +11,9 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,36 +29,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.zip.DeflaterOutputStream;
 
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
-import medmart.loginmedmart.MapActivity.Maps;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
@@ -67,12 +54,25 @@ public class HomePage extends AppCompatActivity {
 
     private int LOCATION_PERMISSION_CODE_FIRST = 1;
     private int LOCATION_PERMISSION_CODE_SECOND = 2;
+    private int ACTIVITY_CODE = 1;
+    private static int REQUEST_CHECK_SETTINGS = 3;
     private boolean dialogBox = true;
     private boolean mLocationPermission = false;
     private LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     private String mDefaultLocationName = "Chandigarh";
     private LatLng mCurrentLocation;
-    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private static HomePage homeInstance;
+    TextView currentAddress;
+
+    public static HomePage GetInstance() {
+        if (homeInstance == null) {
+            homeInstance = new HomePage();
+        }
+
+        return homeInstance;
+    }
+
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
 
@@ -104,28 +104,126 @@ public class HomePage extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_home_page);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
         search = findViewById(R.id.search_text);
         SetOnEditorAction();
-        TextView currentAddress = findViewById(R.id.current_address);
-        currentAddress.setText(Utility.GetDataFromCache(this, "useraddress", mDefaultLocationName));
+        AttachHooksAndAdapters();
 
-        categoryRecycler = findViewById(R.id.catagory_recyclerview);
         PopulateCataegoryRecycler();
+        OnMyLocationAccessListener();
+
         Intent intent = getIntent();
 
-        if (intent.getExtras().containsKey("class") && intent.getStringExtra("class").contentEquals("login")) {
-            Toast.makeText(this, "here but why", Toast.LENGTH_LONG).show();
+        if (intent.getExtras().containsKey("class") &&
+                intent.getStringExtra("class").contentEquals("login")) {
             CheckLocationPermission();
-        }
 
+            if (mLocationPermission) {
+                LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
+
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
+                } else {
+                    // todo if location is already on
+                    GetDeviceLocation();
+                }
+            }
+        }
+    }
+
+    private void AttachHooksAndAdapters() {
+        currentAddress = findViewById(R.id.current_address);
+        categoryRecycler = findViewById(R.id.catagory_recyclerview);
         shopRecycler = findViewById(R.id.shop_recyclerview);
-        PopulateShopRecycler();
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
+
+        shopRecycler.setHasFixedSize(true);
+        shopRecycler.setLayoutManager(linearLayoutManager);
+        shopAdapter = new ShopAdapter();
+        shopRecycler.setAdapter(shopAdapter);
+
+        categoryRecycler.setHasFixedSize(true);
+        categoryRecycler.setLayoutManager(linearLayoutManager1);
+        categoryAdapter = new CategoryAdapter();
+        categoryRecycler.setAdapter(categoryAdapter);
+    }
+
+    public void GetDeviceLocation() {
+        try {
+            if (mLocationPermission) {
+                Toast.makeText(this, "Please Wait loading nearby shops", Toast.LENGTH_LONG).show();
+
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                Task<Location> task = mFusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                        cancellationTokenSource.getToken());
+                task.addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                            List<Address> addresses = Utility.GetCurrentAddressFromLatLng(getApplicationContext(),
+                                    mCurrentLocation);
+
+                            if (addresses != null) {
+                                String address = addresses.get(0).getAddressLine(0);
+                                Utility.StoreDataInCache(getApplicationContext(), "usercity", addresses.get(0).getLocality());
+                                Utility.StoreDataInCache(getApplicationContext(), "useraddress", address);
+                                currentAddress.setText(address);
+                            } else {
+                                currentAddress.setText("Unknown Location");
+                            }
+
+                            Utility.StoreDataInCache(getApplicationContext(), "userlongitude",
+                                    String.valueOf(mCurrentLocation.longitude));
+                            Utility.StoreDataInCache(getApplicationContext(), "userlatitude",
+                                    String.valueOf(mCurrentLocation.latitude));
+
+                            OnMyLocationAccessListener();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Couldn't get Location enter manually", Toast.LENGTH_SHORT).show();
+                            cancellationTokenSource.cancel();
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void OnMyLocationAccessListener() {
+        String address = Utility.GetDataFromCache(getApplicationContext(), "useraddress", mDefaultLocationName);
+        currentAddress.setText(address);
+
+        double latitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlatitude",
+                String.valueOf(mDefaultLocation.latitude)));
+        double longitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlatitude",
+                String.valueOf(mDefaultLocation.longitude)));
+        mCurrentLocation = new LatLng(latitude, longitude);
+        // todo backend call get result of shops and notiyfy shop recycler with new ArrayList
+        //  and comment below, use default image for now
+
+        ArrayList<ShopCard> shopCards = new ArrayList<>();
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+
+        NotifyShopRecycler(shopCards);
     }
 
     private void CheckLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermission = true;
-            Utility.CheckGPSStatus(this, dialogBox);
         } else {
             mLocationPermission = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
         }
@@ -138,11 +236,11 @@ public class HomePage extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_CODE_FIRST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermission = true;
-                Utility.CheckGPSStatus(this, dialogBox);
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
             } else {
                 //
                 mLocationPermission = false;
-                Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+                mLocationPermission = Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
             }
         } else if (requestCode == LOCATION_PERMISSION_CODE_SECOND) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -190,40 +288,32 @@ public class HomePage extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void PopulateShopRecycler() {
-        // todo change it with locations based data
-        shopRecycler.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL, false);
-
-        shopRecycler.setLayoutManager(linearLayoutManager);
-
-        ArrayList<ShopCard> shopCards = new ArrayList<>();
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-
-        shopAdapter = new ShopAdapter(shopCards);
-        shopRecycler.setAdapter(shopAdapter);
+    private void NotifyShopRecycler(ArrayList<ShopCard> shopCards) {
+        shopAdapter.SetContent(shopCards);
     }
 
     private void PopulateCataegoryRecycler() {
-        categoryRecycler.setHasFixedSize(true);
-        categoryRecycler.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
-
         ArrayList<CategoryCard> categoryCards = new ArrayList<>();
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
         categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
-        categoryAdapter = new CategoryAdapter(categoryCards);
-        categoryRecycler.setAdapter(categoryAdapter);
+
+        categoryAdapter.SetContent(categoryCards);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                GetDeviceLocation();
+            }
+
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
 }

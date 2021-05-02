@@ -16,8 +16,9 @@ import medmart.loginmedmart.R;
 public class CategoryAdapter extends RecyclerView .Adapter<CategoryAdapter.CategoryViewHolder> {
     ArrayList<CategoryCard> categoryCards;
 
-    public CategoryAdapter(ArrayList<CategoryCard> categoryCards) {
+    public void SetContent(ArrayList<CategoryCard> categoryCards) {
         this.categoryCards = categoryCards;
+        notifyDataSetChanged();
     }
 
     @NonNull
