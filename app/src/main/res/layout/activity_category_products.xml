@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity.Search"
+    android:background="@color/lightWhite"
     android:orientation="vertical"
-    android:background="@color/lightWhite">
+    tools:context=".CategoryProductsActivity.CategoryProducts">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,21 +24,22 @@
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="30dp"
-                android:src="@drawable/ic_baseline_arrow_back_24"
-                android:layout_marginTop="12dp"
                 android:layout_marginStart="2dp"
-                app:tint="@color/white"
-                android:onClick="GoBack"/>
+                android:layout_marginTop="12dp"
+                android:onClick="GoBack"
+                android:src="@drawable/ic_baseline_arrow_back_24"
+                app:tint="@color/white" />
 
             <TextView
+                android:id="@+id/category_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Search Results"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="11dp"
+                android:text="Gel Products"
                 android:textColor="@color/white"
                 android:textSize="25sp"
-                android:layout_marginTop="11dp"
-                android:layout_marginLeft="15dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
         </LinearLayout>
 
         <RelativeLayout
@@ -52,14 +53,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_margin="15dp"
-                android:imeOptions="actionDone"
                 android:background="@drawable/round_corner_edittext"
+                android:hint="Search with in category"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1"
                 android:paddingLeft="3dp"
                 android:textColor="@color/black"
-                android:maxLines="1"
-                android:hint="Search for Medicines"
                 android:textColorHint="@color/black"
-                android:inputType="text"
                 android:textSize="20sp" />
 
 
@@ -79,18 +80,17 @@
         android:id="@+id/result_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Showing all results for Crocin"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:textSize="18sp"
+        android:text="Showing all products under Gel"
         android:textColor="@color/black"
-        android:textStyle="bold"
-        android:layout_marginLeft="10dp"/>
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search_result"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
-        />
+        android:layout_marginTop="10dp" />
 
 </LinearLayout>

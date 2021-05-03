@@ -1,4 +1,4 @@
-package medmart.loginmedmart.HomeActivity.HelperClasses;
+package medmart.loginmedmart.CommonAdapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

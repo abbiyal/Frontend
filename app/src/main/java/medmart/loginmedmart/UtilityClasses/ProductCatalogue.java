@@ -11,7 +11,8 @@ public class ProductCatalogue {
     public ProductCatalogue() {
     }
 
-    public ProductCatalogue(String productId, String productName, String companyName, String doseStrength, String size, String type) {
+    public ProductCatalogue(String productId, String productName, String companyName, String doseStrength,
+                            String size, String type) {
         this.productId = productId;
         this.productName = productName;
         this.companyName = companyName;

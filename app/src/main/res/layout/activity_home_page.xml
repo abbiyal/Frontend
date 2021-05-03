@@ -19,10 +19,12 @@
 
         <ImageView
             android:id="@+id/app_icon"
+            android:onClick="OpenProfile"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
-            android:src="@drawable/icons8_syringe_64" />
+            app:tint="@color/quantum_bluegrey50"
+            android:src="@drawable/ic_baseline_account_circle_24" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -105,28 +107,6 @@
             android:src="@drawable/search_icon" />
     </RelativeLayout>
 
-
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:background="@color/TopBar_Home">-->
-
-    <!--        <SearchView-->
-    <!--            android:id="@+id/search"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:queryHint="Search for Medicine"-->
-    <!--            android:background="@color/white"-->
-    <!--            android:layout_marginTop="20dp"-->
-    <!--            android:layout_marginLeft="10dp"-->
-    <!--            android:layout_marginRight="10dp"-->
-    <!--            android:layout_marginBottom="10dp"-->
-    <!--            android:textAlignment="center"-->
-    <!--            android:inputType="text"-->
-    <!--            android:iconifiedByDefault="false"-->
-    <!--            android:focusedByDefault="false"-->
-    <!--            />-->
-    <!--    </LinearLayout>-->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
@@ -155,7 +135,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/catagory_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="200dp"
                     android:layout_marginTop="20dp"/>
 
             </LinearLayout>
@@ -165,15 +145,33 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Nearby Shops"
-                    android:textColor="@color/black"
-                    android:textSize="25sp"
-                    android:textStyle="bold" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Nearby Shops"
+                        android:textColor="@color/black"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginRight="30dp"
+                        android:layout_marginBottom="10dp"
+                        android:onClick="UseCurrentLocation"
+                        android:src="@drawable/ic_geolocate"
+                        app:tint="@color/teal_700" />
+
+                </RelativeLayout>
+
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/shop_recyclerview"

@@ -67,9 +67,10 @@ public class PlacesSearch extends AppCompatActivity {
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
-                Intent intent = new Intent(this, Maps.class);
+                Intent intent = getIntent();
                 intent.putExtra("userlongitude", place.getLatLng().longitude);
                 intent.putExtra("userlatitude", place.getLatLng().latitude);
+                intent.setClass(getApplicationContext(), Maps.class);
                 startActivity(intent);
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);

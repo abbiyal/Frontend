@@ -29,6 +29,7 @@
             android:layout_marginTop="15dp"
             android:text="PROFILE"
             android:textColor="@color/white"
+            android:textStyle="bold"
             android:textSize="30sp" />
 
     </LinearLayout>
@@ -119,14 +120,6 @@
                 android:layout_height="25dp"
                 android:layout_marginStart="10dp"
                 android:text="Email" />
-
-            <ImageView
-                android:id="@+id/edit_email"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="290dp"
-                android:src="@drawable/ic_baseline_edit_24"
-                app:tint="@color/teal_700" />
 
         </LinearLayout>
     </LinearLayout>

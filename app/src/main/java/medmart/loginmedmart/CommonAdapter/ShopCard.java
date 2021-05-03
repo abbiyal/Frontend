@@ -1,4 +1,4 @@
-package medmart.loginmedmart.HomeActivity.HelperClasses;
+package medmart.loginmedmart.CommonAdapter;
 
 public class ShopCard {
     int image;

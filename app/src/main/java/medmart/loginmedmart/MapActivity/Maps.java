@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 
 import medmart.loginmedmart.HomeActivity.HomePage;
+import medmart.loginmedmart.ProductResultActivity.ProductResult;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.Utility;
 
@@ -108,10 +109,19 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                     Utility.StoreDataInCache(getApplicationContext(), "useraddress", address);
                 }
 
-                Intent intent1 = new Intent(getApplicationContext(), HomePage.class);
-                intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent1.putExtra("class", "map");
-                startActivity(intent1);
+                Intent intent = getIntent();
+
+                if (intent.getStringExtra("class").contentEquals("homepage")) {
+                    intent.setClass(getApplicationContext(), HomePage.class);
+                }
+                else {
+                    intent.setClass(getApplicationContext(), ProductResult.class);
+                }
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("class", "map");
+                startActivity(intent);
+                Toast.makeText(Maps.this, "Please wait loading nearby shops", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
@@ -121,16 +131,6 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         mPlacesClient = Places.createClient(this);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
     }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
 
     public void Back(View view) {
         Intent intent = new Intent(this, PlacesSearch.class);

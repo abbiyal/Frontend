@@ -42,14 +42,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.DeflaterOutputStream;
 
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
-import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
-import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
+import medmart.loginmedmart.CommonAdapter.ShopAdapter;
+import medmart.loginmedmart.CommonAdapter.ShopCard;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
+import medmart.loginmedmart.ProfileActivity.ProfileActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
@@ -91,6 +91,7 @@ public class HomePage extends AppCompatActivity {
 
     public void ChangeAddress(View view) {
         Intent intent = new Intent(getApplicationContext(), PlacesSearch.class);
+        intent.putExtra("class", "homepage");
         startActivity(intent);
     }
 
@@ -105,7 +106,6 @@ public class HomePage extends AppCompatActivity {
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_home_page);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
         search = findViewById(R.id.search_text);
         SetOnEditorAction();
         AttachHooksAndAdapters();
@@ -131,6 +131,20 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
+    public void UseCurrentLocation(View view) {
+        CheckLocationPermission();
+
+        if (mLocationPermission) {
+            LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
+
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
+            } else {
+                GetDeviceLocation();
+            }
+        }
+    }
+
     private void AttachHooksAndAdapters() {
         currentAddress = findViewById(R.id.current_address);
         categoryRecycler = findViewById(R.id.catagory_recyclerview);
@@ -148,8 +162,12 @@ public class HomePage extends AppCompatActivity {
 
         categoryRecycler.setHasFixedSize(true);
         categoryRecycler.setLayoutManager(linearLayoutManager1);
-        categoryAdapter = new CategoryAdapter();
+        categoryAdapter = new CategoryAdapter(this);
         categoryRecycler.setAdapter(categoryAdapter);
+    }
+    public void OpenProfile(View view) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
     }
 
     public void GetDeviceLocation() {
@@ -196,7 +214,7 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
-    private void OnMyLocationAccessListener() {
+    private void  OnMyLocationAccessListener() {
         String address = Utility.GetDataFromCache(getApplicationContext(), "useraddress", mDefaultLocationName);
         currentAddress.setText(address);
 
@@ -206,8 +224,6 @@ public class HomePage extends AppCompatActivity {
                 String.valueOf(mDefaultLocation.longitude)));
         mCurrentLocation = new LatLng(latitude, longitude);
         String location = String.valueOf(mCurrentLocation.latitude)+','+String.valueOf(mCurrentLocation.longitude);
-        // todo backend call get result of shops and notiyfy shop recycler with new ArrayList
-        //  and comment below, use default image for now
 //        ArrayList<ShopCard> shopCards = new ArrayList<>();
 //        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
 //        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
@@ -219,7 +235,6 @@ public class HomePage extends AppCompatActivity {
 
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         HashMap<String,String> params=new HashMap<String,String>();
-        System.out.println(location);
         params.put("location","\""+location+"\"");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
@@ -235,12 +250,14 @@ public class HomePage extends AppCompatActivity {
                    System.out.println(nearbyShops.get(i));
                    DecimalFormat df = new DecimalFormat("0.00");
                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
-                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance()+" Km");
+                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance());
                    shopCards.add(shopCard);
                }
-               if(shopAdapter == null){
+
+               if(shopAdapter == null) {
                 shopAdapter = new ShopAdapter();
-                shopRecycler.setAdapter(shopAdapter);}
+                shopRecycler.setAdapter(shopAdapter);
+               }
 
                 NotifyShopRecycler(shopCards);
             }

@@ -1,8 +1,11 @@
-package medmart.loginmedmart.SearchActivity.HelperClasses;
+package medmart.loginmedmart.CommonAdapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,16 +14,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
-import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
+import medmart.loginmedmart.ProductResultActivity.ProductResult;
 import medmart.loginmedmart.R;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewModel> {
 
     private ArrayList<SearchCard> searchCards;
+    private Context context;
 
-    public SearchAdapter() {
+    public SearchAdapter(Context context) {
         searchCards = new ArrayList<>();
+        this.context = context;
     }
 
     public void SetContent(ArrayList<SearchCard> searchCards) {
@@ -42,6 +46,16 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         holder.medicineName.setText(search.medicineName);
         holder.medicineCompany.setText(search.medicineCompany);
         holder.medicineSize.setText(search.medicineSize);
+
+        holder.buyNow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ProductResult.class);
+                intent.putExtra("productid", searchCards.get(position).getProductId());
+                intent.putExtra("medicinename", searchCards.get(position).getMedicineName());
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -52,6 +66,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     public class SearchViewModel extends RecyclerView.ViewHolder{
         ImageView medicineImage;
         TextView medicineName, medicineCompany, medicineSize;
+        Button buyNow;
 
         public SearchViewModel(@NonNull View itemView) {
             super(itemView);
@@ -59,6 +74,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             medicineName = itemView.findViewById(R.id.medicine_name);
             medicineCompany = itemView.findViewById(R.id.medicine_company);
             medicineSize = itemView.findViewById(R.id.medicine_size);
+            buyNow = itemView.findViewById(R.id.buy_now);
         }
     }
 }

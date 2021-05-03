@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import medmart.loginmedmart.R;
-import medmart.loginmedmart.SearchActivity.HelperClasses.SearchAdapter;
-import medmart.loginmedmart.SearchActivity.HelperClasses.SearchCard;
+import medmart.loginmedmart.CommonAdapter.SearchAdapter;
+import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.UtilityClasses.ProductCatalogue;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -64,17 +65,17 @@ public class Search extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         searchRecycler.setLayoutManager(linearLayoutManager);
-        searchAdapter = new SearchAdapter();
-        searchRecycler.setAdapter(searchAdapter);
     }
 
     private void SetSearchUi(String query) {
         searchText.setText(query);
+        searchText.setSelection(searchText.getText().length());
+        InputMethodManager imm =(InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
         resultString.setText("Showing all results for " + query);
     }
 
     private void CallSearch(String query) {
-        System.out.println("hello");
         HashMap<String, String> params = new HashMap<>();
         params.put("keyword", query);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
@@ -91,24 +92,29 @@ public class Search extends AppCompatActivity {
                     String sizeString = "";
                     switch (results.get(i).getType()) {
                         case "GEL":
-                            sizeString = results.get(i).getSize() + getString(R.string.Gel_Size);
+                            sizeString = results.get(i).getSize() + " " + getString(R.string.Gel_Size);
                             break;
                         case "POWDER":
-                            sizeString = results.get(i).getSize() + getString(R.string.Powder_Size);
+                            sizeString = results.get(i).getSize() + " " + getString(R.string.Powder_Size);
                             break;
                         case "SYRUP":
                         case "SPRAY":
-                            sizeString = results.get(i).getSize() + getString(R.string.Syrup_Spray_Size);
+                            sizeString = results.get(i).getSize() + " " + getString(R.string.Syrup_Spray_Size);
                             break;
                         case "TABLET":
-                            sizeString = results.get(i).getSize() + getString(R.string.Tablet_Size);
+                            sizeString = results.get(i).getSize() + " " + getString(R.string.Tablet_Size);
                             break;
                         default:
                             sizeString = results.get(i).getSize() + " UNITS";
                     }
                     searchResults.add(new SearchCard(R.drawable.crocin,
                             results.get(i).getProductName(), results.get(i).getCompanyName(),
-                            sizeString));
+                            sizeString, results.get(i).getProductId()));
+                }
+
+                if (searchAdapter == null) {
+                    searchAdapter = new SearchAdapter(getApplicationContext());
+                    searchRecycler.setAdapter(searchAdapter);
                 }
 
                 NotifyRecycler(searchResults);
@@ -127,24 +133,22 @@ public class Search extends AppCompatActivity {
         searchAdapter.SetContent(searchResult);
     }
 
-    private ArrayList<SearchCard> GenerateSampleData() {
-        ArrayList<SearchCard> searchCards = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            searchCards.add(new SearchCard(R.drawable.crocin, getString(R.string.sample_medicine_name),
-                    getString(R.string.sample_medicine_company), getString(R.string.sample_medicine_size)));
-        }
-
-        return searchCards;
-    }
+//    private ArrayList<SearchCard> GenerateSampleData() {
+//        ArrayList<SearchCard> searchCards = new ArrayList<>();
+//
+//        for (int i = 0; i < 10; i++) {
+//            searchCards.add(new SearchCard(R.drawable.crocin, getString(R.string.sample_medicine_name),
+//                    getString(R.string.sample_medicine_company), getString(R.string.sample_medicine_size)));
+//        }
+//
+//        return searchCards;
+//    }
 
     private void SetOnEditorAction() {
-        searchText.setImeActionLabel("Go", EditorInfo.IME_ACTION_NEXT);
+        searchText.setImeActionLabel("Go", EditorInfo.IME_ACTION_DONE);
         searchText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
-                System.out.println("on editor one");
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                     String query = searchText.getText().toString();
                     SetSearchUi(query);

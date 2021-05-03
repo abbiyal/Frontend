@@ -151,7 +151,6 @@ public class Utility extends AppCompatActivity {
                 new android.app.AlertDialog.Builder(context)
                         .setTitle("Device Location is not enabled")
                         .setMessage("Please enable device location to ensure accurate address and faster delivery")
-                        .setCancelable(false)
                         .setPositiveButton("Enable device Loaction", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

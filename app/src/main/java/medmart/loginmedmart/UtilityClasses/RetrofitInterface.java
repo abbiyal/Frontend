@@ -7,7 +7,6 @@ import java.util.Map;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
-import medmart.loginmedmart.SearchActivity.HelperClasses.SearchCard;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
