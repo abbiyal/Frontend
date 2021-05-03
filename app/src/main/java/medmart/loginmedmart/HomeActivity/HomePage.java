@@ -57,21 +57,12 @@ public class HomePage extends AppCompatActivity {
     private int ACTIVITY_CODE = 1;
     private static int REQUEST_CHECK_SETTINGS = 3;
     private boolean dialogBox = true;
-    private boolean mLocationPermission = false;
+    private static boolean mLocationPermission = false;
     private LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     private String mDefaultLocationName = "Chandigarh";
-    private LatLng mCurrentLocation;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private static HomePage homeInstance;
+    private static LatLng mCurrentLocation;
+    private static FusedLocationProviderClient mFusedLocationProviderClient;
     TextView currentAddress;
-
-    public static HomePage GetInstance() {
-        if (homeInstance == null) {
-            homeInstance = new HomePage();
-        }
-
-        return homeInstance;
-    }
 
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
@@ -125,7 +116,6 @@ public class HomePage extends AppCompatActivity {
                 if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
                 } else {
-                    // todo if location is already on
                     GetDeviceLocation();
                 }
             }
@@ -157,7 +147,7 @@ public class HomePage extends AppCompatActivity {
     public void GetDeviceLocation() {
         try {
             if (mLocationPermission) {
-                Toast.makeText(this, "Please Wait loading nearby shops", Toast.LENGTH_LONG).show();
+                Toast.makeText(HomePage.this, "Please wait loading nearby shops", Toast.LENGTH_LONG).show();
 
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Task<Location> task = mFusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
@@ -222,10 +212,14 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void CheckLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
             mLocationPermission = true;
         } else {
-            mLocationPermission = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+            if (Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST,
+                    LOCATION_PERMISSION_CODE_SECOND)) {
+                mLocationPermission = true;
+            }
         }
     }
 
@@ -240,12 +234,17 @@ public class HomePage extends AppCompatActivity {
             } else {
                 //
                 mLocationPermission = false;
-                mLocationPermission = Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+
+                if (Utility.GetLocationPermission(HomePage.this, LOCATION_PERMISSION_CODE_FIRST,
+                        LOCATION_PERMISSION_CODE_SECOND)) {
+                    mLocationPermission = true;
+                    Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
+                }
             }
         } else if (requestCode == LOCATION_PERMISSION_CODE_SECOND) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // todo after getting permission
                 mLocationPermission = true;
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
             } else {
                 //
                 mLocationPermission = false;

@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -51,7 +52,7 @@ import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class Utility {
+public class Utility extends AppCompatActivity {
 
     private static int REQUEST_CHECK_SETTINGS = 3;
 
@@ -169,6 +170,13 @@ public class Utility {
             } else {
                 TurnOnGps(context, activityCode);
             }
+        } else {
+            if (activityCode == 1) {
+                ((HomePage)context).GetDeviceLocation();
+            }
+            else if (activityCode == 2) {
+                ((Maps)context).GetDeviceLocation();
+            }
         }
     }
 
@@ -187,11 +195,10 @@ public class Utility {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 if (activityCode == 1) {
-                    // todo homepage ativity
-                    HomePage.GetInstance().GetDeviceLocation();
+                    ((HomePage)activity).GetDeviceLocation();
                 }
                 else if (activityCode == 2) {
-                    Maps.GetInstance().GetDeviceLocation();
+                    ((Maps)activity).GetDeviceLocation();
                 }
             }
         });

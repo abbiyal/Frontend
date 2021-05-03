@@ -55,28 +55,19 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Marker marker;
-    private boolean mLocationPermissionGranted = false;
+    private static boolean mLocationPermissionGranted = false;
     private int LOCATION_PERMISSION_CODE_FIRST = 1;
     private int LOCATION_PERMISSION_CODE_SECOND = 2;
     private LatLng mDefaultLocation = new LatLng(30.767, 76.7774);
     private String mDefaultLocationName = "Chandigarh";
-    private LatLng mCurrentLocation;
-    private PlacesClient mPlacesClient;
+    private static LatLng mCurrentLocation;
+    private static PlacesClient mPlacesClient;
     private static int REQUEST_CHECK_SETTINGS = 3;
     private boolean dialogBox = false;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private static FusedLocationProviderClient mFusedLocationProviderClient;
     private final int DEFAULT_ZOOM = 15;
     private int ACTIVITY_CODE = 2;
     TextView currentLocation;
-    private static  Maps mapInstance;
-
-    public static Maps GetInstance() {
-        if (mapInstance == null) {
-            mapInstance = new Maps();
-        }
-
-        return mapInstance;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,10 +171,14 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     private void CheckLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
         } else {
-            mLocationPermissionGranted = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+            if (Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST,
+                    LOCATION_PERMISSION_CODE_SECOND)) {
+                mLocationPermissionGranted = true;
+            }
         }
     }
 
@@ -191,7 +186,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                Toast.makeText(this, "Please Wait", Toast.LENGTH_LONG).show();
+                Toast.makeText(Maps.this, "Please wait", Toast.LENGTH_LONG).show();
 
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Task<Location> task = mFusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
@@ -206,7 +201,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                             SetUiWithCurrentLocation();
                         }
                         else {
-                            Toast.makeText(getApplicationContext(), "Couldn't get Location Please try again", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Couldn't get location Please try again", Toast.LENGTH_SHORT).show();
                             cancellationTokenSource.cancel();
                         }
                     }
@@ -239,12 +234,16 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
             } else {
                 //
                 mLocationPermissionGranted = false;
-                mLocationPermissionGranted = Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST, LOCATION_PERMISSION_CODE_SECOND);
+                if (Utility.GetLocationPermission(this, LOCATION_PERMISSION_CODE_FIRST,
+                        LOCATION_PERMISSION_CODE_SECOND)) {
+                    mLocationPermissionGranted = true;
+                    Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
+                }
             }
         } else if (requestCode == LOCATION_PERMISSION_CODE_SECOND) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionGranted = true;
-                GetDeviceLocation();
+                Utility.CheckGPSStatus(this, dialogBox, ACTIVITY_CODE);
             } else {
                 //
                 mLocationPermissionGranted = false;
