@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
 import medmart.loginmedmart.SearchActivity.HelperClasses.SearchCard;
@@ -38,6 +39,9 @@ public interface RetrofitInterface {
 
     @GET("/api/updatePhone")
     Call<HashMap<String,String>> updatePhone(@Header("Authorization") String token, @QueryMap Map<String,String> params);
+
+    @GET("/med-inventory/search/nearbyShops")
+    Call<List<NearbyShopResponse>> findNearbyShops(@Header("Authorization") String token,@QueryMap Map<String,String> params);
 
 
 }

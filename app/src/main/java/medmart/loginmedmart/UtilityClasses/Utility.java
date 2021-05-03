@@ -91,6 +91,7 @@ public class Utility extends AppCompatActivity {
         StoreDataInCache(context, "isLogged", "true");
         Intent intent = new Intent(context, HomePage.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("class","login");
         context.startActivity(intent);
     }
 

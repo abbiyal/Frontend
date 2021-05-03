@@ -11,6 +11,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
@@ -37,18 +38,26 @@ import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
+import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.ShopCard;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import medmart.loginmedmart.UtilityClasses.Utility;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomePage extends AppCompatActivity {
 
@@ -135,8 +144,7 @@ public class HomePage extends AppCompatActivity {
 
         shopRecycler.setHasFixedSize(true);
         shopRecycler.setLayoutManager(linearLayoutManager);
-        shopAdapter = new ShopAdapter();
-        shopRecycler.setAdapter(shopAdapter);
+
 
         categoryRecycler.setHasFixedSize(true);
         categoryRecycler.setLayoutManager(linearLayoutManager1);
@@ -194,21 +202,56 @@ public class HomePage extends AppCompatActivity {
 
         double latitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlatitude",
                 String.valueOf(mDefaultLocation.latitude)));
-        double longitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlatitude",
+        double longitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlongitude",
                 String.valueOf(mDefaultLocation.longitude)));
         mCurrentLocation = new LatLng(latitude, longitude);
+        String location = String.valueOf(mCurrentLocation.latitude)+','+String.valueOf(mCurrentLocation.longitude);
         // todo backend call get result of shops and notiyfy shop recycler with new ArrayList
         //  and comment below, use default image for now
+//        ArrayList<ShopCard> shopCards = new ArrayList<>();
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        NotifyShopRecycler(shopCards);
 
-        ArrayList<ShopCard> shopCards = new ArrayList<>();
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        HashMap<String,String> params=new HashMap<String,String>();
+        System.out.println(location);
+        params.put("location","\""+location+"\"");
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        System.out.println(jwt);
+        Call<List<NearbyShopResponse>> nearbyShopCalls = retrofitInterface.findNearbyShops(jwt,params);
+        nearbyShopCalls.enqueue(new Callback<List<NearbyShopResponse>>() {
+            @Override
+            public void onResponse(Call<List<NearbyShopResponse>> call, Response<List<NearbyShopResponse>> response) {
+                System.out.println("reached here late");
+               ArrayList<ShopCard> shopCards = new ArrayList<>();
+               List<NearbyShopResponse> nearbyShops = response.body();
+               for(int i=0;i<nearbyShops.size();i++){
+                   System.out.println(nearbyShops.get(i));
+                   DecimalFormat df = new DecimalFormat("0.00");
+                   ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
+                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance()+" Km");
+                   shopCards.add(shopCard);
+               }
+               if(shopAdapter == null){
+                shopAdapter = new ShopAdapter();
+                shopRecycler.setAdapter(shopAdapter);}
 
-        NotifyShopRecycler(shopCards);
+                NotifyShopRecycler(shopCards);
+            }
+
+            @Override
+            public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(),"Connection error !!!",Toast.LENGTH_LONG);
+            }
+        });
+
+
     }
 
     private void CheckLocationPermission() {
