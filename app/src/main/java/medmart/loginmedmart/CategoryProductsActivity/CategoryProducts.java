@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,19 +77,42 @@ public class CategoryProducts extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         categoryRecycler.setLayoutManager(linearLayoutManager);
-        RequestForCompleteList();
+        RequestForCompleteList(categoryName.getText().toString());
     }
 
-    private void RequestForCompleteList() {
-        //todo get complete list and set completelistofproducts
-        completeListOfProducts = GenerateSampleData();
+    private void RequestForCompleteList(String categoryName) {
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        HashMap<String,String> params = new HashMap<String,String>();
+        System.out.println(categoryName);
+        params.put("category",categoryName.toUpperCase().split(" ")[0]);
+        Call<List<ProductCatalogue>> productsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
+        productsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
+            @Override
+            public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
+                List<ProductCatalogue> productsInCategory = response.body();
+                completeListOfProducts = new ArrayList<SearchCard>();
+                for(int i=0;i<productsInCategory.size();i++) {
+                    SearchCard searchCard = new SearchCard(R.drawable.crocin, productsInCategory.get(i).getProductName(),
+                            productsInCategory.get(i).getCompanyName(), productsInCategory.get(i).getSize(), productsInCategory.get(i).getProductId());
+                    System.out.println(searchCard);
+                    completeListOfProducts.add(searchCard);
+                }
+                if (categorySearchAdapter == null) {
+                    categorySearchAdapter = new SearchAdapter(getApplicationContext());
+                    categoryRecycler.setAdapter(categorySearchAdapter);
+                }
 
-        if (categorySearchAdapter == null) {
-            categorySearchAdapter = new SearchAdapter(getApplicationContext());
-            categoryRecycler.setAdapter(categorySearchAdapter);
-        }
+                NotifyRecycler(completeListOfProducts);
+            }
 
-        NotifyRecycler(completeListOfProducts);
+            @Override
+            public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG);
+            }
+        });
+
     }
 
     private void NotifyRecycler(ArrayList<SearchCard> lisOfProducts) {
@@ -105,6 +129,13 @@ public class CategoryProducts extends AppCompatActivity {
 
     private void CallSearch(String query) {
         // todo search results under category nd category name is in categoryName textview
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("category",categoryName.toUpperCase().split(" ")[0]);
+        params.put("query",query);
+        Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
         ArrayList<SearchCard> searchResults = new ArrayList<>();
 
 

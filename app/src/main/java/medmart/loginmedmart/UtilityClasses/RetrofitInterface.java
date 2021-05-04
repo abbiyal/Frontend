@@ -42,5 +42,11 @@ public interface RetrofitInterface {
     @GET("/med-inventory/search/nearbyShops")
     Call<List<NearbyShopResponse>> findNearbyShops(@Header("Authorization") String token,@QueryMap Map<String,String> params);
 
+    @POST("/med-inventory/search/shopshavingproducts")
+    Call<List<NearbyShopResponse>> getShopsHavingProducts(@Header("Authorization") String token,@Body HashMap<String,String> params);
+
+    @GET("/med-inventory/search/category")
+    Call<List<ProductCatalogue>> getProductsOfCategory(@Header("Authorization") String token, @QueryMap Map<String,String> params);
+
 
 }

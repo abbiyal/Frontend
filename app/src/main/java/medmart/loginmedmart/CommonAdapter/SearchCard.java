@@ -38,4 +38,15 @@ public class SearchCard {
     public String getMedicineSize() {
         return medicineSize;
     }
+
+    @Override
+    public String toString() {
+        return "SearchCard{" +
+                "image=" + image +
+                ", medicineName='" + medicineName + '\'' +
+                ", medicineCompany='" + medicineCompany + '\'' +
+                ", medicineSize='" + medicineSize + '\'' +
+                ", productId='" + productId + '\'' +
+                '}';
+    }
 }

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,14 +19,22 @@ import android.widget.TextView;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import medmart.loginmedmart.CommonAdapter.ShopAdapter;
 import medmart.loginmedmart.CommonAdapter.ShopCard;
+import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import medmart.loginmedmart.UtilityClasses.Utility;
 import okhttp3.internal.Util;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProductResult extends AppCompatActivity {
     RecyclerView shopRecycler;
@@ -86,28 +95,58 @@ public class ProductResult extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL, false);
         shopRecycler.setHasFixedSize(true);
         shopRecycler.setLayoutManager(linearLayoutManager);
-        // todo reuest nd call result string
-        RequestBackend();
+        RequestBackend(productId);
 
     }
 
-    private void RequestBackend() {
+    private void RequestBackend(String productId) {
 
-        ArrayList<ShopCard> shopCards = new ArrayList<>();
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        HashMap<String,String> params=new HashMap<String,String>();
 
-        if (shopAdapter == null) {
-            shopAdapter = new ShopAdapter();
-            shopRecycler.setAdapter(shopAdapter);
-        }
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String latitude = sharedPreferences.getString("userlatitude", String.valueOf(mDefaultLocation.latitude));
+        String longitude = sharedPreferences.getString("userlongitude", String.valueOf(mDefaultLocation.longitude));
+        String location = latitude + "," + longitude;
+        params.put("location",location);
+        params.put("productid",productId);
+        Call<List<NearbyShopResponse>> shopsHavingProducts = retrofitInterface.getShopsHavingProducts(jwt,params);
+        shopsHavingProducts.enqueue(new Callback<List<NearbyShopResponse>>() {
+            @Override
+            public void onResponse(Call<List<NearbyShopResponse>> call, Response<List<NearbyShopResponse>> response) {
+                List<NearbyShopResponse> shopsHavingProducts = response.body();
+                ArrayList<ShopCard> shopCards = new ArrayList<>();
+                for(int i=0;i<shopsHavingProducts.size();i++){
+                    System.out.println(shopsHavingProducts.get(i));
+                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,shopsHavingProducts.get(i).getShopName(),
+                            shopsHavingProducts.get(i).getDistance(),shopsHavingProducts.get(i).getPrice(),shopsHavingProducts.get(i).getShopId());
+                    shopCards.add(shopCard);
+                }
+                if (shopAdapter == null) {
+                    shopAdapter = new ShopAdapter();
+                    shopRecycler.setAdapter(shopAdapter);
+                }
 
-        NotifyShopRecycler(shopCards);
-        resultString.setText(shopAdapter.getItemCount() + " store delivering " + medicineName);
+                NotifyShopRecycler(shopCards);
+                resultString.setText(shopAdapter.getItemCount() + " store delivering " + medicineName);
+            }
+
+            @Override
+            public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
+
+            }
+        });
+
+//        ArrayList<ShopCard> shopCards = new ArrayList<>();
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
+
+
     }
 
     private void NotifyShopRecycler(ArrayList<ShopCard> shopCards) {

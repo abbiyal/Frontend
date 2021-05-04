@@ -5,14 +5,16 @@ public class NearbyShopResponse {
     private String shopName;
     private Long shopId;
     private String distance;
+    private String price;
 
     public NearbyShopResponse() {
     }
 
-    public NearbyShopResponse(String shopName, Long shopId, String distance) {
+    public NearbyShopResponse(String shopName, Long shopId, String distance, String price) {
         this.shopName = shopName;
         this.shopId = shopId;
-        distance = distance;
+        this.distance = distance;
+        this.price = price;
     }
 
     public String getShopName() {
@@ -36,7 +38,15 @@ public class NearbyShopResponse {
     }
 
     public void setDistance(String distance) {
-        distance = distance;
+        this.distance = distance;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     @Override
@@ -44,7 +54,8 @@ public class NearbyShopResponse {
         return "NearbyShopResponse{" +
                 "shopName='" + shopName + '\'' +
                 ", shopId=" + shopId +
-                ", Distance=" + distance +
+                ", distance='" + distance + '\'' +
+                ", price='" + price + '\'' +
                 '}';
     }
 }

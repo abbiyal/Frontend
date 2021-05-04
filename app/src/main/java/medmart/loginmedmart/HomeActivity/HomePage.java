@@ -250,7 +250,7 @@ public class HomePage extends AppCompatActivity {
                    System.out.println(nearbyShops.get(i));
                    DecimalFormat df = new DecimalFormat("0.00");
                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
-                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance());
+                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance(),"",nearbyShops.get(i).getShopId());
                    shopCards.add(shopCard);
                }
 
@@ -353,11 +353,11 @@ public class HomePage extends AppCompatActivity {
 
     private void PopulateCataegoryRecycler() {
         ArrayList<CategoryCard> categoryCards = new ArrayList<>();
-        categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
-        categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
-        categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
-        categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
-        categoryCards.add(new CategoryCard(R.drawable.app_logo, "Gel"));
+        categoryCards.add(new CategoryCard(R.drawable.gel, "GEL"));
+        categoryCards.add(new CategoryCard(R.drawable.tablet, "TABLET"));
+        categoryCards.add(new CategoryCard(R.drawable.powder, "POWDER"));
+        categoryCards.add(new CategoryCard(R.drawable.spray3, "SPRAY"));
+        categoryCards.add(new CategoryCard(R.drawable.syrup3, "SYRUP"));
 
         categoryAdapter.SetContent(categoryCards);
     }

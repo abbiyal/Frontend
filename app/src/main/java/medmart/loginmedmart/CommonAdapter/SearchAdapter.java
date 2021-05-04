@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import medmart.loginmedmart.ProductResultActivity.ProductResult;
 import medmart.loginmedmart.R;
 
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewModel> {
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewModel>{
 
     private ArrayList<SearchCard> searchCards;
     private Context context;
@@ -53,6 +54,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
                 Intent intent = new Intent(context, ProductResult.class);
                 intent.putExtra("productid", searchCards.get(position).getProductId());
                 intent.putExtra("medicinename", searchCards.get(position).getMedicineName());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
