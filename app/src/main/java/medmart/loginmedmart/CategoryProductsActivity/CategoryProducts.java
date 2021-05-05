@@ -133,13 +133,29 @@ public class CategoryProducts extends AppCompatActivity {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         HashMap<String,String> params = new HashMap<String,String>();
-        params.put("category",categoryName.toUpperCase().split(" ")[0]);
+        params.put("category",categoryName.getText().toString().toUpperCase().split(" ")[0]);
         params.put("query",query);
-        Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
-        ArrayList<SearchCard> searchResults = new ArrayList<>();
+        Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsWithinCategory(jwt,params);
+        searchProductsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
+            @Override
+            public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
+                ArrayList<SearchCard> searchResults = new ArrayList<>();
+                List<ProductCatalogue> products = response.body();
+                for(int i=0;i<products.size();i++) {
+                    SearchCard searchCard = new SearchCard(R.drawable.crocin, products.get(i).getProductName(),
+                            products.get(i).getCompanyName(), products.get(i).getSize(), products.get(i).getProductId());
+                    System.out.println(searchCard);
+                    searchResults.add(searchCard);
+                }
+                NotifyRecycler(searchResults);
+            }
 
+            @Override
+            public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(),"Connection Error !",Toast.LENGTH_LONG);
+            }
+        });
 
-        NotifyRecycler(searchResults);
     }
 
     private ArrayList<SearchCard> GenerateSampleData() {

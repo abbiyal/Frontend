@@ -48,5 +48,8 @@ public interface RetrofitInterface {
     @GET("/med-inventory/search/category")
     Call<List<ProductCatalogue>> getProductsOfCategory(@Header("Authorization") String token, @QueryMap Map<String,String> params);
 
+    @POST("/med-inventory/search/withincategory")
+    Call<List<ProductCatalogue>> getProductsWithinCategory(@Header("Authorization") String token,@Body HashMap<String,String> params);
+
 
 }
