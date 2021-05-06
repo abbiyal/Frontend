@@ -17,6 +17,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
+import medmart.loginmedmart.ForgotPasswordActivities.VerifyOtp;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -49,23 +50,28 @@ public class SignUp extends AppCompatActivity {
                 R.id.login_password, R.string.invalid_confrim_password);
     }
 
-    private void RegisterUser(HashMap<String,String> jsonObject)  {
-        if (awesomeValidation.validate()) {
-            RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-            Call<HashMap<String,String>> addusercall=retrofitInterface.addUser(jsonObject);
-            addusercall.enqueue(new Callback<HashMap<String,String>>() {
-                @Override
-                public void onResponse(Call<HashMap<String,String>> call, Response<HashMap<String,String>> response) {
-                    if (response.body().get("response").contentEquals("success")) {
-                        Utility.login(jsonObject.get("username"), jsonObject.get("password"), getApplicationContext());
-                    }
+    private void RegisterUser(HashMap<String, String> jsonObject) {
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> addusercall = retrofitInterface.addUser(jsonObject);
+        addusercall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                if (response.body().get("response").contentEquals("success")) {
+                    Utility.StoreDataInCache(getApplicationContext(), "name", jsonObject.get("name"));
+                    Utility.StoreDataInCache(getApplicationContext(), "phone", jsonObject.get("phone"));
+                    Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
+                    intent.putExtra("Email", jsonObject.get("username"));
+                    intent.putExtra("password", jsonObject.get("password"));
+                    intent.putExtra("class", "signup");
+                    startActivity(intent);
                 }
-                @Override
-                public void onFailure(Call<HashMap<String,String>> call, Throwable t) {
-                            Toast.makeText(getApplicationContext(),"Failure to Signup",Toast.LENGTH_LONG);
-                }
-            });
-        }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Failure to Signup", Toast.LENGTH_LONG);
+            }
+        });
     }
 
     @Override
@@ -80,17 +86,19 @@ public class SignUp extends AppCompatActivity {
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String username=((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString();
-                String password=((TextInputLayout)findViewById(R.id.login_password)).getEditText().getText().toString();
-                String phone=((TextInputLayout) findViewById(R.id.phone_number)).getEditText().getText().toString();
-                String name=((TextInputLayout) findViewById(R.id.Name)).getEditText().getText().toString();
-                HashMap<String, String> jsonObject=new HashMap<>();
-                jsonObject.put("username",username);
-                jsonObject.put("password",password);
-                jsonObject.put("phone",phone);
-                jsonObject.put("name",name);
-                jsonObject.put("role","ROLE_USER");
-                RegisterUser(jsonObject);
+                if (awesomeValidation.validate()) {
+                    String username = ((TextInputLayout) findViewById(R.id.login_username)).getEditText().getText().toString();
+                    String password = ((TextInputLayout) findViewById(R.id.login_password)).getEditText().getText().toString();
+                    String phone = ((TextInputLayout) findViewById(R.id.phone_number)).getEditText().getText().toString();
+                    String name = ((TextInputLayout) findViewById(R.id.Name)).getEditText().getText().toString();
+                    HashMap<String, String> jsonObject = new HashMap<>();
+                    jsonObject.put("username", username);
+                    jsonObject.put("password", password);
+                    jsonObject.put("phone", phone);
+                    jsonObject.put("name", name);
+                    jsonObject.put("role", "ROLE_USER");
+                    RegisterUser(jsonObject);
+                }
             }
         });
 

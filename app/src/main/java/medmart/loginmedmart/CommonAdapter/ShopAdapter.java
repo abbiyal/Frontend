@@ -35,8 +35,9 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
     public void onBindViewHolder(@NonNull ShopViewHolder holder, int position) {
         ShopCard shop = shopCards.get(position);
         holder.shopImage.setImageResource(shop.getImage());
-        holder.shopName.setText(shop.shopName);
-        holder.shopDistance.setText(shop.shopDistance);
+        holder.shopName.setText(shop.getShopName());
+        holder.shopDistance.setText(shop.getShopDistance());
+        holder.shopPrice.setText(shop.getPrice());
     }
 
     @Override
@@ -46,13 +47,14 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
 
     public static class ShopViewHolder extends RecyclerView.ViewHolder {
         ImageView shopImage;
-        TextView shopName, shopDistance;
+        TextView shopName, shopDistance, shopPrice;
 
         public ShopViewHolder(@NonNull View itemView) {
             super(itemView);
             shopImage = itemView.findViewById(R.id.shop_image);
             shopName = itemView.findViewById(R.id.shop_name);
             shopDistance = itemView.findViewById(R.id.shop_distance);
+            shopPrice = itemView.findViewById(R.id.shop_price);
         }
     }
 }

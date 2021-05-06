@@ -17,9 +17,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginMedMart">
-        <activity android:name=".CategoryProductsActivity.CategoryProducts"></activity>
-        <activity android:name=".ProductResultActivity.ProductResult"></activity>
-        <activity android:name=".MapActivity.PlacesSearch" />
+        <activity android:name=".ShopInventoryActivity.ShopInventory"></activity>
+        <activity
+            android:name=".CategoryProductsActivity.CategoryProducts"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ProductResultActivity.ProductResult"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MapActivity.PlacesSearch"
+            android:screenOrientation="portrait" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -34,13 +41,20 @@
 
         <activity
             android:name=".MapActivity.Maps"
-            android:label="@string/title_activity_maps" />
-        <activity android:name=".ProfileActivity.ProfileActivity" />
-        <activity android:name=".SearchActivity.Search" />
-        <activity android:name=".HomeActivity.HomePage" />
-        <activity android:name=".ForgotPasswordActivities.ForgetPasswordSuccessMessage">
-            android:screenOrientation="portrait"
-        </activity>
+            android:label="@string/title_activity_maps"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ProfileActivity.ProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SearchActivity.Search"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".HomeActivity.HomePage"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ForgotPasswordActivities.ForgetPasswordSuccessMessage"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ForgotPasswordActivities.SetNewPassword"
             android:screenOrientation="portrait" />

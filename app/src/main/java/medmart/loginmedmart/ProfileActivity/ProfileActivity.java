@@ -1,108 +1,195 @@
 package medmart.loginmedmart.ProfileActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.basgeekball.awesomevalidation.utility.RegexTemplate;
 
+import java.util.HashMap;
+
+import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import medmart.loginmedmart.UtilityClasses.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
+    EditText phoneEdit, nameEdit, emailEdit;
+    Button save;
+    private AwesomeValidation nameValidation;
+    private AwesomeValidation phoneValidation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.profile_activity);
 
-        TextView logout=findViewById(R.id.logout);
-        ImageView editName=findViewById(R.id.edit_name);
-        ImageView editPhone=findViewById(R.id.edit_phone);
+        nameEdit = findViewById(R.id.name_edittext);
+        phoneEdit = findViewById(R.id.phone_edittext);
+        emailEdit = findViewById(R.id.email);
+        save = findViewById(R.id.save);
 
-        editPhone.setOnClickListener(new View.OnClickListener() {
+        SetUi();
+        nameValidation = new AwesomeValidation(ValidationStyle.BASIC);
+        nameValidation.addValidation(this, R.id.name_edittext,
+                RegexTemplate.NOT_EMPTY, R.string.invalid_name);
+
+        phoneValidation = new AwesomeValidation(ValidationStyle.BASIC);
+        phoneValidation.addValidation(this, R.id.phone_edittext,
+                "^[5-9][0-9]{9}$", R.string.invalid_phone);
+        SetOnclickListeners();
+    }
+
+    private void SetOnclickListeners() {
+        nameEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-                //Todo Pankaj: Start new Fragment to get new Phone No
-                String Phone="";
-                editPhoneofUser(Phone);
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    save.setVisibility(View.VISIBLE);
+                }
             }
         });
-        editName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                //Todo Pankaj: Start new Fragment to get new Name
-                String email=""; // Todo populate email from profile page
-                editNameofUser(email);
+        nameEdit.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(nameEdit.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
             }
         });
 
-        logout.setOnClickListener(new View.OnClickListener() {
+        phoneEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    save.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        phoneEdit.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(phoneEdit.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logout();
+                save.setVisibility(View.INVISIBLE);
+
+                if (nameEdit.isFocused()) {
+                    nameEdit.clearFocus();
+                    if (nameValidation.validate()) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(nameEdit.getWindowToken(), 0);
+                    }
+                } else if (phoneEdit.isFocused()) {
+                    phoneEdit.clearFocus();
+                    if (phoneValidation.validate()) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(phoneEdit.getWindowToken(), 0);
+                    }
+                }
             }
         });
     }
 
-    private void logout() {
-        SharedPreferences sharedPreferences=getApplicationContext().getSharedPreferences("Login_Cookie",MODE_PRIVATE);
-        SharedPreferences.Editor editor=sharedPreferences.edit();
+    private void SetUi() {
+        nameEdit.setText(Utility.GetDataFromCache(this, "name", "sample"));
+        phoneEdit.setText(Utility.GetDataFromCache(this, "phone", "sample"));
+        emailEdit.setText(Utility.GetDataFromCache(this, "email", "ABC@example.com"));
+    }
+
+    public void Logout(View view) {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("jwt");
         editor.remove("roles");
-        editor.putBoolean("isLogged",false);
+        editor.putString("isLogged", "false");
+        editor.apply();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
-    private void editNameofUser(String email){
-        HashMap<String,String> params = new HashMap<String,String>();
+
+    private void editNameofUser(String email) {
+        HashMap<String, String> params = new HashMap<String, String>();
         params.put("email", email);
-        String jwt="Bearer " ;//+ getCacheData(jwt); //todo populate jwt from cache
-        RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<HashMap<String,String>> updateCall = retrofitInterface.updateName(jwt,params);
+        String jwt = "Bearer ";//+ getCacheData(jwt); //todo populate jwt from cache
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> updateCall = retrofitInterface.updateName(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                if(response.body().get("response").contentEquals("success")){
-                    Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_LONG);
+                if (response.body().get("response").contentEquals("success")) {
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(),"Connection Error !! ",Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG);
 
             }
         });
     }
 
-    private void editPhoneofUser(String phone){
+    private void editPhoneofUser(String phone) {
 
-        HashMap<String,String> params = new HashMap<String,String>();
+        HashMap<String, String> params = new HashMap<String, String>();
         params.put("phone", phone);
-        String jwt="Bearer " ;//+ getCacheData(jwt); //todo Abhishek: populate jwt from cache
-        RetrofitInterface retrofitInterface= RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<HashMap<String,String>> updateCall = retrofitInterface.updatePhone(jwt,params);
+        String jwt = "Bearer ";//+ getCacheData(jwt); //todo Abhishek: populate jwt from cache
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> updateCall = retrofitInterface.updatePhone(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                if(response.body().get("response").contentEquals("success")){
-                    Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_LONG);
+                if (response.body().get("response").contentEquals("success")) {
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(),"Connection Error !! ",Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG);
 
             }
         });

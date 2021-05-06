@@ -129,13 +129,13 @@ public class CategoryProducts extends AppCompatActivity {
 
     private void CallSearch(String query) {
         // todo search results under category nd category name is in categoryName textview
-        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-        HashMap<String,String> params = new HashMap<String,String>();
-        params.put("category",categoryName.toUpperCase().split(" ")[0]);
-        params.put("query",query);
-        Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
+//        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+//        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+//        HashMap<String,String> params = new HashMap<String,String>();
+//        params.put("category",categoryName.getText().toString().toUpperCase().split(" ")[0]);
+//        params.put("query",query);
+//        Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
         ArrayList<SearchCard> searchResults = new ArrayList<>();
 
 

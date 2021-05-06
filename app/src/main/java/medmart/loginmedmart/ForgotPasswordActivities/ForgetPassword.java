@@ -55,6 +55,7 @@ public class ForgetPassword extends AppCompatActivity {
                                 if(response.body().get("response").contentEquals("success")) {
                                     Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
                                     intent.putExtra("Email", ((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString());
+                                    intent.putExtra("class", "forgetpassword");
                                     startActivity(intent);
                                 }
                                 else if(response.body().get("response").contentEquals("No User Found")){

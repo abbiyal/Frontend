@@ -89,6 +89,8 @@ public class Utility extends AppCompatActivity {
         StoreDataInCache(context, "roles", body.getRoles());
         StoreDataInCache(context, "jwt", body.getJwt());
         StoreDataInCache(context, "isLogged", "true");
+        // todo email, phone and name store in cache
+
         Intent intent = new Intent(context, HomePage.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("class","login");
