@@ -81,8 +81,9 @@ public class ProductResult extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_product_result);
-        search = findViewById(R.id.search_text);
         resultString = findViewById(R.id.result_text);
+        resultString.setText(" ");
+        search = findViewById(R.id.search_text);
         currentAddress = findViewById(R.id.current_address);
         currentAddress.setText(Utility.GetDataFromCache(this, "useraddress", mDefaultLocationName));
         Intent intent = getIntent();
@@ -124,7 +125,7 @@ public class ProductResult extends AppCompatActivity {
                     shopCards.add(shopCard);
                 }
                 if (shopAdapter == null) {
-                    shopAdapter = new ShopAdapter();
+                    shopAdapter = new ShopAdapter(getApplicationContext());
                     shopRecycler.setAdapter(shopAdapter);
                 }
 

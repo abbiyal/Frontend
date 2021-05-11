@@ -72,7 +72,7 @@ public class Utility extends AppCompatActivity {
                 if (response.body().getJwt().contentEquals("null")) {
                     Toast.makeText(context, "Invalid Username or Password", Toast.LENGTH_LONG).show();
                 } else
-                    parseData(response.body(), context);
+                    parseData(response.body(), context, user);
             }
 
             @Override
@@ -83,14 +83,15 @@ public class Utility extends AppCompatActivity {
         });
     }
 
-    private static void parseData(Jwt body, Context context) {
+    private static void parseData(Jwt body, Context context, String user) {
         System.out.println(body);
         Toast.makeText(context, body.getJwt(), Toast.LENGTH_LONG).show();
         StoreDataInCache(context, "roles", body.getRoles());
         StoreDataInCache(context, "jwt", body.getJwt());
         StoreDataInCache(context, "isLogged", "true");
-        // todo email, phone and name store in cache
-
+        StoreDataInCache(context, "name", body.getName());
+        StoreDataInCache(context, "phone", body.getPhone());
+        StoreDataInCache(context, "email", user);
         Intent intent = new Intent(context, HomePage.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("class","login");

@@ -7,12 +7,41 @@ public class SearchCard {
     String medicineSize;
     String productId;
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    String type;
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    String price;
+
     public SearchCard(int image, String medicineName, String medicineCompany, String medicineSize, String productId) {
         this.image = image;
         this.medicineName = medicineName;
         this.medicineCompany = medicineCompany;
         this.medicineSize = medicineSize;
         this.productId = productId;
+    }
+
+    public SearchCard(int image, String medicineName, String medicineCompany, String medicineSize, String productId, String price) {
+        this.image = image;
+        this.medicineName = medicineName;
+        this.medicineCompany = medicineCompany;
+        this.medicineSize = medicineSize;
+        this.productId = productId;
+        this.price = price;
     }
 
     public String getProductId() {
@@ -47,6 +76,7 @@ public class SearchCard {
                 ", medicineCompany='" + medicineCompany + '\'' +
                 ", medicineSize='" + medicineSize + '\'' +
                 ", productId='" + productId + '\'' +
+                ", price='" + price + '\'' +
                 '}';
     }
 }

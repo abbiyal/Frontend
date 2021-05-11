@@ -57,19 +57,21 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 if (response.body().get("response").contentEquals("success")) {
-                    Utility.StoreDataInCache(getApplicationContext(), "name", jsonObject.get("name"));
-                    Utility.StoreDataInCache(getApplicationContext(), "phone", jsonObject.get("phone"));
                     Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
                     intent.putExtra("Email", jsonObject.get("username"));
                     intent.putExtra("password", jsonObject.get("password"));
                     intent.putExtra("class", "signup");
                     startActivity(intent);
+                } else if (response.body().get("response").contentEquals("already exist")) {
+                    Toast.makeText(getApplicationContext(), "User slready exist please login", Toast.LENGTH_LONG);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG);
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Failure to Signup", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG);
             }
         });
     }
@@ -87,6 +89,7 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (awesomeValidation.validate()) {
+                    Toast.makeText(getApplicationContext(), "Please wait verifying email", Toast.LENGTH_LONG).show();
                     String username = ((TextInputLayout) findViewById(R.id.login_username)).getEditText().getText().toString();
                     String password = ((TextInputLayout) findViewById(R.id.login_password)).getEditText().getText().toString();
                     String phone = ((TextInputLayout) findViewById(R.id.phone_number)).getEditText().getText().toString();

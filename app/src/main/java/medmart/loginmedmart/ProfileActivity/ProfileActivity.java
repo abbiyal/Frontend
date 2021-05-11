@@ -1,8 +1,10 @@
 package medmart.loginmedmart.ProfileActivity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
@@ -16,6 +18,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
     Button save;
     private AwesomeValidation nameValidation;
     private AwesomeValidation phoneValidation;
+    private AlertDialog passwordChangeALert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +140,27 @@ public class ProfileActivity extends AppCompatActivity {
         nameEdit.setText(Utility.GetDataFromCache(this, "name", "sample"));
         phoneEdit.setText(Utility.GetDataFromCache(this, "phone", "sample"));
         emailEdit.setText(Utility.GetDataFromCache(this, "email", "ABC@example.com"));
+    }
+
+    public void ChangePassword(View view) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(ProfileActivity.this);
+        alertDialog.setTitle("Change Password");
+        alertDialog.setView(R.layout.changepassworddialog);
+        passwordChangeALert = alertDialog.create();
+        passwordChangeALert.show();
+    }
+
+    public void ChangePasswordSubmit(View view) {
+        passwordChangeALert.dismiss();
+        Toast.makeText(this, "here in submit", Toast.LENGTH_LONG).show();
+    }
+
+    public void ChangePasswordCancel(View view) {
+        passwordChangeALert.dismiss();
+    }
+
+    public void Back(View view) {
+        finish();
     }
 
     public void Logout(View view) {

@@ -52,6 +52,7 @@ import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.ProfileActivity.ProfileActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
+import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import medmart.loginmedmart.UtilityClasses.Utility;
@@ -112,6 +113,8 @@ public class HomePage extends AppCompatActivity {
 
         PopulateCataegoryRecycler();
         OnMyLocationAccessListener();
+        Intent intent1 = new Intent(this, ShopInventory.class);
+        startActivity(intent1);
 
         Intent intent = getIntent();
 
@@ -255,7 +258,7 @@ public class HomePage extends AppCompatActivity {
                }
 
                if(shopAdapter == null) {
-                shopAdapter = new ShopAdapter();
+                shopAdapter = new ShopAdapter(getApplicationContext());
                 shopRecycler.setAdapter(shopAdapter);
                }
 

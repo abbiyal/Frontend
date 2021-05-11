@@ -115,6 +115,26 @@ public class VerifyOtp extends AppCompatActivity {
         if (parentActivity.contentEquals("signup")) {
             if (!IsOtpVerified) {
                 // todo call backend to delete user
+                System.out.println("here for good");
+                RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+                HashMap<String, String> params = new HashMap<>();
+                params.put("email", userName);
+
+                Call<HashMap<String, String>> deleteUser = retrofitInterface.DeleteUser(params);
+
+                deleteUser.enqueue(new Callback<HashMap<String, String>>() {
+                    @Override
+                    public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                        if (response.body().get("response").contentEquals("success")) {
+                            System.out.println("ho gya delete");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                    }
+                });
             }
         }
     }

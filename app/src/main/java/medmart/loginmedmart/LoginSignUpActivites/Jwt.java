@@ -10,6 +10,20 @@ public class Jwt {
     @SerializedName("roles")
     private String roles;
 
+    @SerializedName("name")
+    private  String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    @SerializedName("phoneno")
+    private String phone;
+
     public Jwt(String jwt) {
         this.jwt = jwt;
     }

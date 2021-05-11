@@ -3,6 +3,7 @@ package medmart.loginmedmart.LoginSignUpActivites;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -10,6 +11,9 @@ import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
 
 import medmart.loginmedmart.ForgotPasswordActivities.ForgetPassword;
 import medmart.loginmedmart.HomeActivity.HomePage;
@@ -19,15 +23,17 @@ import medmart.loginmedmart.UtilityClasses.Utility;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private AwesomeValidation awesomeValidation;
+
     private static LoginActivity loginActivity;
 
-    public static LoginActivity getInstance(){
+    public static LoginActivity getInstance() {
         return loginActivity;
     }
 
-    public void GenerateNewPassword(View view){
-            Intent intent = new Intent(getApplicationContext(), ForgetPassword.class);
-            startActivity(intent);
+    public void GenerateNewPassword(View view) {
+        Intent intent = new Intent(getApplicationContext(), ForgetPassword.class);
+        startActivity(intent);
     }
 
     @Override
@@ -43,22 +49,30 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
+        awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
+        awesomeValidation.addValidation(this, R.id.login_username,
+                Patterns.EMAIL_ADDRESS, R.string.invalid_username);
+        awesomeValidation.addValidation(this, R.id.login_password,
+                ".{5,}", R.string.invalid_password);
+
         setContentView(R.layout.activity_login);
 
-        Button login = (Button)findViewById(R.id.login_button);
+        Button login = (Button) findViewById(R.id.login_button);
 
-        login.setOnClickListener(new View.OnClickListener(){
+        login.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 //OnCLick Stuff
-                EditText username= findViewById(R.id.login_username);
-                EditText password=findViewById(R.id.login_password);
-                String user=username.getText().toString();
-                String psswd=password.getText().toString();
-                Utility.login(user,psswd,getApplicationContext());
+                if (awesomeValidation.validate()) {
+                    EditText username = findViewById(R.id.login_username);
+                    EditText password = findViewById(R.id.login_password);
+                    String user = username.getText().toString();
+                    String psswd = password.getText().toString();
+                    Utility.login(user, psswd, getApplicationContext());
+                }
             }
         });
 
-        Button signUp = (Button)findViewById(R.id.signup_button);
+        Button signUp = (Button) findViewById(R.id.signup_button);
 
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override

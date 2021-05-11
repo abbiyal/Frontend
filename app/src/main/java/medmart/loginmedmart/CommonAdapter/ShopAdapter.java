@@ -1,5 +1,7 @@
 package medmart.loginmedmart.CommonAdapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import medmart.loginmedmart.R;
+import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
 
 public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder> {
 
     ArrayList<ShopCard> shopCards;
     private RecyclerView.ViewHolder holder;
     private int position;
+    private Context context;
+
+    public ShopAdapter(Context context) {
+        shopCards = new ArrayList<>();
+        this.context = context;
+    }
 
     public void SetContent(ArrayList<ShopCard> shopCards) {
         this.shopCards = shopCards;
@@ -38,6 +47,14 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
         holder.shopName.setText(shop.getShopName());
         holder.shopDistance.setText(shop.getShopDistance());
         holder.shopPrice.setText(shop.getPrice());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ShopInventory.class);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override

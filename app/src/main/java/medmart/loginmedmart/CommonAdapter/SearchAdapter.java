@@ -44,9 +44,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     public void onBindViewHolder(@NonNull SearchViewModel holder, int position) {
         SearchCard search = searchCards.get(position);
         holder.medicineImage.setImageResource(search.getImage());
-        holder.medicineName.setText(search.medicineName);
-        holder.medicineCompany.setText(search.medicineCompany);
-        holder.medicineSize.setText(search.medicineSize);
+        holder.medicineName.setText(search.getMedicineName());
+        holder.medicineCompany.setText(search.getMedicineCompany());
+        holder.medicineSize.setText(search.getMedicineSize());
 
         holder.buyNow.setOnClickListener(new View.OnClickListener() {
             @Override
