@@ -3,6 +3,7 @@ package medmart.loginmedmart.ShopInventoryActivity.HelperClasses;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 
@@ -30,7 +32,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     private long shopId;
     private int[] quantityIds = {R.id.remove_item, R.id.quantity1, R.id.quantity2, R.id.quantity3, R.id.quantity4
             , R.id.quantity5, R.id.quantity6, R.id.quantity7, R.id.quantity8, R.id.quantity9, R.id.quantity10};
-    private TextView[] quantites = new TextView[11];
+    private TextView[] quantities = new TextView[11];
 
     public InventoryAdapter(Context context, long shopId) {
         this.context = context;
@@ -40,10 +42,10 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         this.shopId = shopId;
 
         for (int i = 0; i < 11; i++) {
-            quantites[i] = pickQuantity.findViewById(quantityIds[i]);
+            quantities[i] = pickQuantity.findViewById(quantityIds[i]);
         }
 
-        quantites[0].setOnClickListener(new View.OnClickListener() {
+        quantities[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RemoveItem();
@@ -88,7 +90,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             holder.medicineImage.setImageResource(R.drawable.powder);
         }
 
-        HashMap<String, Cart.CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
+        HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
         if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
                 cartItemHashMap.containsKey(search.getProductId()) && cartItemHashMap.get(search.getProductId()).getQuantity() > 0) {
             holder.addToCart.setVisibility(View.GONE);
@@ -107,9 +109,26 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                     // todo add item from new shop,, empty cart and add this nd tell backend as well
                     new AlertDialog.Builder(context)
                             .setTitle("Discard Cart")
-                            .setMessage("")
+                            .setMessage("Items have been added from different shop. Are you sure you want to " +
+                                    "discard it")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    Cart.GetInstance().ClearCart();
+                                    PickQuantity(search, holder);
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .create().show();
                 } else {
-                    PickQuantity(cartItemHashMap, search.getProductId(), holder);
+                    PickQuantity(search, holder);
                 }
             }
         });
@@ -120,12 +139,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         return searchCards.size();
     }
 
-    public void PickQuantity(HashMap<String, Cart.CartItem> cartItemHashMap, String productId, InventoryViewModel holder) {
+    public void PickQuantity(SearchCard product, InventoryViewModel holder) {
         for (int i = 1; i < 11; i++) {
-            quantites[i].setOnClickListener(new View.OnClickListener() {
+            int finalI = i;
+            quantities[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SetQuantity(v, holder);
+                    SetQuantity(product, holder, quantities[finalI].getEditableText().toString());
                     pickQuantity.dismiss();
                 }
             });
@@ -134,8 +154,18 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         pickQuantity.show();
     }
 
-    private void SetQuantity(View v, InventoryViewModel holder) {
-        // todo set quantitiy here and tell backend as well
+    private void SetQuantity(SearchCard product, InventoryViewModel holder, String quantity) {
+        holder.addToCart.setVisibility(View.GONE);
+        holder.quantity.setText("Quantity " + quantity);
+        holder.quantity.setVisibility(View.VISIBLE);
+
+        CartItem cartItem = new CartItem(Integer.parseInt(quantity),
+                Double.parseDouble(product.getPrice()));
+        Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
+        Cart.GetInstance().setTotalItems(Cart.GetInstance().getTotalItems() + 1);
+        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() + cartItem.getPrice());
+
+        // todo backend call to add cart
     }
 
     public class InventoryViewModel extends RecyclerView.ViewHolder {
