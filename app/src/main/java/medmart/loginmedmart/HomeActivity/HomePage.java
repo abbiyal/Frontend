@@ -114,14 +114,16 @@ public class HomePage extends AppCompatActivity {
         PopulateCataegoryRecycler();
         OnMyLocationAccessListener();
         Intent intent1 = new Intent(this, ShopInventory.class);
+        intent1.putExtra("shopid", 100);
         startActivity(intent1);
 
         Intent intent = getIntent();
 
         if (intent.getExtras().containsKey("class") &&
                 intent.getStringExtra("class").contentEquals("login")) {
-            CheckLocationPermission();
 
+            GetCartData();
+            CheckLocationPermission();
             if (mLocationPermission) {
                 LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
 
@@ -132,6 +134,11 @@ public class HomePage extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void GetCartData() {
+        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT);
+        // todo get cart here and populate
     }
 
     public void UseCurrentLocation(View view) {

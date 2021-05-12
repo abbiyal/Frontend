@@ -6,6 +6,8 @@ public class SearchCard {
     String medicineCompany;
     String medicineSize;
     String productId;
+    String price;
+    String type;
 
     public String getType() {
         return type;
@@ -15,8 +17,6 @@ public class SearchCard {
         this.type = type;
     }
 
-    String type;
-
     public String getPrice() {
         return price;
     }
@@ -25,7 +25,7 @@ public class SearchCard {
         this.price = price;
     }
 
-    String price;
+
 
     public SearchCard(int image, String medicineName, String medicineCompany, String medicineSize, String productId) {
         this.image = image;

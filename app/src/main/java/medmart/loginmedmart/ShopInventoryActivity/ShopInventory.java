@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -89,6 +90,9 @@ public class ShopInventory extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_shop_inventory);
+
+        Intent intent = getIntent();
+        SHOP_ID = intent.getLongExtra("shopid", 100);
 
         inventoryRecycler = findViewById(R.id.inventoryrv);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
@@ -190,17 +194,11 @@ public class ShopInventory extends AppCompatActivity {
                     }
 
                 }
-//                Stream<SearchCard> stream = categoryInventory.get(0).stream().filter(
-//                        e -> e.getType().contentEquals(Category.valueOf(category))
-//                );
-//                List<SearchCard> list = stream.collect(Collectors.toList());
-//
-//                categoryInventory.set(category, new ArrayList<SearchCard>(list));
             }
         }
 
         if (inventoryAdapter == null) {
-            inventoryAdapter = new InventoryAdapter(this);
+            inventoryAdapter = new InventoryAdapter(this, SHOP_ID);
             inventoryRecycler.setAdapter(inventoryAdapter);
         }
 
