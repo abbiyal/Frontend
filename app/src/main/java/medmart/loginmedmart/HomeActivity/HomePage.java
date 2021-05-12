@@ -113,10 +113,6 @@ public class HomePage extends AppCompatActivity {
 
         PopulateCataegoryRecycler();
         OnMyLocationAccessListener();
-        Intent intent1 = new Intent(this, ShopInventory.class);
-        intent1.putExtra("shopid", 100);
-        startActivity(intent1);
-
         Intent intent = getIntent();
 
         if (intent.getExtras().containsKey("class") &&

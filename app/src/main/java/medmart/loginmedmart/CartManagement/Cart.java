@@ -15,6 +15,10 @@ public class Cart {
         listOfItems.clear();
     }
 
+    public Cart() {
+        listOfItems = new HashMap<String, CartItem>();
+    }
+
     public static Cart GetInstance() {
         if (cartInstance == null) {
             cartInstance = new Cart();

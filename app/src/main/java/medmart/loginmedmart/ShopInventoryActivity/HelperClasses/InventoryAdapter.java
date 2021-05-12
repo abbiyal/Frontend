@@ -91,8 +91,10 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         }
 
         HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
+//        System.out.println("here on binding " + search.getProductId());
+
         if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
-                cartItemHashMap.containsKey(search.getProductId()) && cartItemHashMap.get(search.getProductId()).getQuantity() > 0) {
+                cartItemHashMap.containsKey(search.getProductId())) {
             holder.addToCart.setVisibility(View.GONE);
             holder.quantity.setText("Quantity " + cartItemHashMap.get(search.getProductId()).getQuantity());
             holder.quantity.setVisibility(View.VISIBLE);
@@ -104,8 +106,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.addToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (Cart.GetInstance().getShopId() != shopId) {
+                if (Cart.GetInstance().getTotalItems() > 0 && Cart.GetInstance().getShopId() != shopId) {
                     // todo add item from new shop,, empty cart and add this nd tell backend as well
                     new AlertDialog.Builder(context)
                             .setTitle("Discard Cart")
@@ -145,7 +146,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             quantities[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SetQuantity(product, holder, quantities[finalI].getEditableText().toString());
+                    SetQuantity(product, holder, quantities[finalI].getText().toString());
                     pickQuantity.dismiss();
                 }
             });
@@ -163,8 +164,10 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                 Double.parseDouble(product.getPrice()));
         Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
         Cart.GetInstance().setTotalItems(Cart.GetInstance().getTotalItems() + 1);
-        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() + cartItem.getPrice());
+        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() + cartItem.getPrice() * cartItem.getQuantity());
+        Cart.GetInstance().setShopId(shopId);
 
+        System.out.println(Cart.GetInstance().getListOfItems().size());
         // todo backend call to add cart
     }
 

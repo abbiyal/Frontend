@@ -182,9 +182,7 @@ public class ShopInventory extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void PopulateRecyclerView(int category) {
         if (categoryInventory.get(category).size() == 0) {
-
             if (category == 0) {
-                // todo get all inventory list
                 HashMap<String, String> params = new HashMap<>();
                 params.put("shopid", String.valueOf(SHOP_ID));
                 SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
@@ -195,7 +193,7 @@ public class ShopInventory extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
                         List<HashMap<String,String>> products = response.body();
-                        if ( ! products.isEmpty()) {
+                        if ( !products.isEmpty()) {
                             ArrayList<SearchCard> searchCards = new ArrayList<>();
                             for(int i=0;i<products.size();i++) {
                                 HashMap<String, String> product = products.get(i);
@@ -206,13 +204,22 @@ public class ShopInventory extends AppCompatActivity {
                                 String size = product.get("size");
                                 String type = product.get("type");
                                 String price = product.get("price");
-                                SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, price);
+                                SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
+                                searchCard.setType(type);
                                 searchCards.add(searchCard);
                             }
+
                             categoryInventory.set(category, searchCards);
+
+                            if (inventoryAdapter == null) {
+                                inventoryAdapter = new InventoryAdapter(getApplicationContext(), SHOP_ID);
+                                inventoryRecycler.setAdapter(inventoryAdapter);
+                            }
+
+                            inventoryAdapter.SetContent(categoryInventory.get(category));
                         }
                         else {
-                            Toast.makeText(getApplicationContext(),"No poducts Found",Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(),"No products Found",Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -221,7 +228,6 @@ public class ShopInventory extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG).show();
                     }
                 });
-
             } else {
                 for (int i = 0; i < categoryInventory.get(0).size(); i++) {
                     if (categoryInventory.get(0).get(i).getType().contentEquals("GEL")) {
@@ -235,7 +241,6 @@ public class ShopInventory extends AppCompatActivity {
                     } else if (categoryInventory.get(0).get(i).getType().contentEquals("POWDER")) {
                         categoryInventory.get(Category.POWDER.getValue()).add(categoryInventory.get(0).get(i));
                     }
-
                 }
             }
         }
