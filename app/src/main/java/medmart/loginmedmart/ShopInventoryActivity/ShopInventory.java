@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +31,11 @@ import medmart.loginmedmart.ProfileActivity.ProfileActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ShopInventory extends AppCompatActivity {
 
@@ -178,7 +185,43 @@ public class ShopInventory extends AppCompatActivity {
 
             if (category == 0) {
                 // todo get all inventory list
-                categoryInventory.set(category, GenerateSampleData());
+                HashMap<String, String> params = new HashMap<>();
+                params.put("shopid", String.valueOf(SHOP_ID));
+                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+                String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+                RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+                Call<List<HashMap<String,String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt,params);
+                shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
+                    @Override
+                    public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
+                        List<HashMap<String,String>> products = response.body();
+                        if ( ! products.isEmpty()) {
+                            ArrayList<SearchCard> searchCards = new ArrayList<>();
+                            for(int i=0;i<products.size();i++) {
+                                HashMap<String, String> product = products.get(i);
+                                String productId = product.get("id");
+                                String companyName = product.get("companyName");
+                                String Dosestrength = product.get("doseStrength");
+                                String productName = product.get("productName");
+                                String size = product.get("size");
+                                String type = product.get("type");
+                                String price = product.get("price");
+                                SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, price);
+                                searchCards.add(searchCard);
+                            }
+                            categoryInventory.set(category, searchCards);
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(),"No poducts Found",Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG).show();
+                    }
+                });
+
             } else {
                 for (int i = 0; i < categoryInventory.get(0).size(); i++) {
                     if (categoryInventory.get(0).get(i).getType().contentEquals("GEL")) {

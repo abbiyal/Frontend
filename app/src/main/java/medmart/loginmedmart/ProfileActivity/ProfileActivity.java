@@ -124,12 +124,14 @@ public class ProfileActivity extends AppCompatActivity {
                     if (nameValidation.validate()) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(nameEdit.getWindowToken(), 0);
+                        editNameofUser(emailEdit.getText().toString(),nameEdit.getText().toString());
                     }
                 } else if (phoneEdit.isFocused()) {
                     phoneEdit.clearFocus();
                     if (phoneValidation.validate()) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(phoneEdit.getWindowToken(), 0);
+                        editPhoneofUser(emailEdit.getText().toString(),phoneEdit.getText().toString());
                     }
                 }
             }
@@ -151,6 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void ChangePasswordSubmit(View view) {
+        //todo call editPasswordofUser function with arguments
         passwordChangeALert.dismiss();
         Toast.makeText(this, "here in submit", Toast.LENGTH_LONG).show();
     }
@@ -175,10 +178,12 @@ public class ProfileActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void editNameofUser(String email) {
+    private void editNameofUser(String email,String name) {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("email", email);
-        String jwt = "Bearer ";//+ getCacheData(jwt); //todo populate jwt from cache
+        params.put("name",name);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");//todo populate jwt from cache
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, String>> updateCall = retrofitInterface.updateName(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
@@ -197,11 +202,13 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void editPhoneofUser(String phone) {
+    private void editPhoneofUser(String email,String phone) {
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("phone", phone);
-        String jwt = "Bearer ";//+ getCacheData(jwt); //todo Abhishek: populate jwt from cache
+        params.put("email",email);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " +  sharedPreferences.getString("jwt", "No JWT FOUND"); //todo Abhishek: populate jwt from cache
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, String>> updateCall = retrofitInterface.updatePhone(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
@@ -222,4 +229,33 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    private void editPasswordofUser(String email,String newpassword,String oldpassword){
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("newpassword", newpassword);
+        params.put("username",email);
+        params.put("oldpassword",oldpassword);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " +  sharedPreferences.getString("jwt", "No JWT FOUND"); //todo Abhishek: populate jwt from cache
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> updateCall = retrofitInterface.updateProfilePassword(jwt, params);
+        updateCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                if (response.body().get("response").contentEquals("success")) {
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Try Again ", Toast.LENGTH_LONG);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG);
+
+            }
+        });
+
+
+    }
 }
