@@ -54,7 +54,7 @@ public interface RetrofitInterface {
     @POST("/api/signup/invalid/delete")
     Call<HashMap<String, String>> DeleteUser(@Body HashMap<String, String> params);
 
-    @GET("/search/products_in_shop")
+    @GET("/med-inventory/search/products_in_shop")
     Call<List<HashMap<String, String>>> findShopProducts(@Header("Authorization") String token, @QueryMap HashMap<String, String> params);
 
     @POST("/api/profile/updatePassword")

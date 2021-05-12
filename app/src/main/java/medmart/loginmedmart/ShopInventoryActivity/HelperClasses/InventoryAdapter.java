@@ -91,8 +91,10 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         }
 
         HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
+//        System.out.println("here on binding " + search.getProductId());
+
         if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
-                cartItemHashMap.containsKey(search.getProductId()) && cartItemHashMap.get(search.getProductId()).getQuantity() > 0) {
+                cartItemHashMap.containsKey(search.getProductId())) {
             holder.addToCart.setVisibility(View.GONE);
             holder.quantity.setText("Quantity " + cartItemHashMap.get(search.getProductId()).getQuantity());
             holder.quantity.setVisibility(View.VISIBLE);
@@ -101,11 +103,17 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             holder.quantity.setVisibility(View.GONE);
         }
 
+        holder.quantity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PickQuantity(search, holder);
+            }
+        });
+
         holder.addToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (Cart.GetInstance().getShopId() != shopId) {
+                if (Cart.GetInstance().getTotalItems() > 0 && Cart.GetInstance().getShopId() != shopId) {
                     // todo add item from new shop,, empty cart and add this nd tell backend as well
                     new AlertDialog.Builder(context)
                             .setTitle("Discard Cart")
@@ -145,7 +153,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             quantities[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SetQuantity(product, holder, quantities[finalI].getEditableText().toString());
+                    SetQuantity(product, holder, quantities[finalI].getText().toString());
                     pickQuantity.dismiss();
                 }
             });
@@ -158,13 +166,22 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.addToCart.setVisibility(View.GONE);
         holder.quantity.setText("Quantity " + quantity);
         holder.quantity.setVisibility(View.VISIBLE);
+        double prevValue = 0;
 
-        CartItem cartItem = new CartItem(Integer.parseInt(quantity),
-                Double.parseDouble(product.getPrice()));
-        Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
-        Cart.GetInstance().setTotalItems(Cart.GetInstance().getTotalItems() + 1);
-        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() + cartItem.getPrice());
+        if (!Cart.GetInstance().getListOfItems().containsKey(product.getProductId())) {
+            CartItem cartItem = new CartItem(Integer.parseInt(quantity),
+                    Double.parseDouble(product.getPrice()));
+            Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
+            Cart.GetInstance().setTotalItems(Cart.GetInstance().getTotalItems() + 1);
+        } else {
+            prevValue = Double.parseDouble(product.getPrice()) * Integer.parseInt(quantity);
+            Cart.GetInstance().getListOfItems().get(product.getProductId()).setQuantity(Integer.parseInt(quantity));
+        }
 
+        CartItem cartItem = Cart.GetInstance().getListOfItems().get(product.getProductId());
+
+        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
+        Cart.GetInstance().setShopId(shopId);
         // todo backend call to add cart
     }
 
