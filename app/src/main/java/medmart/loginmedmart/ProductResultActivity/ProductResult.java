@@ -121,7 +121,10 @@ public class ProductResult extends AppCompatActivity {
                 for(int i=0;i<shopsHavingProducts.size();i++){
                     System.out.println(shopsHavingProducts.get(i));
                     ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,shopsHavingProducts.get(i).getShopName(),
-                            shopsHavingProducts.get(i).getDistance(),"Rs " + shopsHavingProducts.get(i).getPrice(),shopsHavingProducts.get(i).getShopId());
+                            shopsHavingProducts.get(i).getDistance(),"Rs " + shopsHavingProducts.get(i).getPrice(),
+                            shopsHavingProducts.get(i).getShopId());
+                    // todo add shop address here as well
+//                    shopCard.setShopAddress();
                     shopCards.add(shopCard);
                 }
                 if (shopAdapter == null) {

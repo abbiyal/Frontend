@@ -230,14 +230,6 @@ public class HomePage extends AppCompatActivity {
                 String.valueOf(mDefaultLocation.longitude)));
         mCurrentLocation = new LatLng(latitude, longitude);
         String location = String.valueOf(mCurrentLocation.latitude)+','+String.valueOf(mCurrentLocation.longitude);
-//        ArrayList<ShopCard> shopCards = new ArrayList<>();
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));
-//        NotifyShopRecycler(shopCards);
 
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         HashMap<String,String> params=new HashMap<String,String>();
@@ -257,6 +249,8 @@ public class HomePage extends AppCompatActivity {
                    DecimalFormat df = new DecimalFormat("0.00");
                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
                            nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance(),"",nearbyShops.get(i).getShopId());
+                   // todo set shop address here from backend
+//                   shopCard.setShopAddress();
                    shopCards.add(shopCard);
                }
 

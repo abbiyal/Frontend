@@ -1,7 +1,6 @@
 package medmart.loginmedmart.ShopInventoryActivity;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,21 +14,16 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import medmart.loginmedmart.CommonAdapter.SearchCard;
-import medmart.loginmedmart.ProfileActivity.ProfileActivity;
 import medmart.loginmedmart.R;
-import medmart.loginmedmart.SearchActivity.Search;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -76,6 +70,8 @@ public class ShopInventory extends AppCompatActivity {
     private Button categoryOnFocus;
     private int[] categoryButtonId = {R.id.all, R.id.gel, R.id.tablet, R.id.spray, R.id.syrup, R.id.powder};
     private Long SHOP_ID;
+    private TextView shopNameTV, shopAddressTV;
+    private  String shopName, shopAddress;
 
     ArrayList<SearchCard> searchInventory;
     ArrayList<ArrayList<SearchCard>> categoryInventory = new ArrayList<ArrayList<SearchCard>>(6);
@@ -100,6 +96,12 @@ public class ShopInventory extends AppCompatActivity {
 
         Intent intent = getIntent();
         SHOP_ID = intent.getLongExtra("shopid", 100);
+        shopNameTV = findViewById(R.id.shop_name);
+        shopAddressTV = findViewById(R.id.shop_address);
+        shopName = intent.getStringExtra("shopname");
+        shopAddress = intent.getStringExtra("shopaddress");
+
+        SetShopUi();
 
         inventoryRecycler = findViewById(R.id.inventoryrv);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
@@ -122,7 +124,13 @@ public class ShopInventory extends AppCompatActivity {
         categoryOnFocus = categoryButtons[0];
         categoryButtons[0].setBackgroundColor(getColor(R.color.black));
         categoryButtons[0].setTextColor(getColor(R.color.white));
+        categoryOnFocus = categoryButtons[0];
         HandleCategoryClick(findViewById(R.id.all));
+    }
+
+    private void SetShopUi() {
+        shopNameTV.setText(shopName);
+        shopAddressTV.setText(shopAddress);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -177,6 +185,22 @@ public class ShopInventory extends AppCompatActivity {
         }
 
         return searchCards;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SetShopUi();
+
+        if (categoryInventory.get(0).size() == 0) {
+            // todo get cart
+            categoryOnFocus = categoryButtons[0];
+            categoryButtons[0].setBackgroundColor(getColor(R.color.black));
+            categoryButtons[0].setTextColor(getColor(R.color.white));
+            categoryOnFocus = categoryButtons[0];
+            PopulateRecyclerView(0);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -251,6 +275,10 @@ public class ShopInventory extends AppCompatActivity {
         }
 
         inventoryAdapter.SetContent(categoryInventory.get(category));
+    }
+
+    public void Back(View view) {
+        finish();
     }
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
