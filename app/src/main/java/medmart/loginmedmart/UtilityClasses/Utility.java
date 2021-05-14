@@ -34,10 +34,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -219,6 +221,11 @@ public class Utility extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public static <T> List<T> stringToArray(String s, Class<T[]> clazz) {
+        T[] arr = new Gson().fromJson(s, clazz);
+        return Arrays.asList(arr);
     }
 
     public static List<Address> GetCurrentAddressFromLatLng(Context context, @NotNull LatLng mCurrentLocation) {

@@ -63,15 +63,15 @@ public class SignUp extends AppCompatActivity {
                     intent.putExtra("class", "signup");
                     startActivity(intent);
                 } else if (response.body().get("response").contentEquals("already exist")) {
-                    Toast.makeText(getApplicationContext(), "User already exist please login", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "User already exist please login", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Fail to Signup please try agian", Toast.LENGTH_LONG).show();
             }
         });
     }

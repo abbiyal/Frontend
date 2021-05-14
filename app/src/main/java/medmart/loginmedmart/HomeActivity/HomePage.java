@@ -1,12 +1,5 @@
 package medmart.loginmedmart.HomeActivity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -26,9 +19,15 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -37,24 +36,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import kotlin.text.Regex;
 import medmart.loginmedmart.CartManagement.Cart;
 import medmart.loginmedmart.CartManagement.CartItem;
+import medmart.loginmedmart.CommonAdapter.ShopAdapter;
+import medmart.loginmedmart.CommonAdapter.ShopCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
-import medmart.loginmedmart.CommonAdapter.ShopAdapter;
-import medmart.loginmedmart.CommonAdapter.ShopCard;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.ProfileActivity.ProfileActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.SearchActivity.Search;
-import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import medmart.loginmedmart.UtilityClasses.Utility;
@@ -134,43 +135,50 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void GetCartData() {
-        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT);
+        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
         // todo get cart here and populate
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email");
-        HashMap<String,String> params = new HashMap<String,String>();
-        params.put("customerId",email);
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("customerId", email);
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<HashMap<String,Object>> cartCall = retrofitInterface.getUserCart(jwt,params);
+        Call<HashMap<String, Object>> cartCall = retrofitInterface.getUserCart(jwt, params);
         cartCall.enqueue(new Callback<HashMap<String, Object>>() {
             @Override
             public void onResponse(Call<HashMap<String, Object>> call, Response<HashMap<String, Object>> response) {
-                HashMap<String,Object> cart = response.body();
-                Long cartId = (Long)cart.get("cartId");
-                Long  shopId = (Long)cart.get("shopId");
-                int totalItems = (int)cart.get("totalItems");
-                Double totalValue = (Double)cart.get("totalValue");
-                List<CartItem> items = (List<CartItem>)cart.get("items");
-                Cart.GetInstance().setCartId(String.valueOf(cartId));
-                Cart.GetInstance().setShopId(shopId);
-                Cart.GetInstance().setTotalValue(totalValue);
-                Cart.GetInstance().setTotalItems(totalItems);
-                HashMap<String,CartItem> listofItems = new HashMap<String,CartItem>();
-                for(int i=0;i<items.size();i++) {
-                    listofItems.put(items.get(i).getProductId(),items.get(i));
-                }
-                Cart.GetInstance().setListOfItems(listofItems);
+                try {
+                    HashMap<String, Object> cart = response.body();
+                    String cartId = (String) cart.get("cartId");
+                    String shopIdString = (String) cart.get("shopId");
+                    long shopId = Long.parseLong(shopIdString);
+                    String totalValueString = (String) cart.get("totalItems");
+                    int totalItems = Integer.parseInt(totalValueString);
+                    Double totalValue = (Double) cart.get("totalValue");
+                    List<CartItem> items = (List<CartItem>) cart.get("items");
+                    Cart.GetInstance().setCartId(cartId);
+                    Cart.GetInstance().setShopId(shopId);
+                    Cart.GetInstance().setTotalValue(totalValue);
+                    Cart.GetInstance().setTotalItems(totalItems);
+                    HashMap<String, CartItem> listofItems = new HashMap<String, CartItem>();
 
+                    for (int i = 0; i < items.size(); i++) {
+                        System.out.println("here in po " + items.get(i).getQuantity());
+                        listofItems.put(items.get(i).getProductId(), items.get(i));
+                    }
+
+                    Cart.GetInstance().setListOfItems(listofItems);
+                    System.out.println(Cart.GetInstance().getListOfItems().size());
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, Object>> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(),"Conenction Error !! ",Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Conenction Error !! ", Toast.LENGTH_LONG);
             }
         });
-
-
     }
 
     public void UseCurrentLocation(View view) {
@@ -207,6 +215,7 @@ public class HomePage extends AppCompatActivity {
         categoryAdapter = new CategoryAdapter(this);
         categoryRecycler.setAdapter(categoryAdapter);
     }
+
     public void OpenProfile(View view) {
         Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
@@ -243,8 +252,7 @@ public class HomePage extends AppCompatActivity {
                                     String.valueOf(mCurrentLocation.latitude));
 
                             OnMyLocationAccessListener();
-                        }
-                        else {
+                        } else {
                             Toast.makeText(getApplicationContext(), "Couldn't get Location enter manually", Toast.LENGTH_SHORT).show();
                             cancellationTokenSource.cancel();
                         }
@@ -256,7 +264,7 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
-    private void  OnMyLocationAccessListener() {
+    private void OnMyLocationAccessListener() {
         String address = Utility.GetDataFromCache(getApplicationContext(), "useraddress", mDefaultLocationName);
         currentAddress.setText(address);
 
@@ -265,41 +273,41 @@ public class HomePage extends AppCompatActivity {
         double longitude = Double.parseDouble(Utility.GetDataFromCache(getApplicationContext(), "userlongitude",
                 String.valueOf(mDefaultLocation.longitude)));
         mCurrentLocation = new LatLng(latitude, longitude);
-        String location = String.valueOf(mCurrentLocation.latitude)+','+String.valueOf(mCurrentLocation.longitude);
+        String location = String.valueOf(mCurrentLocation.latitude) + ',' + String.valueOf(mCurrentLocation.longitude);
 
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        HashMap<String,String> params=new HashMap<String,String>();
-        params.put("location","\""+location+"\"");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("location", "\"" + location + "\"");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         System.out.println(jwt);
-        Call<List<NearbyShopResponse>> nearbyShopCalls = retrofitInterface.findNearbyShops(jwt,params);
+        Call<List<NearbyShopResponse>> nearbyShopCalls = retrofitInterface.findNearbyShops(jwt, params);
         nearbyShopCalls.enqueue(new Callback<List<NearbyShopResponse>>() {
             @Override
             public void onResponse(Call<List<NearbyShopResponse>> call, Response<List<NearbyShopResponse>> response) {
                 System.out.println("reached here late");
-               ArrayList<ShopCard> shopCards = new ArrayList<>();
-               List<NearbyShopResponse> nearbyShops = response.body();
-               for(int i=0;i<nearbyShops.size();i++){
-                   System.out.println(nearbyShops.get(i));
-                   DecimalFormat df = new DecimalFormat("0.00");
-                   ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
-                           nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance(),"",nearbyShops.get(i).getShopId());
-                   shopCard.setShopAddress(nearbyShops.get(i).getAddress());
-                   shopCards.add(shopCard);
-               }
+                ArrayList<ShopCard> shopCards = new ArrayList<>();
+                List<NearbyShopResponse> nearbyShops = response.body();
+                for (int i = 0; i < nearbyShops.size(); i++) {
+                    System.out.println(nearbyShops.get(i));
+                    DecimalFormat df = new DecimalFormat("0.00");
+                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
+                            nearbyShops.get(i).getShopName(), nearbyShops.get(i).getDistance(), "", nearbyShops.get(i).getShopId());
+                    shopCard.setShopAddress(nearbyShops.get(i).getAddress());
+                    shopCards.add(shopCard);
+                }
 
-               if(shopAdapter == null) {
-                shopAdapter = new ShopAdapter(getApplicationContext());
-                shopRecycler.setAdapter(shopAdapter);
-               }
+                if (shopAdapter == null) {
+                    shopAdapter = new ShopAdapter(getApplicationContext());
+                    shopRecycler.setAdapter(shopAdapter);
+                }
 
                 NotifyShopRecycler(shopCards);
             }
 
             @Override
             public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(),"Connection error !!!",Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection error !!!", Toast.LENGTH_LONG);
             }
         });
 

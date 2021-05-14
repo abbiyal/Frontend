@@ -7,6 +7,18 @@ public class Cart {
     private long shopId;
     private int totalItems;
     private double totalValue;
+
+    @Override
+    public String toString() {
+        return "Cart{" +
+                "cartId='" + cartId + '\'' +
+                ", shopId=" + shopId +
+                ", totalItems=" + totalItems +
+                ", totalValue=" + totalValue +
+                ", listOfItems=" + listOfItems +
+                '}';
+    }
+
     private HashMap<String, CartItem> listOfItems;
 
     private static Cart cartInstance;

@@ -183,12 +183,12 @@ public class ShopInventory extends AppCompatActivity {
         // todo call search nd use serachInventory for filling nd call setcontent
     }
 
-    private void CheckCartUi() {
+    public void CheckCartUi() {
         if (Cart.GetInstance().getTotalItems() > 0) {
             cartItemCount.setText(Cart.GetInstance().getTotalItems() + " items in cart");
             cartValue.setText("Rs. " + Cart.GetInstance().getTotalValue());
             ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
-            layoutParams.height = 350;
+            layoutParams.height = 500;
             inventoryRecycler.setLayoutParams(layoutParams);
             viewCart.setVisibility(View.VISIBLE);
         } else {

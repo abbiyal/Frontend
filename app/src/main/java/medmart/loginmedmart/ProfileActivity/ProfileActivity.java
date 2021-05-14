@@ -1,16 +1,11 @@
 package medmart.loginmedmart.ProfileActivity;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import android.content.DialogInterface;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -18,9 +13,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
@@ -38,11 +35,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
-    EditText phoneEdit, nameEdit, emailEdit;
+    EditText phoneEdit, nameEdit, emailEdit, oldPassword, newPassword, confirmNewPassword;
     Button save;
     private AwesomeValidation nameValidation;
     private AwesomeValidation phoneValidation;
-    private AlertDialog passwordChangeALert;
+    private Dialog passwordChangeALert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
         phoneValidation = new AwesomeValidation(ValidationStyle.BASIC);
         phoneValidation.addValidation(this, R.id.phone_edittext,
                 "^[5-9][0-9]{9}$", R.string.invalid_phone);
+
         SetOnclickListeners();
     }
 
@@ -124,14 +122,14 @@ public class ProfileActivity extends AppCompatActivity {
                     if (nameValidation.validate()) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(nameEdit.getWindowToken(), 0);
-                        editNameofUser(emailEdit.getText().toString(),nameEdit.getText().toString());
+                        editNameofUser(emailEdit.getText().toString(), nameEdit.getText().toString());
                     }
                 } else if (phoneEdit.isFocused()) {
                     phoneEdit.clearFocus();
                     if (phoneValidation.validate()) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(phoneEdit.getWindowToken(), 0);
-                        editPhoneofUser(emailEdit.getText().toString(),phoneEdit.getText().toString());
+                        editPhoneofUser(emailEdit.getText().toString(), phoneEdit.getText().toString());
                     }
                 }
             }
@@ -145,17 +143,28 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void ChangePassword(View view) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(ProfileActivity.this);
-        alertDialog.setTitle("Change Password");
-        alertDialog.setView(R.layout.changepassworddialog);
-        passwordChangeALert = alertDialog.create();
+        passwordChangeALert = new Dialog(ProfileActivity.this);
+        passwordChangeALert.setTitle("Change Password");
+        passwordChangeALert.setContentView(R.layout.changepassworddialog);
+
+        oldPassword = passwordChangeALert.findViewById(R.id.old_password);
+        newPassword = passwordChangeALert.findViewById(R.id.new_password);
+        confirmNewPassword = passwordChangeALert.findViewById(R.id.confirm_new_password);
         passwordChangeALert.show();
     }
 
     public void ChangePasswordSubmit(View view) {
         //todo call editPasswordofUser function with arguments
         passwordChangeALert.dismiss();
-        Toast.makeText(this, "here in submit", Toast.LENGTH_LONG).show();
+        String oldPasswordString = oldPassword.getEditableText().toString();
+        String newPasswordString = newPassword.getEditableText().toString();
+        String confirmNewPasswordString = confirmNewPassword.getEditableText().toString();
+
+        if (oldPasswordString.length() > 5 && newPasswordString.contentEquals(confirmNewPasswordString)) {
+            editPasswordofUser(emailEdit.getText().toString(), oldPasswordString, newPasswordString);
+        } else {
+            Toast.makeText(this, "Check credentials", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void ChangePasswordCancel(View view) {
@@ -178,10 +187,11 @@ public class ProfileActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void editNameofUser(String email,String name) {
+    private void editNameofUser(String email, String name) {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("email", email);
-        params.put("name",name);
+        params.put("name", name);
+        ProgressDialog dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");//todo populate jwt from cache
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
@@ -190,25 +200,27 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 if (response.body().get("response").contentEquals("success")) {
-                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                    Utility.StoreDataInCache(getApplicationContext(), "name", name);
+                    dialog.dismiss();
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG).show();
 
             }
         });
     }
 
-    private void editPhoneofUser(String email,String phone) {
+    private void editPhoneofUser(String email, String phone) {
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("phone", phone);
-        params.put("email",email);
+        params.put("email", email);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-        String jwt = "Bearer " +  sharedPreferences.getString("jwt", "No JWT FOUND"); //todo Abhishek: populate jwt from cache
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND"); //todo Abhishek: populate jwt from cache
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, String>> updateCall = retrofitInterface.updatePhone(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
@@ -229,29 +241,29 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void editPasswordofUser(String email,String newpassword,String oldpassword){
+    private void editPasswordofUser(String email, String oldpassword, String newpassword) {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("newpassword", newpassword);
-        params.put("username",email);
-        params.put("oldpassword",oldpassword);
+        params.put("username", email);
+        params.put("oldpassword", oldpassword);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-        String jwt = "Bearer " +  sharedPreferences.getString("jwt", "No JWT FOUND"); //todo Abhishek: populate jwt from cache
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, String>> updateCall = retrofitInterface.updateProfilePassword(jwt, params);
         updateCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 if (response.body().get("response").contentEquals("success")) {
-                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Try Again ", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                    Logout(new View(getApplicationContext()));
+                } else {
+                    Toast.makeText(getApplicationContext(), "Try Again ", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection Error !! ", Toast.LENGTH_LONG).show();
 
             }
         });
