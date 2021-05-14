@@ -60,4 +60,16 @@ public interface RetrofitInterface {
     @POST("/api/profile/updatePassword")
     Call<HashMap<String, String>> updateProfilePassword(@Header("Authorization") String token, @Body Map<String, String> params);
 
+    @GET("/cart-service/carts/getcart")
+    Call<HashMap<String,Object>> getUserCart(@Header("Authorization") String token,@QueryMap HashMap<String, String> params);
+
+    @POST("/cart-service/carts/addIteminCart")
+    Call<HashMap<String, String>> addItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
+
+    @GET("/cart-service/carts/emptyCart")
+    Call<HashMap<String,String>> emptyCart(@Header("Authorization") String token,@QueryMap HashMap<String, String> params);
+
+    @POST("/cart-service/carts/updateItemQuantity")
+    Call<HashMap<String, String>> updateItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
+
 }

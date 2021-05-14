@@ -355,7 +355,6 @@ public class ShopInventory extends AppCompatActivity {
     }
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
-
         if (button_newfocus != categoryButtons[0]) {
             search.setText("Search for Medicines in category");
         } else {

@@ -3,6 +3,7 @@ package medmart.loginmedmart.ForgotPasswordActivities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -75,6 +76,8 @@ public class VerifyOtp extends AppCompatActivity {
             public void onClick(View v) {
                 RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
                 HashMap<String, String> otp = new HashMap<>();
+                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+                String email = sharedPreferences.getString("email", "No email");
                 Call<HashMap<String, String>> verifyOtpCall = retrofitInterface.verifyOtp(otp);
                 String token = ((PinView) findViewById(R.id.otp)).getEditableText().toString();
                 otp.put("otp", token);
@@ -107,7 +110,6 @@ public class VerifyOtp extends AppCompatActivity {
         });
 
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -136,4 +138,6 @@ public class VerifyOtp extends AppCompatActivity {
             }
         }
     }
+
+
 }
