@@ -37,12 +37,16 @@ import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import kotlin.text.Regex;
 import medmart.loginmedmart.CartManagement.Cart;
@@ -62,6 +66,8 @@ import medmart.loginmedmart.UtilityClasses.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static java.lang.Character.getType;
 
 public class HomePage extends AppCompatActivity {
 
@@ -155,7 +161,7 @@ public class HomePage extends AppCompatActivity {
                     String totalValueString = (String) cart.get("totalItems");
                     int totalItems = Integer.parseInt(totalValueString);
                     Double totalValue = (Double) cart.get("totalValue");
-                    List<CartItem> items = (List<CartItem>) cart.get("items");
+                    ArrayList<CartItem> items = (ArrayList<CartItem>) cart.get("items");
                     Cart.GetInstance().setCartId(cartId);
                     Cart.GetInstance().setShopId(shopId);
                     Cart.GetInstance().setTotalValue(totalValue);
@@ -163,8 +169,14 @@ public class HomePage extends AppCompatActivity {
                     HashMap<String, CartItem> listofItems = new HashMap<String, CartItem>();
 
                     for (int i = 0; i < items.size(); i++) {
-                        System.out.println("here in po " + items.get(i).getQuantity());
-                        listofItems.put(items.get(i).getProductId(), items.get(i));
+                        Gson gson = new Gson();
+                        Type type = new TypeToken<Map<String, String>>(){}.getType();
+                        Map<String, String> productMap = gson.fromJson(gson.toJson(items.get(i)), type);
+                        String productId = productMap.get("productId");
+                        Double price = Double.parseDouble(productMap.get("price"));
+                        int quantity = (int)(Double.parseDouble(productMap.get("quantity")));
+                        CartItem cartItem = new CartItem(quantity,price,productId);
+                        listofItems.put(productId, cartItem);
                     }
 
                     Cart.GetInstance().setListOfItems(listofItems);
