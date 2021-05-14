@@ -149,8 +149,8 @@
             android:id="@+id/search_text"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="15dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="15dp"
             android:layout_marginRight="10dp"
             android:background="@drawable/searchbox_lightwhite"
             android:hint="Search for Medicines"
@@ -163,22 +163,73 @@
 
         <ImageView
             android:id="@+id/search_icon"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="20dp"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:tint="@color/black"
             android:layout_marginRight="25dp"
+            android:src="@drawable/ic_baseline_search_24"
             android:onClick="CallSearch"
-            android:src="@drawable/ic_baseline_search_24" />
+            android:tint="@color/black"/>
+
+        <ImageView
+            android:id="@+id/cross_icon"
+            android:onClick="ClearSearch"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="25dp"
+            android:visibility="gone"
+            android:src="@drawable/cross"
+            android:tint="@color/black"/>
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/inventoryrv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="350dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:id="@+id/view_cart_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/item_count"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="4 items in cart"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/cart_value"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="Rs. 456"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/view_cart"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:backgroundTint="@color/teal_700"
+            android:text="View Cart" />
+
+    </LinearLayout>
 </LinearLayout>

@@ -6,6 +6,7 @@ public class ShopCard {
     String shopDistance;
     String price;
     Long shopId;
+    String shopAddress;
 
     public String getShopAddress() {
         return shopAddress;
@@ -14,9 +15,6 @@ public class ShopCard {
     public void setShopAddress(String shopAddress) {
         this.shopAddress = shopAddress;
     }
-
-    String shopAddress;
-
     public ShopCard(int image, String shopName, String shopDistance, String price, Long shopId) {
         this.image = image;
         this.shopName = shopName;

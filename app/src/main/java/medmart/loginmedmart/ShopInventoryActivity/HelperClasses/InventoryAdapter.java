@@ -91,7 +91,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         }
 
         HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
-//        System.out.println("here on binding " + search.getProductId());
 
         if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
                 cartItemHashMap.containsKey(search.getProductId())) {

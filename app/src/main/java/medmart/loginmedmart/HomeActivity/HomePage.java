@@ -82,7 +82,6 @@ public class HomePage extends AppCompatActivity {
     ShopAdapter shopAdapter;
 
     EditText search;
-    ImageView searchbutton;
 
     @Override
     protected void onStart() {

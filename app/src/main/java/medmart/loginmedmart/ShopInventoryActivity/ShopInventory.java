@@ -10,10 +10,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import medmart.loginmedmart.CartManagement.Cart;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
@@ -68,16 +75,22 @@ public class ShopInventory extends AppCompatActivity {
 
     private Button[] categoryButtons = new Button[6];
     private Button categoryOnFocus;
+    private int categoryOnFocusIndex;
     private int[] categoryButtonId = {R.id.all, R.id.gel, R.id.tablet, R.id.spray, R.id.syrup, R.id.powder};
     private Long SHOP_ID;
-    private TextView shopNameTV, shopAddressTV;
+    private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
     private  String shopName, shopAddress;
+    Button viewCartButton;
+    LinearLayout viewCart;
 
     ArrayList<SearchCard> searchInventory;
     ArrayList<ArrayList<SearchCard>> categoryInventory = new ArrayList<ArrayList<SearchCard>>(6);
 
     RecyclerView inventoryRecycler;
     InventoryAdapter inventoryAdapter;
+
+    EditText search;
+    ImageView searchIcon, clearSearchIcon;
 
     public ShopInventory() {
     }
@@ -93,6 +106,12 @@ public class ShopInventory extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.teal_700));
         setContentView(R.layout.activity_shop_inventory);
+        search = findViewById(R.id.search_text);
+        searchIcon = findViewById(R.id.search_icon);
+        clearSearchIcon = findViewById(R.id.clear_icon);
+
+        searchInventory = new ArrayList<>();
+        SetOnEditorAction();
 
         Intent intent = getIntent();
         SHOP_ID = intent.getLongExtra("shopid", 100);
@@ -104,6 +123,12 @@ public class ShopInventory extends AppCompatActivity {
         SetShopUi();
 
         inventoryRecycler = findViewById(R.id.inventoryrv);
+        viewCart = findViewById(R.id.view_cart_layout);
+        cartItemCount = findViewById(R.id.item_count);
+        cartValue = findViewById(R.id.cart_value);
+        viewCartButton = findViewById(R.id.view_cart);
+        // todo set viewCartButton click listener
+        CheckCartUi();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         inventoryRecycler.setHasFixedSize(true);
@@ -125,7 +150,53 @@ public class ShopInventory extends AppCompatActivity {
         categoryButtons[0].setBackgroundColor(getColor(R.color.black));
         categoryButtons[0].setTextColor(getColor(R.color.white));
         categoryOnFocus = categoryButtons[0];
+        categoryOnFocusIndex = 0;
         HandleCategoryClick(findViewById(R.id.all));
+    }
+
+    private void SetOnEditorAction() {
+        search.setImeActionLabel("Go", EditorInfo.IME_ACTION_NEXT);
+        search.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                    CallSearch(v);
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    public void ClearSearch(View view) {
+        searchIcon.setVisibility(View.VISIBLE);
+        clearSearchIcon.setVisibility(View.GONE);
+        inventoryAdapter.SetContent(categoryInventory.get(categoryOnFocusIndex));
+        search.getText().clear();
+    }
+
+    public void CallSearch(View v) {
+        String query = search.getText().toString();
+        String category = Category.valueOf(categoryOnFocusIndex);
+        searchIcon.setVisibility(View.GONE);
+        clearSearchIcon.setVisibility(View.VISIBLE);
+        // todo call search nd use serachInventory for filling nd call setcontent
+    }
+
+    private void CheckCartUi() {
+        if (Cart.GetInstance().getTotalItems() > 0) {
+            cartItemCount.setText(Cart.GetInstance().getTotalItems() + " items in cart");
+            cartValue.setText("Rs. " + Cart.GetInstance().getTotalValue());
+            ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
+            layoutParams.height = 350;
+            inventoryRecycler.setLayoutParams(layoutParams);
+            viewCart.setVisibility(View.VISIBLE);
+        } else {
+            ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            inventoryRecycler.setLayoutParams(layoutParams);
+            viewCart.setVisibility(View.GONE);
+        }
     }
 
     private void SetShopUi() {
@@ -205,6 +276,8 @@ public class ShopInventory extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void PopulateRecyclerView(int category) {
+        this.categoryOnFocusIndex = category;
+
         if (categoryInventory.get(category).size() == 0) {
             if (category == 0) {
                 HashMap<String, String> params = new HashMap<>();
@@ -282,7 +355,13 @@ public class ShopInventory extends AppCompatActivity {
     }
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
-        // todo selection of a category
+
+        if (button_newfocus != categoryButtons[0]) {
+            search.setText("Search for Medicines in category");
+        } else {
+            search.setText("Search for Medicines");
+        }
+
         button_onfocus.setTextColor(getColor(R.color.black));
         button_onfocus.setBackgroundColor(getColor(R.color.lightWhite));
         button_newfocus.setBackgroundColor(getColor(R.color.black));

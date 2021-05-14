@@ -7,6 +7,8 @@ public class Cart {
     private long shopId;
     private int totalItems;
     private double totalValue;
+    private HashMap<String, CartItem> listOfItems;
+
     private static Cart cartInstance;
 
     public void ClearCart() {
@@ -66,6 +68,4 @@ public class Cart {
     public void setListOfItems(HashMap<String, CartItem> listOfItems) {
         this.listOfItems = listOfItems;
     }
-
-    private HashMap<String, CartItem> listOfItems;
 }

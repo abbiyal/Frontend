@@ -114,8 +114,6 @@ public class VerifyOtp extends AppCompatActivity {
 
         if (parentActivity.contentEquals("signup")) {
             if (!IsOtpVerified) {
-                // todo call backend to delete user
-                System.out.println("here for good");
                 RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
                 HashMap<String, String> params = new HashMap<>();
                 params.put("email", userName);
