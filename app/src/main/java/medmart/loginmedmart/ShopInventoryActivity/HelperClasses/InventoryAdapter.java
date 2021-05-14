@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +24,14 @@ import medmart.loginmedmart.CartManagement.Cart;
 import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.InventoryViewModel> {
 
@@ -125,6 +135,27 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                     Cart.GetInstance().ClearCart();
+                                    SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+                                    String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+                                    String email = sharedPreferences.getString("email", "No email FOUND");
+                                    HashMap<String,String> params = new HashMap<String,String>();
+                                    params.put("userId",email);
+                                    RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+                                    Call<HashMap<String,String>> emptyCart = retrofitInterface.emptyCart(jwt,params);
+                                    emptyCart.enqueue(new Callback<HashMap<String, String>>() {
+                                        @Override
+                                        public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                                            if(response.body().get("response").contentEquals("success"))
+                                                Toast.makeText(context, "cart Empty !!!", Toast.LENGTH_SHORT).show();
+                                            else
+                                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                                        }
+                                    });
                                     PickQuantity(search, holder);
                                 }
                             })
@@ -167,8 +198,8 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.quantity.setText("Quantity " + quantity);
         holder.quantity.setVisibility(View.VISIBLE);
         double prevValue = 0;
-
-        if (!Cart.GetInstance().getListOfItems().containsKey(product.getProductId())) {
+        Boolean CartEmpty = !(Cart.GetInstance().getListOfItems().containsKey(product.getProductId()));
+        if (CartEmpty) {
             CartItem cartItem = new CartItem(Integer.parseInt(quantity),
                     Double.parseDouble(product.getPrice()));
             Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
@@ -183,6 +214,64 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
         Cart.GetInstance().setShopId(shopId);
         // todo backend call to add cart
+        if(!CartEmpty) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("username",email);
+        params.put("productId",cartItem.getProductId());
+        params.put("quanitty",String.valueOf(cartItem.getQuantity()));
+        params.put("price",String.valueOf(cartItem.getPrice()));
+        params.put("productName",product.getMedicineName());
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String,String>>  addItemCall = retrofitInterface.addItemInCart(jwt,params);
+        addItemCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                if(response.body().get("response").contentEquals("success"))
+                    Toast.makeText(context,"Item Added To Cart",Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(context,"Error adding in cart",Toast.LENGTH_SHORT).show();
+
+
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+            }
+        });
+        }
+        else {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+            String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+            String email = sharedPreferences.getString("email", "No email FOUND");
+            HashMap<String,String> params = new HashMap<String,String>();
+            params.put("userId",email);
+            params.put("productId",cartItem.getProductId());
+            params.put("quanitty",String.valueOf(cartItem.getQuantity()));
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String,String>>  updateItemCall = retrofitInterface.updateItemInCart(jwt,params);
+            updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    if(response.body().get("response").contentEquals("success"))
+                        Toast.makeText(context,"Item Updated In Cart",Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(context,"Error adding in cart",Toast.LENGTH_SHORT).show();
+
+
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                }
+            });
+
+        }
+
     }
 
     public class InventoryViewModel extends RecyclerView.ViewHolder {

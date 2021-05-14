@@ -282,7 +282,6 @@ public class ShopInventory extends AppCompatActivity {
     }
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
-        // todo selection of a category
         button_onfocus.setTextColor(getColor(R.color.black));
         button_onfocus.setBackgroundColor(getColor(R.color.lightWhite));
         button_newfocus.setBackgroundColor(getColor(R.color.black));

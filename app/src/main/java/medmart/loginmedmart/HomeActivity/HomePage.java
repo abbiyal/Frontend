@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
@@ -135,6 +137,41 @@ public class HomePage extends AppCompatActivity {
     private void GetCartData() {
         Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT);
         // todo get cart here and populate
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email");
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("customerId",email);
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String,Object>> cartCall = retrofitInterface.getUserCart(jwt,params);
+        cartCall.enqueue(new Callback<HashMap<String, Object>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, Object>> call, Response<HashMap<String, Object>> response) {
+                HashMap<String,Object> cart = response.body();
+                Long cartId = (Long)cart.get("cartId");
+                Long  shopId = (Long)cart.get("shopId");
+                int totalItems = (int)cart.get("totalItems");
+                Double totalValue = (Double)cart.get("totalValue");
+                List<CartItem> items = (List<CartItem>)cart.get("items");
+                Cart.GetInstance().setCartId(String.valueOf(cartId));
+                Cart.GetInstance().setShopId(shopId);
+                Cart.GetInstance().setTotalValue(totalValue);
+                Cart.GetInstance().setTotalItems(totalItems);
+                HashMap<String,CartItem> listofItems = new HashMap<String,CartItem>();
+                for(int i=0;i<items.size();i++) {
+                    listofItems.put(items.get(i).getProductId(),items.get(i));
+                }
+                Cart.GetInstance().setListOfItems(listofItems);
+
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, Object>> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(),"Conenction Error !! ",Toast.LENGTH_LONG);
+            }
+        });
+
+
     }
 
     public void UseCurrentLocation(View view) {
@@ -249,8 +286,7 @@ public class HomePage extends AppCompatActivity {
                    DecimalFormat df = new DecimalFormat("0.00");
                    ShopCard shopCard = new ShopCard(R.drawable.biyal_shop__1_,
                            nearbyShops.get(i).getShopName(),nearbyShops.get(i).getDistance(),"",nearbyShops.get(i).getShopId());
-                   // todo set shop address here from backend
-//                   shopCard.setShopAddress();
+                   shopCard.setShopAddress(nearbyShops.get(i).getAddress());
                    shopCards.add(shopCard);
                }
 
