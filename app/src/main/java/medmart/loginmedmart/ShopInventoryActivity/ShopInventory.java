@@ -63,6 +63,7 @@ public class ShopInventory extends AppCompatActivity {
     private Long SHOP_ID;
     private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
     private String shopName, shopAddress;
+
     public ShopInventory() {
     }
 
@@ -326,15 +327,14 @@ public class ShopInventory extends AppCompatActivity {
 
                     CartService.GetInstance().setListOfItems(listofItems);
                     CheckCartUi();
-                    if (categoryInventory.get(0).size() == 0) {
-                        categoryOnFocus = categoryButtons[0];
-                        categoryButtons[0].setBackgroundColor(getColor(R.color.black));
-                        categoryButtons[0].setTextColor(getColor(R.color.white));
-                        categoryOnFocus = categoryButtons[0];
-                        categoryOnFocusIndex = 0;
-                        HandleCategoryClick(findViewById(R.id.all));
-                        PopulateRecyclerView(0);
-                    }
+                    categoryOnFocus = categoryButtons[0];
+                    categoryButtons[0].setBackgroundColor(getColor(R.color.black));
+                    categoryButtons[0].setTextColor(getColor(R.color.white));
+                    categoryOnFocus = categoryButtons[0];
+                    categoryOnFocusIndex = 0;
+                    HandleCategoryClick(findViewById(R.id.all));
+                    PopulateRecyclerView(0);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

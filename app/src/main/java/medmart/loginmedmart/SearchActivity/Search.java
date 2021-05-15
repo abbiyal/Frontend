@@ -61,7 +61,7 @@ public class Search extends AppCompatActivity {
         SetOnEditorAction();
 
         searchRecycler = findViewById(R.id.rv_search_result);
-        searchRecycler.setHasFixedSize(false);
+        searchRecycler.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         searchRecycler.setLayoutManager(linearLayoutManager);

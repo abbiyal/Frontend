@@ -11,7 +11,8 @@
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/white">
 
             <ImageView
                 android:id="@+id/medicine_image"
@@ -25,7 +26,6 @@
                 android:id="@+id/med_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:orientation="vertical"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@id/medicine_image">
@@ -65,11 +65,11 @@
                 android:id="@+id/delete_icon"
                 android:layout_toRightOf="@id/med_details"
                 android:layout_width="35dp"
-                android:tint="@color/teal_700"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="10dp"
-                android:src="@drawable/icons8_trash_can_50"/>
+                android:src="@drawable/icons8_trash_can_50"
+                app:tint="@color/teal_700" />
 
             <Button
                 android:id="@+id/quantity"

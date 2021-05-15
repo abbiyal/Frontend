@@ -2,6 +2,8 @@ package medmart.loginmedmart.CartActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,13 +14,10 @@ import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import medmart.loginmedmart.CartActivity.HelperClasses.CustomArrayAdapter;
+import medmart.loginmedmart.CartActivity.HelperClasses.CartAdapter;
 import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
@@ -32,8 +31,8 @@ import retrofit2.Response;
 
 public class Cart extends AppCompatActivity {
     TextView itemCount, currentLocation;
-    ListView listView;
-    CustomArrayAdapter arrayAdapter;
+    RecyclerView cartRecyclerView;
+    CartAdapter cartAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,12 @@ public class Cart extends AppCompatActivity {
 
         itemCount = findViewById(R.id.item_count);
         currentLocation = findViewById(R.id.currentlocation);
-        listView = findViewById(R.id.cartitem_list);
+        cartRecyclerView = findViewById(R.id.cartitem_rv);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false);
+        cartRecyclerView.setLayoutManager(linearLayoutManager);
+        cartRecyclerView.setHasFixedSize(false);
+
     }
 
     @Override
@@ -83,13 +87,16 @@ public class Cart extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
                 List<ProductCatalogue> productList = response.body();
-                ProductCatalogue[] productCatalogues = new ProductCatalogue[productList.size()];
+
                 if (productList.size() != 0) {
-                    productCatalogues = new ArrayList<ProductCatalogue>(productList).toArray(new ProductCatalogue[0]);
-                    arrayAdapter = new CustomArrayAdapter(getApplicationContext(), R.layout.cart_card_view, productCatalogues);
-                    listView.setAdapter(arrayAdapter);
-                } else
-                    System.out.println("Empty productList");
+
+                    if (cartAdapter == null) {
+                        cartAdapter = new CartAdapter(Cart.this);
+                        cartRecyclerView.setAdapter(cartAdapter);
+                    }
+
+                    cartAdapter.SetContent(new ArrayList<ProductCatalogue>(productList));
+                }
             }
 
             @Override
@@ -99,10 +106,4 @@ public class Cart extends AppCompatActivity {
         });
 
     }
-
-    public void RemoveItem(int position) {
-
-
-    }
-
 }

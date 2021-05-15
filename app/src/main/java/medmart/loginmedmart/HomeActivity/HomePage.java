@@ -185,7 +185,7 @@ public class HomePage extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<HashMap<String, Object>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Conenction Error !! ", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Conenction Error !! ", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -316,7 +316,7 @@ public class HomePage extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Connection error !!!", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Connection error !!!", Toast.LENGTH_LONG).show();
             }
         });
 
