@@ -80,4 +80,5 @@ public class CartService {
     public void setListOfItems(HashMap<String, CartItem> listOfItems) {
         this.listOfItems = listOfItems;
     }
+
 }
