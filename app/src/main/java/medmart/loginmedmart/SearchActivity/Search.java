@@ -61,7 +61,7 @@ public class Search extends AppCompatActivity {
         SetOnEditorAction();
 
         searchRecycler = findViewById(R.id.rv_search_result);
-        searchRecycler.setHasFixedSize(true);
+        searchRecycler.setHasFixedSize(false);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         searchRecycler.setLayoutManager(linearLayoutManager);
@@ -132,17 +132,6 @@ public class Search extends AppCompatActivity {
     private void NotifyRecycler(ArrayList<SearchCard> searchResult) {
         searchAdapter.SetContent(searchResult);
     }
-
-//    private ArrayList<SearchCard> GenerateSampleData() {
-//        ArrayList<SearchCard> searchCards = new ArrayList<>();
-//
-//        for (int i = 0; i < 10; i++) {
-//            searchCards.add(new SearchCard(R.drawable.crocin, getString(R.string.sample_medicine_name),
-//                    getString(R.string.sample_medicine_company), getString(R.string.sample_medicine_size)));
-//        }
-//
-//        return searchCards;
-//    }
 
     private void SetOnEditorAction() {
         searchText.setImeActionLabel("Go", EditorInfo.IME_ACTION_DONE);
