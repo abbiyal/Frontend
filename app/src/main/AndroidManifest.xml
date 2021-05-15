@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginMedMart">
-        <activity android:name=".ShopInventoryActivity.ShopInventory"></activity>
+        <activity android:name=".CartActivity.Cart"></activity>
+        <activity android:name=".ShopInventoryActivity.ShopInventory" />
         <activity
             android:name=".CategoryProductsActivity.CategoryProducts"
             android:screenOrientation="portrait" />

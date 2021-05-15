@@ -223,7 +223,7 @@ public class Utility extends AppCompatActivity {
         });
     }
 
-    public static <T> List<T> stringToArray(String s, Class<T[]> clazz) {
+    public static  <T> List<T> stringToArray(String s, Class<T[]> clazz) {
         T[] arr = new Gson().fromJson(s, clazz);
         return Arrays.asList(arr);
     }

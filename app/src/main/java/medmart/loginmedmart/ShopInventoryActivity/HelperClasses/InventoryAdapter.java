@@ -54,17 +54,18 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         for (int i = 0; i < 11; i++) {
             quantities[i] = pickQuantity.findViewById(quantityIds[i]);
         }
-
-        quantities[0].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RemoveItem();
-            }
-        });
     }
 
-    private void RemoveItem() {
-
+    private void RemoveItem(SearchCard product, InventoryViewModel holder) {
+        Cart cart = Cart.GetInstance();
+        int prevQuantity = cart.getListOfItems().get(product.getProductId()).getQuantity();
+        double prevPrice = cart.getListOfItems().get(product.getProductId()).getPrice();
+        cart.setTotalItems(cart.getTotalItems()-prevQuantity);
+        cart.setTotalValue(cart.getTotalValue()-(prevPrice * prevQuantity));
+        cart.getListOfItems().remove(product.getProductId());
+        holder.quantity.setVisibility(View.GONE);
+        holder.addToCart.setVisibility(View.VISIBLE);
+        // todo remove item;
     }
 
     public void SetContent(ArrayList<SearchCard> searchCards) {
@@ -101,8 +102,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         }
 
         HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
-
-        System.out.println(cartItemHashMap.size());
 
         if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
                 cartItemHashMap.containsKey(search.getProductId())) {
@@ -190,6 +189,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                 }
             });
         }
+
+        quantities[0].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RemoveItem(product, holder);
+            }
+        });
 
         pickQuantity.show();
     }

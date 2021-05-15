@@ -23,12 +23,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
@@ -188,7 +193,7 @@ public class ShopInventory extends AppCompatActivity {
             cartItemCount.setText(Cart.GetInstance().getTotalItems() + " items in cart");
             cartValue.setText("Rs. " + Cart.GetInstance().getTotalValue());
             ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
-            layoutParams.height = 500;
+            layoutParams.height = (int) (350 * getResources().getDisplayMetrics().density);
             inventoryRecycler.setLayoutParams(layoutParams);
             viewCart.setVisibility(View.VISIBLE);
         } else {
@@ -265,13 +270,67 @@ public class ShopInventory extends AppCompatActivity {
         SetShopUi();
 
         if (categoryInventory.get(0).size() == 0) {
-            // todo get cart
+            GetCartData();
             categoryOnFocus = categoryButtons[0];
             categoryButtons[0].setBackgroundColor(getColor(R.color.black));
             categoryButtons[0].setTextColor(getColor(R.color.white));
             categoryOnFocus = categoryButtons[0];
             PopulateRecyclerView(0);
+            CheckCartUi();
         }
+    }
+
+    private void GetCartData() {
+        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
+        // todo get cart here and populate
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("customerId", email);
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, Object>> cartCall = retrofitInterface.getUserCart(jwt, params);
+        cartCall.enqueue(new Callback<HashMap<String, Object>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, Object>> call, Response<HashMap<String, Object>> response) {
+                try {
+                    HashMap<String, Object> cart = response.body();
+                    String cartId = (String) cart.get("cartId");
+                    String shopIdString = (String) cart.get("shopId");
+                    long shopId = Long.parseLong(shopIdString);
+                    String totalValueString = (String) cart.get("totalItems");
+                    int totalItems = Integer.parseInt(totalValueString);
+                    Double totalValue = (Double) cart.get("totalValue");
+                    ArrayList<CartItem> items = (ArrayList<CartItem>) cart.get("items");
+                    Cart.GetInstance().setCartId(cartId);
+                    Cart.GetInstance().setShopId(shopId);
+                    Cart.GetInstance().setTotalValue(totalValue);
+                    Cart.GetInstance().setTotalItems(totalItems);
+                    HashMap<String, CartItem> listofItems = new HashMap<String, CartItem>();
+
+                    for (int i = 0; i < items.size(); i++) {
+                        Gson gson = new Gson();
+                        Type type = new TypeToken<Map<String, String>>(){}.getType();
+                        Map<String, String> productMap = gson.fromJson(gson.toJson(items.get(i)), type);
+                        String productId = productMap.get("productId");
+                        Double price = Double.parseDouble(productMap.get("price"));
+                        int quantity = (int)(Double.parseDouble(productMap.get("quantity")));
+                        CartItem cartItem = new CartItem(quantity,price,productId);
+                        listofItems.put(productId, cartItem);
+                    }
+
+                    Cart.GetInstance().setListOfItems(listofItems);
+                    System.out.println(Cart.GetInstance().getListOfItems().size());
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, Object>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Conenction Error !! ", Toast.LENGTH_LONG);
+            }
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
