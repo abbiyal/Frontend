@@ -1,5 +1,7 @@
 package medmart.loginmedmart.UtilityClasses;
 
+import org.json.JSONArray;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,4 +80,7 @@ public interface RetrofitInterface {
 
     @POST("/med-inventory/search/searchWithinShop")
     Call<List<ProductCatalogue>> searchProductsWihinShop(@Header("Authorization") String token, @Body Map<String, String> params);
+
+    @POST("/med-inventory/search/findProductById")
+    Call<List<ProductCatalogue>> findPrdocutsById(@Header("Authorization") String jwt, @Body List<String> productIdArray);
 }

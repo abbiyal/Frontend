@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import java.util.HashMap;
 
 import medmart.loginmedmart.CartActivity.Cart;
+import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
@@ -37,6 +38,10 @@ public class CustomArrayAdapter extends ArrayAdapter {
             , R.id.quantity5, R.id.quantity6, R.id.quantity7, R.id.quantity8, R.id.quantity9, R.id.quantity10};
     private TextView[] quantities = new TextView[11];
     private ImageView cancel_dialog;
+
+    public void SetContent(ProductCatalogue[] cartItems) {
+        this.cartItems = cartItems;
+    }
 
     public CustomArrayAdapter(@NonNull Context context, int resource, @NonNull ProductCatalogue[] cartItems) {
         super(context, resource, cartItems);
@@ -69,7 +74,8 @@ public class CustomArrayAdapter extends ArrayAdapter {
         ImageView deleteItem = row.findViewById(R.id.delete_icon);
         medicineName.setText(cartItems[position].getProductName());
         medicineSize.setText(cartItems[position].getSize());
-        medicinePrice.setText(cartItems[position].getProductId());
+        medicinePrice.setText("Rs. " + String.valueOf(CartService.GetInstance()
+                .getListOfItems().get(cartItems[position].getProductId()).getPrice()));
         View finalRow = row;
 
         deleteItem.setOnClickListener(new View.OnClickListener() {
@@ -89,13 +95,98 @@ public class CustomArrayAdapter extends ArrayAdapter {
         return finalRow;
     }
 
+    private void SetQuantity(int position, View holder, String quantity) {
+        ProductCatalogue product = cartItems[position];
+        Boolean isProductPresent = CartService.GetInstance().getListOfItems().containsKey(product.getProductId());
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("username", email);
+        params.put("shopId", String.valueOf(CartService.GetInstance().getShopId()));
+        params.put("productId", product.getProductId());
+        params.put("quantity", quantity);
+
+        if (!isProductPresent) {
+            params.put("price", String.valueOf(String.valueOf(CartService.GetInstance()
+                    .getListOfItems().get(cartItems[position].getProductId()).getPrice())));
+            params.put("productName", product.getProductName());
+
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String, String>> addItemCall = retrofitInterface.addItemInCart(jwt, params);
+            addItemCall.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    if (response.body().get("response").contentEquals("success")) {
+                        Toast.makeText(context, "Item Added To Cart", Toast.LENGTH_SHORT).show();
+                        UpdateCartOnFrontend(position, holder, quantity, isProductPresent);
+                        ((ShopInventory) context).CheckCartUi();
+                    } else
+                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                }
+            });
+        } else {
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String, String>> updateItemCall = retrofitInterface.updateItemInCart(jwt, params);
+            updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    if (response.body().get("response").contentEquals("success")) {
+                        Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
+                        UpdateCartOnFrontend(position, holder, quantity, isProductPresent);
+                        // todo cart ui
+                    } else
+                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                }
+            });
+
+        }
+    }
+
+    private void UpdateCartOnFrontend(int position, View holder, String quantity, Boolean isProductPresent) {
+        ((TextView)(holder.findViewById(R.id.quantity))).setText("Qty " + quantity);
+        ProductCatalogue product = cartItems[position];
+        String price = String.valueOf(CartService.GetInstance().getListOfItems().get(product.getProductId()).getPrice());
+        double prevValue = 0;
+
+
+        if (!isProductPresent) {
+            CartItem cartItem = new CartItem(Integer.parseInt(quantity),
+                    Double.parseDouble(price));
+            CartService.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
+            CartService.GetInstance().setTotalItems(CartService.GetInstance().getTotalItems() + Integer.parseInt(quantity));
+        } else {
+            int prevQuantity = CartService.GetInstance().getListOfItems().get(product.getProductId()).getQuantity();
+            prevValue = Double.parseDouble(price) * prevQuantity;
+
+            CartService.GetInstance().getListOfItems().get(product.getProductId()).setQuantity(Integer.parseInt(quantity));
+            CartService.GetInstance().setTotalItems(CartService.GetInstance().getTotalItems()
+                    + Integer.parseInt(quantity) - prevQuantity);
+        }
+
+        CartItem cartItem = CartService.GetInstance().getListOfItems().get(product.getProductId());
+
+        CartService.GetInstance().setTotalValue(CartService.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
+    }
+
     private void PickQuantity(int position, View finalRow) {
         for (int i = 1; i < 11; i++) {
             int finalI = i;
             quantities[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SetQuantity(product, holder, quantities[finalI].getText().toString());
+                    SetQuantity(position, finalRow, quantities[finalI].getText().toString());
                     pickQuantity.dismiss();
                 }
             });

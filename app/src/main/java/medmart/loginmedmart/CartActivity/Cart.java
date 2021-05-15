@@ -9,12 +9,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import medmart.loginmedmart.CartActivity.HelperClasses.CustomArrayAdapter;
 import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.ShopInventory;
@@ -28,6 +32,8 @@ import retrofit2.Response;
 
 public class Cart extends AppCompatActivity {
     TextView itemCount, currentLocation;
+    ListView listView;
+    CustomArrayAdapter arrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,13 @@ public class Cart extends AppCompatActivity {
 
         itemCount = findViewById(R.id.item_count);
         currentLocation = findViewById(R.id.currentlocation);
+        listView = findViewById(R.id.cartitem_list);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getProductsForCart();
     }
 
     public void GoBack(View view) {
@@ -59,22 +72,23 @@ public class Cart extends AppCompatActivity {
     private void SetUi() {
         currentLocation.setText(Utility.GetDataFromCache(this, "useraddress", "Chandigarh"));
     }
-    public ProductCatalogue[] getProductsForCart(){
-        List<String> productsIds = (List<String>) CartService.GetInstance().getListOfItems().keySet();
+
+    public void getProductsForCart() {
+        List<String> productsIds = new ArrayList<String> (CartService.GetInstance().getListOfItems().keySet());
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-        JSONArray productIdArray = new JSONArray(productsIds);
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<List<ProductCatalogue>> productsCall = retrofitInterface.findPrdocutsById(jwt,productIdArray);
+        Call<List<ProductCatalogue>> productsCall = retrofitInterface.findPrdocutsById(jwt, productsIds);
         productsCall.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
                 List<ProductCatalogue> productList = response.body();
                 ProductCatalogue[] productCatalogues = new ProductCatalogue[productList.size()];
-                if(productList.size()!=0){
-                    productCatalogues = (ProductCatalogue[]) productList.toArray();
-                }
-                else
+                if (productList.size() != 0) {
+                    productCatalogues = new ArrayList<ProductCatalogue>(productList).toArray(new ProductCatalogue[0]);
+                    arrayAdapter = new CustomArrayAdapter(getApplicationContext(), R.layout.cart_card_view, productCatalogues);
+                    listView.setAdapter(arrayAdapter);
+                } else
                     System.out.println("Empty productList");
             }
 
@@ -85,4 +99,10 @@ public class Cart extends AppCompatActivity {
         });
 
     }
+
+    public void RemoveItem(int position) {
+
+
+    }
+
 }
