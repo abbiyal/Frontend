@@ -48,4 +48,8 @@ public class Cart extends AppCompatActivity {
     private void SetUi() {
         currentLocation.setText(Utility.GetDataFromCache(this, "useraddress", "Chandigarh"));
     }
+
+    public void RemoveItem(int position) {
+
+    }
 }
