@@ -43,6 +43,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     private int[] quantityIds = {R.id.remove_item, R.id.quantity1, R.id.quantity2, R.id.quantity3, R.id.quantity4
             , R.id.quantity5, R.id.quantity6, R.id.quantity7, R.id.quantity8, R.id.quantity9, R.id.quantity10};
     private TextView[] quantities = new TextView[11];
+    private ImageView cancel_dialog;
 
     public InventoryAdapter(Context context, long shopId) {
         this.context = context;
@@ -54,6 +55,8 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         for (int i = 0; i < 11; i++) {
             quantities[i] = pickQuantity.findViewById(quantityIds[i]);
         }
+
+        cancel_dialog = pickQuantity.findViewById(R.id.cancel_dialog);
     }
 
     private void RemoveItem(SearchCard product, InventoryViewModel holder) {
@@ -65,6 +68,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         cart.getListOfItems().remove(product.getProductId());
         holder.quantity.setVisibility(View.GONE);
         holder.addToCart.setVisibility(View.VISIBLE);
+
         // todo remove item;
     }
 
@@ -134,29 +138,8 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
-                                    Cart.GetInstance().ClearCart();
-                                    SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-                                    String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-                                    String email = sharedPreferences.getString("email", "No email FOUND");
-                                    HashMap<String, String> params = new HashMap<String, String>();
-                                    params.put("userId", email);
-                                    RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-                                    Call<HashMap<String, String>> emptyCart = retrofitInterface.emptyCart(jwt, params);
-                                    emptyCart.enqueue(new Callback<HashMap<String, String>>() {
-                                        @Override
-                                        public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                                            if (response.body().get("response").contentEquals("success"))
-                                                Toast.makeText(context, "cart Empty !!!", Toast.LENGTH_SHORT).show();
-                                            else
-                                                Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
-                                        }
-                                    });
-                                    PickQuantity(search, holder);
+                                    ClearBackendCart(search, holder);
+                                    dialog.dismiss();
                                 }
                             })
                             .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -169,6 +152,32 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                 } else {
                     PickQuantity(search, holder);
                 }
+            }
+        });
+    }
+
+    private void ClearBackendCart(SearchCard search, InventoryViewModel holder) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("userId", email);
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> emptyCart = retrofitInterface.emptyCart(jwt, params);
+        emptyCart.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                if (response.body().get("response").contentEquals("success")) {
+                    Toast.makeText(context, "cart Empty !!!", Toast.LENGTH_SHORT).show();
+                    Cart.GetInstance().ClearCart();
+                    PickQuantity(search, holder);
+                } else
+                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
             }
         });
     }
@@ -194,6 +203,14 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             @Override
             public void onClick(View v) {
                 RemoveItem(product, holder);
+                pickQuantity.dismiss();
+            }
+        });
+
+        cancel_dialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickQuantity.dismiss();
             }
         });
 
@@ -201,11 +218,67 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     }
 
     private void SetQuantity(SearchCard product, InventoryViewModel holder, String quantity) {
+        Boolean isProductPresent = Cart.GetInstance().getListOfItems().containsKey(product.getProductId());
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("userId", email);
+        params.put("shopId", String.valueOf(shopId));
+        params.put("productId", product.getProductId());
+        params.put("quantity", quantity);
+
+        if (!isProductPresent) {
+            params.put("price", String.valueOf(product.getPrice()));
+            params.put("productName", product.getMedicineName());
+
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String, String>> addItemCall = retrofitInterface.addItemInCart(jwt, params);
+            addItemCall.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    if (response.body().get("response").contentEquals("success")) {
+                        Toast.makeText(context, "Item Added To Cart", Toast.LENGTH_SHORT).show();
+                        UpdateCartOnFrontend(product, holder, quantity, isProductPresent);
+                        ((ShopInventory) context).CheckCartUi();
+                    } else
+                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                }
+            });
+        } else {
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String, String>> updateItemCall = retrofitInterface.updateItemInCart(jwt, params);
+            updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    if (response.body().get("response").contentEquals("success")) {
+                        Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
+                        UpdateCartOnFrontend(product, holder, quantity, isProductPresent);
+                        ((ShopInventory) context).CheckCartUi();
+                    } else
+                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+                }
+            });
+
+        }
+    }
+
+    private void UpdateCartOnFrontend(SearchCard product, InventoryViewModel holder, String quantity, Boolean isProductPresent) {
         holder.addToCart.setVisibility(View.GONE);
         holder.quantity.setText("Quantity " + quantity);
         holder.quantity.setVisibility(View.VISIBLE);
         double prevValue = 0;
-        Boolean isProductPresent = Cart.GetInstance().getListOfItems().containsKey(product.getProductId());
 
         if (!isProductPresent) {
             CartItem cartItem = new CartItem(Integer.parseInt(quantity),
@@ -223,64 +296,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
 
         Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
         Cart.GetInstance().setShopId(shopId);
-        // todo backend call to add cart
-        if (!isProductPresent) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-            String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-            String email = sharedPreferences.getString("email", "No email FOUND");
-            HashMap<String, String> params = new HashMap<String, String>();
-            params.put("username", email);
-            params.put("shopId", String.valueOf(shopId));
-            params.put("productId", product.getProductId());
-            params.put("quantity", String.valueOf(cartItem.getQuantity()));
-            params.put("price", String.valueOf(cartItem.getPrice()));
-            params.put("productName", product.getMedicineName());
-            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-            Call<HashMap<String, String>> addItemCall = retrofitInterface.addItemInCart(jwt, params);
-            addItemCall.enqueue(new Callback<HashMap<String, String>>() {
-                @Override
-                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                    if (response.body().get("response").contentEquals("success")) {
-                        Toast.makeText(context, "Item Added To Cart", Toast.LENGTH_SHORT).show();
-                        ((ShopInventory) context).CheckCartUi();
-                    } else
-                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
-                }
-            });
-        } else {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-            String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-            String email = sharedPreferences.getString("email", "No email FOUND");
-            HashMap<String, String> params = new HashMap<String, String>();
-            params.put("userId", email);
-            params.put("shopId", String.valueOf(shopId));
-            params.put("productId", product.getProductId());
-            params.put("quantity", String.valueOf(cartItem.getQuantity()));
-            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-            Call<HashMap<String, String>> updateItemCall = retrofitInterface.updateItemInCart(jwt, params);
-            updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
-                @Override
-                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                    if (response.body().get("response").contentEquals("success")) {
-                        Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
-                        ((ShopInventory) context).CheckCartUi();
-                    } else
-                        Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
-                }
-            });
-
-        }
-
     }
 
     public class InventoryViewModel extends RecyclerView.ViewHolder {

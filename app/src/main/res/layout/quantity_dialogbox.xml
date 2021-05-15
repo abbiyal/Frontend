@@ -19,6 +19,7 @@
             android:textSize="30sp" />
 
         <ImageView
+            android:id="@+id/cancel_dialog"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginLeft="10dp"
