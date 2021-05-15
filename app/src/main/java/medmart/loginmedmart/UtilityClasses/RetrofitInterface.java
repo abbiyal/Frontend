@@ -9,6 +9,7 @@ import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -72,4 +73,9 @@ public interface RetrofitInterface {
     @POST("/cart-service/carts/updateItemQuantity")
     Call<HashMap<String, String>> updateItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
 
+    @DELETE("/cart-service/carts/cart-service/carts/updateItemQuantity")
+    Call<HashMap<String,String>> deleteItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
+
+    @POST("/cart-service/search/searchWithinShop")
+    Call<List<ProductCatalogue>> searchProductsWihinShop(@Header("Authorization") String token, @Body Map<String, String> params);
 }
