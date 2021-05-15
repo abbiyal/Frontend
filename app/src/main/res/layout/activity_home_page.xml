@@ -37,7 +37,7 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:id="@+id/cart"
+            android:id="@+id/cartService"
             android:layout_width="40dp"
             android:layout_height="38dp"
             android:layout_alignParentRight="true"
@@ -48,7 +48,7 @@
         android:id="@+id/topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/cart"
+        android:layout_alignBottom="@id/cartService"
         android:background="@color/teal_700">
 
         <TextView

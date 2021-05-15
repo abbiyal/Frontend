@@ -2,7 +2,7 @@ package medmart.loginmedmart.CartManagement;
 
 import java.util.HashMap;
 
-public class Cart {
+public class CartService {
     private String cartId;
     private long shopId;
     private int totalItems;
@@ -21,7 +21,7 @@ public class Cart {
 
     private HashMap<String, CartItem> listOfItems;
 
-    private static Cart cartInstance;
+    private static CartService cartServiceInstance;
 
     public void ClearCart() {
         totalItems = 0;
@@ -29,16 +29,16 @@ public class Cart {
         listOfItems.clear();
     }
 
-    public Cart() {
+    public CartService() {
         listOfItems = new HashMap<String, CartItem>();
     }
 
-    public static Cart GetInstance() {
-        if (cartInstance == null) {
-            cartInstance = new Cart();
+    public static CartService GetInstance() {
+        if (cartServiceInstance == null) {
+            cartServiceInstance = new CartService();
         }
 
-        return cartInstance;
+        return cartServiceInstance;
     }
 
     public String getCartId() {

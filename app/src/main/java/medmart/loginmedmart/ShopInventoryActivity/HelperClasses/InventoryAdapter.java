@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
@@ -37,7 +37,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
 
     private ArrayList<SearchCard> searchCards;
     private Dialog pickQuantity;
-    private NumberPicker numberPicker;
     private Context context;
     private long shopId;
     private int[] quantityIds = {R.id.remove_item, R.id.quantity1, R.id.quantity2, R.id.quantity3, R.id.quantity4
@@ -60,16 +59,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     }
 
     private void RemoveItem(SearchCard product, InventoryViewModel holder) {
-        Cart cart = Cart.GetInstance();
-        int prevQuantity = cart.getListOfItems().get(product.getProductId()).getQuantity();
-        double prevPrice = cart.getListOfItems().get(product.getProductId()).getPrice();
-        cart.setTotalItems(cart.getTotalItems()-prevQuantity);
-        cart.setTotalValue(cart.getTotalValue()-(prevPrice * prevQuantity));
-        cart.getListOfItems().remove(product.getProductId());
-        holder.quantity.setVisibility(View.GONE);
-        holder.addToCart.setVisibility(View.VISIBLE);
-
-        // todo remove item;
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
@@ -82,10 +71,19 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                         if(response.body().get("response").contentEquals("success")) {
-                            Toast.makeText(context,"Cart Empty !!",Toast.LENGTH_LONG).show();
+                            Toast.makeText(context,"Item Removed !!",Toast.LENGTH_LONG).show();
+                            CartService cartService = CartService.GetInstance();
+                            int prevQuantity = cartService.getListOfItems().get(product.getProductId()).getQuantity();
+                            double prevPrice = cartService.getListOfItems().get(product.getProductId()).getPrice();
+                            cartService.setTotalItems(cartService.getTotalItems()-prevQuantity);
+                            cartService.setTotalValue(cartService.getTotalValue()-(prevPrice * prevQuantity));
+                            cartService.getListOfItems().remove(product.getProductId());
+                            holder.quantity.setVisibility(View.GONE);
+                            holder.addToCart.setVisibility(View.VISIBLE);
+                            ((ShopInventory) context).CheckCartUi();
                         }
                         else
-                            Toast.makeText(context,"Error emptying cart",Toast.LENGTH_LONG).show();
+                            Toast.makeText(context,"Error removing",Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -129,9 +127,9 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             holder.medicineImage.setImageResource(R.drawable.powder);
         }
 
-        HashMap<String, CartItem> cartItemHashMap = Cart.GetInstance().getListOfItems();
+        HashMap<String, CartItem> cartItemHashMap = CartService.GetInstance().getListOfItems();
 
-        if (cartItemHashMap.size() > 0 && Cart.GetInstance().getShopId() == shopId &&
+        if (cartItemHashMap.size() > 0 && CartService.GetInstance().getShopId() == shopId &&
                 cartItemHashMap.containsKey(search.getProductId())) {
             holder.addToCart.setVisibility(View.GONE);
             holder.quantity.setText("Quantity " + cartItemHashMap.get(search.getProductId()).getQuantity());
@@ -151,7 +149,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.addToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Cart.GetInstance().getTotalItems() > 0 && Cart.GetInstance().getShopId() != shopId) {
+                if (CartService.GetInstance().getTotalItems() > 0 && CartService.GetInstance().getShopId() != shopId) {
                     // todo add item from new shop,, empty cart and add this nd tell backend as well
                     new AlertDialog.Builder(context)
                             .setTitle("Discard Cart")
@@ -193,7 +191,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 if (response.body().get("response").contentEquals("success")) {
                     Toast.makeText(context, "cart Empty !!!", Toast.LENGTH_SHORT).show();
-                    Cart.GetInstance().ClearCart();
+                    CartService.GetInstance().ClearCart();
                     PickQuantity(search, holder);
                 } else
                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
@@ -242,13 +240,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     }
 
     private void SetQuantity(SearchCard product, InventoryViewModel holder, String quantity) {
-        Boolean isProductPresent = Cart.GetInstance().getListOfItems().containsKey(product.getProductId());
+        Boolean isProductPresent = CartService.GetInstance().getListOfItems().containsKey(product.getProductId());
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("userId", email);
+        params.put("username", email);
         params.put("shopId", String.valueOf(shopId));
         params.put("productId", product.getProductId());
         params.put("quantity", quantity);
@@ -304,22 +302,25 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.quantity.setVisibility(View.VISIBLE);
         double prevValue = 0;
 
+
         if (!isProductPresent) {
             CartItem cartItem = new CartItem(Integer.parseInt(quantity),
                     Double.parseDouble(product.getPrice()));
-            Cart.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
-            Cart.GetInstance().setTotalItems(Cart.GetInstance().getTotalItems() + Integer.parseInt(quantity));
+            CartService.GetInstance().getListOfItems().put(product.getProductId(), cartItem);
+            CartService.GetInstance().setTotalItems(CartService.GetInstance().getTotalItems() + Integer.parseInt(quantity));
         } else {
-            prevValue = Double.parseDouble(product.getPrice()) * Integer.parseInt(quantity);
-            Cart.GetInstance().getListOfItems().get(product.getProductId()).setQuantity(Integer.parseInt(quantity));
-            Cart.GetInstance().setTotalItems(-Cart.GetInstance().getTotalItems()
-                    + Integer.parseInt(quantity));
+            int prevQuantity = CartService.GetInstance().getListOfItems().get(product.getProductId()).getQuantity();
+            prevValue = Double.parseDouble(product.getPrice()) * prevQuantity;
+
+            CartService.GetInstance().getListOfItems().get(product.getProductId()).setQuantity(Integer.parseInt(quantity));
+            CartService.GetInstance().setTotalItems(CartService.GetInstance().getTotalItems()
+                    + Integer.parseInt(quantity) - prevQuantity);
         }
 
-        CartItem cartItem = Cart.GetInstance().getListOfItems().get(product.getProductId());
+        CartItem cartItem = CartService.GetInstance().getListOfItems().get(product.getProductId());
 
-        Cart.GetInstance().setTotalValue(Cart.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
-        Cart.GetInstance().setShopId(shopId);
+        CartService.GetInstance().setTotalValue(CartService.GetInstance().getTotalValue() - prevValue + (cartItem.getPrice() * cartItem.getQuantity()));
+        CartService.GetInstance().setShopId(shopId);
     }
 
     public class InventoryViewModel extends RecyclerView.ViewHolder {

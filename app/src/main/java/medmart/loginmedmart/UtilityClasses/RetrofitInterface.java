@@ -73,9 +73,9 @@ public interface RetrofitInterface {
     @POST("/cart-service/carts/updateItemQuantity")
     Call<HashMap<String, String>> updateItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
 
-    @DELETE("/cart-service/carts/cart-service/carts/updateItemQuantity")
-    Call<HashMap<String,String>> deleteItemInCart(@Header("Authorization") String token, @Body Map<String, String> params);
+    @DELETE("/cart-service/carts/deleteIteminCart")
+    Call<HashMap<String,String>> deleteItemInCart(@Header("Authorization") String token, @QueryMap Map<String, String> params);
 
-    @POST("/cart-service/search/searchWithinShop")
+    @POST("/med-inventory/search/searchWithinShop")
     Call<List<ProductCatalogue>> searchProductsWihinShop(@Header("Authorization") String token, @Body Map<String, String> params);
 }

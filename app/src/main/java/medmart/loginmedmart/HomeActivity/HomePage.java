@@ -37,19 +37,16 @@ import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kotlin.text.Regex;
-import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.ShopAdapter;
 import medmart.loginmedmart.CommonAdapter.ShopCard;
@@ -162,10 +159,10 @@ public class HomePage extends AppCompatActivity {
                     int totalItems = Integer.parseInt(totalValueString);
                     Double totalValue = (Double) cart.get("totalValue");
                     ArrayList<CartItem> items = (ArrayList<CartItem>) cart.get("items");
-                    Cart.GetInstance().setCartId(cartId);
-                    Cart.GetInstance().setShopId(shopId);
-                    Cart.GetInstance().setTotalValue(totalValue);
-                    Cart.GetInstance().setTotalItems(totalItems);
+                    CartService.GetInstance().setCartId(cartId);
+                    CartService.GetInstance().setShopId(shopId);
+                    CartService.GetInstance().setTotalValue(totalValue);
+                    CartService.GetInstance().setTotalItems(totalItems);
                     HashMap<String, CartItem> listofItems = new HashMap<String, CartItem>();
 
                     for (int i = 0; i < items.size(); i++) {
@@ -179,8 +176,8 @@ public class HomePage extends AppCompatActivity {
                         listofItems.put(productId, cartItem);
                     }
 
-                    Cart.GetInstance().setListOfItems(listofItems);
-                    System.out.println(Cart.GetInstance().getListOfItems().size());
+                    CartService.GetInstance().setListOfItems(listofItems);
+                    System.out.println(CartService.GetInstance().getListOfItems().size());
                 }catch (Exception e) {
                     e.printStackTrace();
                 }

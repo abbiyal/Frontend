@@ -54,7 +54,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
                 Intent intent = new Intent(context, ShopInventory.class);
                 intent.putExtra("shopid", shop.getShopId());
                 intent.putExtra("shopname", shop.getShopName());
-                intent.putExtra("shopname", shop.getShopAddress());
+                intent.putExtra("shopaddress", shop.getShopAddress());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }

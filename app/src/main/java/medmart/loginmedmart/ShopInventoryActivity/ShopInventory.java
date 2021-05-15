@@ -1,11 +1,5 @@
 package medmart.loginmedmart.ShopInventoryActivity;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -23,6 +17,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -32,8 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import medmart.loginmedmart.CartManagement.Cart;
+import medmart.loginmedmart.CartActivity.Cart;
 import medmart.loginmedmart.CartManagement.CartItem;
+import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
@@ -46,58 +47,22 @@ import retrofit2.Response;
 
 public class ShopInventory extends AppCompatActivity {
 
-    private enum Category {
-        ALL(0),
-        GEL(1),
-        TABLET(2),
-        SPRAY(3),
-        SYRUP(4),
-        POWDER(5);
-
-        private final int value;
-
-        Category(final int newValue) {
-            value = newValue;
-        }
-
-        private static Map map = new HashMap<>();
-
-        public int getValue() {
-            return value;
-        }
-
-        static {
-            for (Category category : Category.values()) {
-                map.put(category.value, category);
-            }
-        }
-
-        public static String valueOf(int pageType) {
-            return map.get(pageType).toString();
-        }
-    }
-
-    ;
-
-    private Button[] categoryButtons = new Button[6];
-    private Button categoryOnFocus;
-    private int categoryOnFocusIndex;
-    private int[] categoryButtonId = {R.id.all, R.id.gel, R.id.tablet, R.id.spray, R.id.syrup, R.id.powder};
-    private Long SHOP_ID;
-    private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
-    private  String shopName, shopAddress;
     Button viewCartButton;
-    LinearLayout viewCart;
 
+    LinearLayout viewCart;
     ArrayList<SearchCard> searchInventory;
     ArrayList<ArrayList<SearchCard>> categoryInventory = new ArrayList<ArrayList<SearchCard>>(6);
-
     RecyclerView inventoryRecycler;
     InventoryAdapter inventoryAdapter;
-
     EditText search;
     ImageView searchIcon, clearSearchIcon;
-
+    private final Button[] categoryButtons = new Button[6];
+    private Button categoryOnFocus;
+    private int categoryOnFocusIndex;
+    private final int[] categoryButtonId = {R.id.all, R.id.gel, R.id.tablet, R.id.spray, R.id.syrup, R.id.powder};
+    private Long SHOP_ID;
+    private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
+    private String shopName, shopAddress;
     public ShopInventory() {
     }
 
@@ -114,27 +79,42 @@ public class ShopInventory extends AppCompatActivity {
         setContentView(R.layout.activity_shop_inventory);
         search = findViewById(R.id.search_text);
         searchIcon = findViewById(R.id.search_icon);
-        clearSearchIcon = findViewById(R.id.clear_icon);
+        viewCartButton = findViewById(R.id.view_cart);
+
+        viewCartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                intent.setClass(getApplicationContext(), Cart.class);
+                startActivity(intent);
+            }
+        });
+
+        searchIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CallSearch(v);
+            }
+        });
+
+        clearSearchIcon = findViewById(R.id.cross_icon);
 
         searchInventory = new ArrayList<>();
         SetOnEditorAction();
 
         Intent intent = getIntent();
-        SHOP_ID = intent.getLongExtra("shopid", 100);
+        SHOP_ID = intent.getLongExtra("shopid", -100);
         shopNameTV = findViewById(R.id.shop_name);
         shopAddressTV = findViewById(R.id.shop_address);
         shopName = intent.getStringExtra("shopname");
         shopAddress = intent.getStringExtra("shopaddress");
-
-        SetShopUi();
 
         inventoryRecycler = findViewById(R.id.inventoryrv);
         viewCart = findViewById(R.id.view_cart_layout);
         cartItemCount = findViewById(R.id.item_count);
         cartValue = findViewById(R.id.cart_value);
         viewCartButton = findViewById(R.id.view_cart);
-        // todo set viewCartButton click listener
-        CheckCartUi();
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         inventoryRecycler.setHasFixedSize(true);
@@ -151,13 +131,6 @@ public class ShopInventory extends AppCompatActivity {
                 }
             });
         }
-
-        categoryOnFocus = categoryButtons[0];
-        categoryButtons[0].setBackgroundColor(getColor(R.color.black));
-        categoryButtons[0].setTextColor(getColor(R.color.white));
-        categoryOnFocus = categoryButtons[0];
-        categoryOnFocusIndex = 0;
-        HandleCategoryClick(findViewById(R.id.all));
     }
 
     private void SetOnEditorAction() {
@@ -186,29 +159,30 @@ public class ShopInventory extends AppCompatActivity {
         String category = Category.valueOf(categoryOnFocusIndex);
         searchIcon.setVisibility(View.GONE);
         clearSearchIcon.setVisibility(View.VISIBLE);
-        // todo call search nd use serachInventory for filling nd call setcontent
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("category",category);
-        params.put("query",query);
-        params.put("shopId",String.valueOf(SHOP_ID));
+        params.put("category", category);
+        params.put("query", query);
+        params.put("shopId", String.valueOf(SHOP_ID));
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<List<ProductCatalogue>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt,params);
+        Call<List<ProductCatalogue>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
         searchResultsCall.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
                 List<ProductCatalogue> searchResults = response.body();
-                if ( searchResults.size() != 0 ) {
+                if (searchResults.size() != 0) {
                     for (int i = 0; i < searchResults.size(); i++) {
                         ProductCatalogue productCatalogue = searchResults.get(i);
-                        searchInventory.add(new SearchCard(-1,productCatalogue.getProductName(),productCatalogue.getCompanyName(),
-                                productCatalogue.getSize(),productCatalogue.getProductId(),productCatalogue.getProductId()));
+                        SearchCard searchCard = new SearchCard(-1, productCatalogue.getProductName(), productCatalogue.getCompanyName(),
+                                productCatalogue.getSize(), productCatalogue.getProductId(), productCatalogue.getProductId());
+                        searchCard.setType(productCatalogue.getType());
+                        searchInventory.add(searchCard);
+
                     }
                     inventoryAdapter.SetContent(searchInventory);
-                }
-                else {
+                } else {
                     Toast.makeText(getApplicationContext(), "No Products Found", Toast.LENGTH_LONG).show();
                     inventoryAdapter.SetContent(new ArrayList<SearchCard>());
                 }
@@ -222,15 +196,15 @@ public class ShopInventory extends AppCompatActivity {
     }
 
     public void CheckCartUi() {
-        if (Cart.GetInstance().getTotalItems() > 0) {
-            cartItemCount.setText(Cart.GetInstance().getTotalItems() + " items in cart");
-            cartValue.setText("Rs. " + Cart.GetInstance().getTotalValue());
-            ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
-            layoutParams.height = (int) (350 * getResources().getDisplayMetrics().density);
+        if (CartService.GetInstance().getTotalItems() > 0 && SHOP_ID == CartService.GetInstance().getShopId()) {
+            cartItemCount.setText(CartService.GetInstance().getTotalItems() + " items in cart");
+            cartValue.setText("Rs. " + CartService.GetInstance().getTotalValue());
+            ViewGroup.LayoutParams layoutParams = inventoryRecycler.getLayoutParams();
+            layoutParams.height = (int) (430 * getResources().getDisplayMetrics().density);
             inventoryRecycler.setLayoutParams(layoutParams);
             viewCart.setVisibility(View.VISIBLE);
         } else {
-            ViewGroup.LayoutParams layoutParams= inventoryRecycler.getLayoutParams();
+            ViewGroup.LayoutParams layoutParams = inventoryRecycler.getLayoutParams();
             layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
             inventoryRecycler.setLayoutParams(layoutParams);
             viewCart.setVisibility(View.GONE);
@@ -301,21 +275,17 @@ public class ShopInventory extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         SetShopUi();
+        GetCartData();
+    }
 
-        if (categoryInventory.get(0).size() == 0) {
-            GetCartData();
-            categoryOnFocus = categoryButtons[0];
-            categoryButtons[0].setBackgroundColor(getColor(R.color.black));
-            categoryButtons[0].setTextColor(getColor(R.color.white));
-            categoryOnFocus = categoryButtons[0];
-            PopulateRecyclerView(0);
-            CheckCartUi();
-        }
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        SetShopUi();
+        GetCartData();
     }
 
     private void GetCartData() {
-        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
-        // todo get cart here and populate
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email");
@@ -324,6 +294,7 @@ public class ShopInventory extends AppCompatActivity {
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, Object>> cartCall = retrofitInterface.getUserCart(jwt, params);
         cartCall.enqueue(new Callback<HashMap<String, Object>>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onResponse(Call<HashMap<String, Object>> call, Response<HashMap<String, Object>> response) {
                 try {
@@ -335,26 +306,36 @@ public class ShopInventory extends AppCompatActivity {
                     int totalItems = Integer.parseInt(totalValueString);
                     Double totalValue = (Double) cart.get("totalValue");
                     ArrayList<CartItem> items = (ArrayList<CartItem>) cart.get("items");
-                    Cart.GetInstance().setCartId(cartId);
-                    Cart.GetInstance().setShopId(shopId);
-                    Cart.GetInstance().setTotalValue(totalValue);
-                    Cart.GetInstance().setTotalItems(totalItems);
+                    CartService.GetInstance().setCartId(cartId);
+                    CartService.GetInstance().setShopId(shopId);
+                    CartService.GetInstance().setTotalValue(totalValue);
+                    CartService.GetInstance().setTotalItems(totalItems);
                     HashMap<String, CartItem> listofItems = new HashMap<String, CartItem>();
 
                     for (int i = 0; i < items.size(); i++) {
                         Gson gson = new Gson();
-                        Type type = new TypeToken<Map<String, String>>(){}.getType();
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
                         Map<String, String> productMap = gson.fromJson(gson.toJson(items.get(i)), type);
                         String productId = productMap.get("productId");
                         Double price = Double.parseDouble(productMap.get("price"));
-                        int quantity = (int)(Double.parseDouble(productMap.get("quantity")));
-                        CartItem cartItem = new CartItem(quantity,price,productId);
+                        int quantity = (int) (Double.parseDouble(productMap.get("quantity")));
+                        CartItem cartItem = new CartItem(quantity, price, productId);
                         listofItems.put(productId, cartItem);
                     }
 
-                    Cart.GetInstance().setListOfItems(listofItems);
-                    System.out.println(Cart.GetInstance().getListOfItems().size());
-                }catch (Exception e) {
+                    CartService.GetInstance().setListOfItems(listofItems);
+                    CheckCartUi();
+                    if (categoryInventory.get(0).size() == 0) {
+                        categoryOnFocus = categoryButtons[0];
+                        categoryButtons[0].setBackgroundColor(getColor(R.color.black));
+                        categoryButtons[0].setTextColor(getColor(R.color.white));
+                        categoryOnFocus = categoryButtons[0];
+                        categoryOnFocusIndex = 0;
+                        HandleCategoryClick(findViewById(R.id.all));
+                        PopulateRecyclerView(0);
+                    }
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -377,14 +358,14 @@ public class ShopInventory extends AppCompatActivity {
                 SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
                 String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
                 RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-                Call<List<HashMap<String,String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt,params);
+                Call<List<HashMap<String, String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt, params);
                 shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
                     @Override
                     public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
-                        List<HashMap<String,String>> products = response.body();
-                        if ( !products.isEmpty()) {
+                        List<HashMap<String, String>> products = response.body();
+                        if (!products.isEmpty()) {
                             ArrayList<SearchCard> searchCards = new ArrayList<>();
-                            for(int i=0;i<products.size();i++) {
+                            for (int i = 0; i < products.size(); i++) {
                                 HashMap<String, String> product = products.get(i);
                                 String productId = product.get("id");
                                 String companyName = product.get("companyName");
@@ -406,15 +387,14 @@ public class ShopInventory extends AppCompatActivity {
                             }
 
                             inventoryAdapter.SetContent(categoryInventory.get(category));
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(),"No products Found",Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "No products Found", Toast.LENGTH_LONG).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
-                        Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                     }
                 });
             } else {
@@ -448,9 +428,9 @@ public class ShopInventory extends AppCompatActivity {
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
         if (button_newfocus != categoryButtons[0]) {
-            search.setText("Search for Medicines in category");
+            search.setHint("Search for Medicines in category");
         } else {
-            search.setText("Search for Medicines");
+            search.setHint("Search for Medicines");
         }
 
         button_onfocus.setTextColor(getColor(R.color.black));
@@ -458,5 +438,36 @@ public class ShopInventory extends AppCompatActivity {
         button_newfocus.setBackgroundColor(getColor(R.color.black));
         button_newfocus.setTextColor(getColor(R.color.white));
         this.categoryOnFocus = button_newfocus;
+    }
+
+    private enum Category {
+        ALL(0),
+        GEL(1),
+        TABLET(2),
+        SPRAY(3),
+        SYRUP(4),
+        POWDER(5);
+
+        private static final Map map = new HashMap<>();
+
+        static {
+            for (Category category : Category.values()) {
+                map.put(category.value, category);
+            }
+        }
+
+        private final int value;
+
+        Category(final int newValue) {
+            value = newValue;
+        }
+
+        public static String valueOf(int pageType) {
+            return map.get(pageType).toString();
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 }
