@@ -37,6 +37,7 @@ import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
+import medmart.loginmedmart.UtilityClasses.ProductCatalogue;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import retrofit2.Call;
@@ -186,6 +187,38 @@ public class ShopInventory extends AppCompatActivity {
         searchIcon.setVisibility(View.GONE);
         clearSearchIcon.setVisibility(View.VISIBLE);
         // todo call search nd use serachInventory for filling nd call setcontent
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("category",category);
+        params.put("query",query);
+        params.put("shopId",String.valueOf(SHOP_ID));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<List<ProductCatalogue>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt,params);
+        searchResultsCall.enqueue(new Callback<List<ProductCatalogue>>() {
+            @Override
+            public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
+                List<ProductCatalogue> searchResults = response.body();
+                if ( searchResults.size() != 0 ) {
+                    for (int i = 0; i < searchResults.size(); i++) {
+                        ProductCatalogue productCatalogue = searchResults.get(i);
+                        searchInventory.add(new SearchCard(-1,productCatalogue.getProductName(),productCatalogue.getCompanyName(),
+                                productCatalogue.getSize(),productCatalogue.getProductId(),productCatalogue.getProductId()));
+                    }
+                    inventoryAdapter.SetContent(searchInventory);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "No Products Found", Toast.LENGTH_LONG).show();
+                    inventoryAdapter.SetContent(new ArrayList<SearchCard>());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "connection Error !!", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void CheckCartUi() {

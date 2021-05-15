@@ -70,6 +70,30 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.addToCart.setVisibility(View.VISIBLE);
 
         // todo remove item;
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        String email = sharedPreferences.getString("email", "No email FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("userId", email);
+        params.put("productId",product.getProductId());
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String,String>> delteIteminCartCall = retrofitInterface.deleteItemInCart(jwt,params);
+        delteIteminCartCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                        if(response.body().get("response").contentEquals("success")) {
+                            Toast.makeText(context,"Cart Empty !!",Toast.LENGTH_LONG).show();
+                        }
+                        else
+                            Toast.makeText(context,"Error emptying cart",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                Toast.makeText(context,"Connection Error !!1",Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     public void SetContent(ArrayList<SearchCard> searchCards) {
