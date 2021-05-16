@@ -20,12 +20,13 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
 
     ArrayList<ShopCard> shopCards;
     private RecyclerView.ViewHolder holder;
-    private int position;
     private Context context;
+    private String productName;
 
-    public ShopAdapter(Context context) {
+    public ShopAdapter(Context context, String productName) {
         shopCards = new ArrayList<>();
         this.context = context;
+        this.productName = productName;
     }
 
     public void SetContent(ArrayList<ShopCard> shopCards) {
@@ -48,6 +49,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
         holder.shopDistance.setText(shop.getShopDistance());
         holder.shopPrice.setText(shop.getPrice());
 
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,27 +57,34 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
                 intent.putExtra("shopid", shop.getShopId());
                 intent.putExtra("shopname", shop.getShopName());
                 intent.putExtra("shopaddress", shop.getShopAddress());
+
+                if (productName == null) {
+                    intent.putExtra("productname", "null");
+                } else {
+                    intent.putExtra("productname", productName);
+                }
+
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
-    }
+}
 
     @Override
     public int getItemCount() {
         return shopCards.size();
     }
 
-    public static class ShopViewHolder extends RecyclerView.ViewHolder {
-        ImageView shopImage;
-        TextView shopName, shopDistance, shopPrice;
+public static class ShopViewHolder extends RecyclerView.ViewHolder {
+    ImageView shopImage;
+    TextView shopName, shopDistance, shopPrice;
 
-        public ShopViewHolder(@NonNull View itemView) {
-            super(itemView);
-            shopImage = itemView.findViewById(R.id.shop_image);
-            shopName = itemView.findViewById(R.id.shop_name);
-            shopDistance = itemView.findViewById(R.id.shop_distance);
-            shopPrice = itemView.findViewById(R.id.shop_price);
-        }
+    public ShopViewHolder(@NonNull View itemView) {
+        super(itemView);
+        shopImage = itemView.findViewById(R.id.shop_image);
+        shopName = itemView.findViewById(R.id.shop_name);
+        shopDistance = itemView.findViewById(R.id.shop_distance);
+        shopPrice = itemView.findViewById(R.id.shop_price);
     }
+}
 }

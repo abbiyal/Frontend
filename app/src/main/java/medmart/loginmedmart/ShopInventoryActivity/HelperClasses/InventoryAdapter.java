@@ -44,13 +44,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     private TextView[] quantities = new TextView[11];
     private ImageView cancel_dialog;
 
+
     public InventoryAdapter(Context context, long shopId) {
         this.context = context;
         pickQuantity = new Dialog(context);
         pickQuantity.setContentView(R.layout.quantity_dialogbox);
         pickQuantity.setCancelable(false);
         this.shopId = shopId;
-
         for (int i = 0; i < 11; i++) {
             quantities[i] = pickQuantity.findViewById(quantityIds[i]);
         }

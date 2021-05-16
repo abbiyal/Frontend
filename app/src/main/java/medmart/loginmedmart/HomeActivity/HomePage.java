@@ -19,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import medmart.loginmedmart.CartActivity.Cart;
 import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CommonAdapter.ShopAdapter;
@@ -78,7 +80,8 @@ public class HomePage extends AppCompatActivity {
     private String mDefaultLocationName = "Chandigarh";
     private static LatLng mCurrentLocation;
     private static FusedLocationProviderClient mFusedLocationProviderClient;
-    TextView currentAddress;
+    TextView currentAddress, itemCount;
+    ImageView cartImage;
 
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
@@ -93,6 +96,12 @@ public class HomePage extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         search.getText().clear();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        GetCartData();
     }
 
     public void ChangeAddress(View view) {
@@ -113,6 +122,8 @@ public class HomePage extends AppCompatActivity {
         setContentView(R.layout.activity_home_page);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         search = findViewById(R.id.search_text);
+        itemCount = findViewById(R.id.item_count);
+        cartImage = findViewById(R.id.cart_icon);
         SetOnEditorAction();
         AttachHooksAndAdapters();
 
@@ -137,9 +148,13 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
+    public void OpenCart(View view) {
+        Intent intent = new Intent(this, Cart.class);
+        startActivity(intent);
+    }
+
     private void GetCartData() {
         Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
-        // todo get cart here and populate
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email");
@@ -177,6 +192,10 @@ public class HomePage extends AppCompatActivity {
                     }
 
                     CartService.GetInstance().setListOfItems(listofItems);
+                    CartService.GetInstance().setCartLoaded(true);
+                    itemCount.setText(String.valueOf(CartService.GetInstance().getTotalItems()));
+                    itemCount.setVisibility(View.VISIBLE);
+                    cartImage.setVisibility(View.VISIBLE);
                     System.out.println(CartService.GetInstance().getListOfItems().size());
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -307,7 +326,7 @@ public class HomePage extends AppCompatActivity {
                 }
 
                 if (shopAdapter == null) {
-                    shopAdapter = new ShopAdapter(getApplicationContext());
+                    shopAdapter = new ShopAdapter(getApplicationContext(), null);
                     shopRecycler.setAdapter(shopAdapter);
                 }
 
@@ -319,8 +338,6 @@ public class HomePage extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Connection error !!!", Toast.LENGTH_LONG).show();
             }
         });
-
-
     }
 
     private void CheckLocationPermission() {

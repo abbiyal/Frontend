@@ -63,6 +63,7 @@ public class ShopInventory extends AppCompatActivity {
     private Long SHOP_ID;
     private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
     private String shopName, shopAddress;
+    private String productName;
 
     public ShopInventory() {
     }
@@ -109,6 +110,7 @@ public class ShopInventory extends AppCompatActivity {
         shopAddressTV = findViewById(R.id.shop_address);
         shopName = intent.getStringExtra("shopname");
         shopAddress = intent.getStringExtra("shopaddress");
+        productName = intent.getStringExtra("productname");
 
         inventoryRecycler = findViewById(R.id.inventoryrv);
         viewCart = findViewById(R.id.view_cart_layout);
@@ -132,6 +134,9 @@ public class ShopInventory extends AppCompatActivity {
                 }
             });
         }
+
+        categoryOnFocusIndex = 0;
+        categoryOnFocus = categoryButtons[0];
     }
 
     private void SetOnEditorAction() {
@@ -148,15 +153,26 @@ public class ShopInventory extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void ClearSearch(View view) {
         searchIcon.setVisibility(View.VISIBLE);
         clearSearchIcon.setVisibility(View.GONE);
-        inventoryAdapter.SetContent(categoryInventory.get(categoryOnFocusIndex));
+        searchInventory = new ArrayList<SearchCard>();
+
+        if (categoryInventory.get(0).size() == 0) {
+            HandleCategoryClick(findViewById(R.id.all));
+        } else {
+            inventoryAdapter.SetContent(categoryInventory.get(categoryOnFocusIndex));
+        }
+
         search.getText().clear();
     }
 
     public void CallSearch(View v) {
+        // todo change product catalogue to hashmap string , to get price
+        searchInventory.clear();
         String query = search.getText().toString();
+        query = query.replaceAll("\\s", "");
         String category = Category.valueOf(categoryOnFocusIndex);
         searchIcon.setVisibility(View.GONE);
         clearSearchIcon.setVisibility(View.VISIBLE);
@@ -177,14 +193,26 @@ public class ShopInventory extends AppCompatActivity {
                     for (int i = 0; i < searchResults.size(); i++) {
                         ProductCatalogue productCatalogue = searchResults.get(i);
                         SearchCard searchCard = new SearchCard(-1, productCatalogue.getProductName(), productCatalogue.getCompanyName(),
-                                productCatalogue.getSize(), productCatalogue.getProductId(), productCatalogue.getProductId());
+                                productCatalogue.getSize(), productCatalogue.getProductId(), productCatalogue.getProductName());
                         searchCard.setType(productCatalogue.getType());
                         searchInventory.add(searchCard);
 
                     }
+
+                    if (inventoryAdapter == null) {
+                        inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
+                        inventoryRecycler.setAdapter(inventoryAdapter);
+                    }
+
                     inventoryAdapter.SetContent(searchInventory);
                 } else {
                     Toast.makeText(getApplicationContext(), "No Products Found", Toast.LENGTH_LONG).show();
+
+                    if (inventoryAdapter == null) {
+                        inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
+                        inventoryRecycler.setAdapter(inventoryAdapter);
+                    }
+
                     inventoryAdapter.SetContent(new ArrayList<SearchCard>());
                 }
             }
@@ -219,34 +247,44 @@ public class ShopInventory extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void HandleCategoryClick(View view) {
+        searchInventory = new ArrayList<SearchCard>();
+        searchIcon.setVisibility(View.VISIBLE);
+        clearSearchIcon.setVisibility(View.GONE);
+        CheckCartUi();
+        categoryOnFocus = categoryButtons[categoryOnFocusIndex];
         switch (view.getId()) {
             case R.id.all:
+                System.out.println("all");
                 setFocus(categoryOnFocus, categoryButtons[Category.ALL.getValue()]);
                 PopulateRecyclerView(Category.ALL.getValue());
                 break;
 
             case R.id.gel:
+                System.out.println("gel");
                 setFocus(categoryOnFocus, categoryButtons[Category.GEL.getValue()]);
                 PopulateRecyclerView(Category.GEL.getValue());
                 break;
 
             case R.id.tablet:
+                System.out.println("tablet");
                 setFocus(categoryOnFocus, categoryButtons[Category.TABLET.getValue()]);
                 PopulateRecyclerView(Category.TABLET.getValue());
                 break;
 
             case R.id.spray:
+                System.out.println("spray");
                 setFocus(categoryOnFocus, categoryButtons[Category.SPRAY.getValue()]);
                 PopulateRecyclerView(Category.SPRAY.getValue());
-
                 break;
 
             case R.id.syrup:
+                System.out.println("syrup");
                 setFocus(categoryOnFocus, categoryButtons[Category.SYRUP.getValue()]);
                 PopulateRecyclerView(Category.SYRUP.getValue());
                 break;
 
             case R.id.powder:
+                System.out.println("poeder");
                 setFocus(categoryOnFocus, categoryButtons[Category.POWDER.getValue()]);
                 PopulateRecyclerView(Category.POWDER.getValue());
                 break;
@@ -277,13 +315,41 @@ public class ShopInventory extends AppCompatActivity {
         super.onResume();
         SetShopUi();
         GetCartData();
+
+
+        if (productName.contentEquals("null")) {
+            categoryOnFocus = categoryButtons[categoryOnFocusIndex];
+            categoryButtons[0].setBackgroundColor(getColor(R.color.black));
+            categoryButtons[0].setTextColor(getColor(R.color.white));
+            HandleCategoryClick(findViewById(R.id.all));
+            PopulateRecyclerView(0);
+        } else {
+            setFocus(categoryButtons[0], categoryButtons[0]);
+            search.setText(productName);
+            productName = "null";
+            CallSearch(search);
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onRestart() {
         super.onRestart();
         SetShopUi();
         GetCartData();
+
+        if (productName.contentEquals("null")) {
+            categoryOnFocus = categoryButtons[categoryOnFocusIndex];
+            categoryButtons[0].setBackgroundColor(getColor(R.color.black));
+            categoryButtons[0].setTextColor(getColor(R.color.white));
+            HandleCategoryClick(findViewById(R.id.all));
+            PopulateRecyclerView(0);
+        } else {
+            setFocus(categoryButtons[0], categoryButtons[0]);
+            search.setText(productName);
+            productName = "null";
+            CallSearch(search);
+        }
     }
 
     private void GetCartData() {
@@ -327,14 +393,6 @@ public class ShopInventory extends AppCompatActivity {
 
                     CartService.GetInstance().setListOfItems(listofItems);
                     CheckCartUi();
-                    categoryOnFocus = categoryButtons[0];
-                    categoryButtons[0].setBackgroundColor(getColor(R.color.black));
-                    categoryButtons[0].setTextColor(getColor(R.color.white));
-                    categoryOnFocus = categoryButtons[0];
-                    categoryOnFocusIndex = 0;
-                    HandleCategoryClick(findViewById(R.id.all));
-                    PopulateRecyclerView(0);
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -351,75 +409,73 @@ public class ShopInventory extends AppCompatActivity {
     private void PopulateRecyclerView(int category) {
         this.categoryOnFocusIndex = category;
 
-        if (categoryInventory.get(category).size() == 0) {
-            if (category == 0) {
-                HashMap<String, String> params = new HashMap<>();
-                params.put("shopid", String.valueOf(SHOP_ID));
-                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
-                String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
-                RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-                Call<List<HashMap<String, String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt, params);
-                shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
-                    @Override
-                    public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
-                        List<HashMap<String, String>> products = response.body();
-                        if (!products.isEmpty()) {
-                            ArrayList<SearchCard> searchCards = new ArrayList<>();
-                            for (int i = 0; i < products.size(); i++) {
-                                HashMap<String, String> product = products.get(i);
-                                String productId = product.get("id");
-                                String companyName = product.get("companyName");
-                                String Dosestrength = product.get("doseStrength");
-                                String productName = product.get("productName");
-                                String size = product.get("size");
-                                String type = product.get("type");
-                                String price = product.get("price");
-                                SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
-                                searchCard.setType(type);
-                                searchCards.add(searchCard);
-                            }
-
-                            categoryInventory.set(category, searchCards);
-
-                            if (inventoryAdapter == null) {
-                                inventoryAdapter = new InventoryAdapter(getApplicationContext(), SHOP_ID);
-                                inventoryRecycler.setAdapter(inventoryAdapter);
-                            }
-
-                            inventoryAdapter.SetContent(categoryInventory.get(category));
-                        } else {
-                            Toast.makeText(getApplicationContext(), "No products Found", Toast.LENGTH_LONG).show();
+        if (categoryInventory.get(0).size() == 0) {
+            HashMap<String, String> params = new HashMap<>();
+            params.put("shopid", String.valueOf(SHOP_ID));
+            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+            String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<List<HashMap<String, String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt, params);
+            shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
+                @Override
+                public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
+                    List<HashMap<String, String>> products = response.body();
+                    if (!products.isEmpty()) {
+                        ArrayList<SearchCard> searchCards = new ArrayList<>();
+                        for (int i = 0; i < products.size(); i++) {
+                            HashMap<String, String> product = products.get(i);
+                            String productId = product.get("id");
+                            String companyName = product.get("companyName");
+                            String Dosestrength = product.get("doseStrength");
+                            String productName = product.get("productName");
+                            String size = product.get("size");
+                            String type = product.get("type");
+                            String price = product.get("price");
+                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
+                            searchCard.setType(type);
+                            searchCards.add(searchCard);
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
-                        Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
-                    }
-                });
-            } else {
-                for (int i = 0; i < categoryInventory.get(0).size(); i++) {
-                    if (categoryInventory.get(0).get(i).getType().contentEquals("GEL")) {
-                        categoryInventory.get(Category.GEL.getValue()).add(categoryInventory.get(0).get(i));
-                    } else if (categoryInventory.get(0).get(i).getType().contentEquals("TABLET")) {
-                        categoryInventory.get(Category.TABLET.getValue()).add(categoryInventory.get(0).get(i));
-                    } else if (categoryInventory.get(0).get(i).getType().contentEquals("SPRAY")) {
-                        categoryInventory.get(Category.SPRAY.getValue()).add(categoryInventory.get(0).get(i));
-                    } else if (categoryInventory.get(0).get(i).getType().contentEquals("SYRUP")) {
-                        categoryInventory.get(Category.SYRUP.getValue()).add(categoryInventory.get(0).get(i));
-                    } else if (categoryInventory.get(0).get(i).getType().contentEquals("POWDER")) {
-                        categoryInventory.get(Category.POWDER.getValue()).add(categoryInventory.get(0).get(i));
+                        categoryInventory.set(0, searchCards);
+
+                        for (int i = 0; i < categoryInventory.get(0).size(); i++) {
+                            if (categoryInventory.get(0).get(i).getType().contentEquals("GEL")) {
+                                categoryInventory.get(Category.GEL.getValue()).add(categoryInventory.get(0).get(i));
+                            } else if (categoryInventory.get(0).get(i).getType().contentEquals("TABLET")) {
+                                categoryInventory.get(Category.TABLET.getValue()).add(categoryInventory.get(0).get(i));
+                            } else if (categoryInventory.get(0).get(i).getType().contentEquals("SPRAY")) {
+                                categoryInventory.get(Category.SPRAY.getValue()).add(categoryInventory.get(0).get(i));
+                            } else if (categoryInventory.get(0).get(i).getType().contentEquals("SYRUP")) {
+                                categoryInventory.get(Category.SYRUP.getValue()).add(categoryInventory.get(0).get(i));
+                            } else if (categoryInventory.get(0).get(i).getType().contentEquals("POWDER")) {
+                                categoryInventory.get(Category.POWDER.getValue()).add(categoryInventory.get(0).get(i));
+                            }
+                        }
+
+                        if (inventoryAdapter == null) {
+                            inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
+                            inventoryRecycler.setAdapter(inventoryAdapter);
+                        }
+
+                        inventoryAdapter.SetContent(categoryInventory.get(category));
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No products Found", Toast.LENGTH_LONG).show();
                     }
                 }
+
+                @Override
+                public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            if (inventoryAdapter == null) {
+                inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
+                inventoryRecycler.setAdapter(inventoryAdapter);
             }
-        }
 
-        if (inventoryAdapter == null) {
-            inventoryAdapter = new InventoryAdapter(this, SHOP_ID);
-            inventoryRecycler.setAdapter(inventoryAdapter);
+            inventoryAdapter.SetContent(categoryInventory.get(category));
         }
-
-        inventoryAdapter.SetContent(categoryInventory.get(category));
     }
 
     public void Back(View view) {
@@ -427,6 +483,8 @@ public class ShopInventory extends AppCompatActivity {
     }
 
     private void setFocus(Button button_onfocus, Button button_newfocus) {
+        search.getText().clear();
+
         if (button_newfocus != categoryButtons[0]) {
             search.setHint("Search for Medicines in category");
         } else {
@@ -438,6 +496,11 @@ public class ShopInventory extends AppCompatActivity {
         button_newfocus.setBackgroundColor(getColor(R.color.black));
         button_newfocus.setTextColor(getColor(R.color.white));
         this.categoryOnFocus = button_newfocus;
+    }
+
+    public void MoveToPosition(int adapterPosition) {
+        System.out.println("Cahlda kyu nahi");
+        inventoryRecycler.getLayoutManager().scrollToPosition(adapterPosition);
     }
 
     private enum Category {

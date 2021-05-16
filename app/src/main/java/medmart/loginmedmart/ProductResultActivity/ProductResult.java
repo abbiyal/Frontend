@@ -127,7 +127,7 @@ public class ProductResult extends AppCompatActivity {
                     shopCards.add(shopCard);
                 }
                 if (shopAdapter == null) {
-                    shopAdapter = new ShopAdapter(getApplicationContext());
+                    shopAdapter = new ShopAdapter(getApplicationContext(), medicineName);
                     shopRecycler.setAdapter(shopAdapter);
                 }
 

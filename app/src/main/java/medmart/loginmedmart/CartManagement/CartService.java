@@ -8,6 +8,16 @@ public class CartService {
     private int totalItems;
     private double totalValue;
 
+    public boolean isCartLoaded() {
+        return isCartLoaded;
+    }
+
+    public void setCartLoaded(boolean cartLoaded) {
+        isCartLoaded = cartLoaded;
+    }
+
+    private boolean isCartLoaded;
+
     @Override
     public String toString() {
         return "Cart{" +
@@ -30,11 +40,13 @@ public class CartService {
     }
 
     public CartService() {
+        isCartLoaded = false;
         listOfItems = new HashMap<String, CartItem>();
     }
 
     public static CartService GetInstance() {
         if (cartServiceInstance == null) {
+
             cartServiceInstance = new CartService();
         }
 

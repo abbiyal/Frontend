@@ -70,6 +70,7 @@ public class Cart extends AppCompatActivity {
         intent.putExtra("shopid", CartService.GetInstance().getShopId());
         intent.putExtra("shopname", "");
         intent.putExtra("shopaddress", "");
+        intent.putExtra("productname", "null");
         startActivity(intent);
     }
 

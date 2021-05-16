@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#C2DFFF"
+    android:orientation="vertical"
     tools:context=".HomeActivity.HomePage">
 
     <RelativeLayout
@@ -19,12 +19,12 @@
 
         <ImageView
             android:id="@+id/app_icon"
-            android:onClick="OpenProfile"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
-            app:tint="@color/quantum_bluegrey50"
-            android:src="@drawable/ic_baseline_account_circle_24" />
+            android:onClick="OpenProfile"
+            android:src="@drawable/ic_baseline_account_circle_24"
+            app:tint="@color/quantum_bluegrey50" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -37,18 +37,33 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:id="@+id/cartService"
-            android:layout_width="40dp"
-            android:layout_height="38dp"
+            android:id="@+id/cart_icon"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
             android:layout_alignParentRight="true"
+            android:onClick="OpenCart"
+            android:visibility="gone"
             android:src="@drawable/icons8_fast_cart_64" />
+
+        <TextView
+            android:id="@+id/item_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/cart_item_count_badge"
+            android:onClick="OpenCart"
+            android:visibility="gone"
+            android:padding="2dp"
+            android:text="99"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/cartService"
+        android:layout_alignBottom="@id/cart_icon"
         android:background="@color/teal_700">
 
         <TextView
@@ -62,15 +77,15 @@
 
         <TextView
             android:id="@+id/current_address"
-            android:onClick="ChangeAddress"
             android:layout_width="230dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="3dp"
-            android:text="140307 Chudiala"
-            android:singleLine="true"
-            android:scrollHorizontally="true"
             android:ellipsize="end"
+            android:onClick="ChangeAddress"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="140307 Chudiala"
             android:textColor="@color/white"
             android:textStyle="bold" />
     </LinearLayout>
@@ -87,12 +102,12 @@
             android:layout_height="30dp"
             android:layout_margin="15dp"
             android:background="@drawable/round_corner_edittext"
+            android:hint="Search for Medicines"
+            android:inputType="text"
+            android:maxLines="1"
             android:paddingLeft="3dp"
             android:textColor="@color/black"
-            android:maxLines="1"
-            android:hint="Search for Medicines"
             android:textColorHint="@color/black"
-            android:inputType="text"
             android:textSize="20sp" />
 
 
@@ -136,7 +151,7 @@
                     android:id="@+id/catagory_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:layout_marginTop="20dp"/>
+                    android:layout_marginTop="20dp" />
 
             </LinearLayout>
 
@@ -148,6 +163,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
