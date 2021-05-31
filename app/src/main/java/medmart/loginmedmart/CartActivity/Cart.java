@@ -1,8 +1,10 @@
 package medmart.loginmedmart.CartActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -25,6 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.razorpay.Checkout;
+import com.razorpay.PaymentResultListener;
+
+import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -46,7 +51,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class Cart extends AppCompatActivity {
+public class Cart extends AppCompatActivity implements PaymentResultListener {
     TextView itemCount, currentLocation, cartValue, amountText;
     EditText completeAddress;
     Button addAddress, proceedCheckout;
@@ -122,8 +127,66 @@ public class Cart extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onPaymentSuccess(String razorpayPaymentID) {
+        /**
+         * Add your logic here for a successful payment response
+         */
+    }
+
+    @Override
+    public void onPaymentError(int code, String response) {
+        /**
+         * Add your logic here for a failed payment response
+         */
+    }
+
+    public void StartPayment() {
+        /**
+         * Instantiate Checkout
+         */
+        Checkout checkout = new Checkout();
+        checkout.setKeyID("rzp_test_eutwk0rpzPmlAl");
+
+        /**
+         * Set your logo here
+         */
+        checkout.setImage(R.drawable.emptycart);
+
+        /**
+         * Reference to current activity
+         */
+        final Activity activity = this;
+
+        /**
+         * Pass your payment options to the Razorpay Checkout as a JSONObject
+         */
+        try {
+            JSONObject options = new JSONObject();
+
+            options.put("name", "MedMart");
+            options.put("description", "Reference No. #123456");
+            options.put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.png");
+            options.put("order_id", "order_DBJOWzybf0sJbb");//from response of step 3.
+            options.put("theme.color", "#3399cc");
+            options.put("currency", "INR");
+            options.put("amount", "50000");//pass amount in currency subunits
+            options.put("prefill.email", "gaurav.kumar@example.com");
+            options.put("prefill.contact", "9988776655");
+            JSONObject retryObj = new JSONObject();
+            retryObj.put("enabled", true);
+            retryObj.put("max_count", 3);
+            options.put("retry", retryObj);
+
+            checkout.open(activity, options);
+
+        } catch (Exception e) {
+            Log.e("payment error", "Error in starting Razorpay Checkout", e);
+        }
+    }
+
     private void GetOrderId() {
-        
+
     }
 
     @Override
@@ -260,10 +323,5 @@ public class Cart extends AppCompatActivity {
             }
         });
 
-    }
-
-    public void IntitatePayment() {
-        Checkout checkout = new Checkout();
-        checkout.setKeyID("<YOUR_KEY_ID>");
     }
 }
