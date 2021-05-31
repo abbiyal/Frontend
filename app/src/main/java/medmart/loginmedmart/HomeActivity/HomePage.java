@@ -169,7 +169,10 @@ public class HomePage extends AppCompatActivity {
                     HashMap<String, Object> cart = response.body();
                     String cartId = (String) cart.get("cartId");
                     String shopIdString = (String) cart.get("shopId");
-                    long shopId = Long.parseLong(shopIdString);
+                    long shopId = -9;
+                    if (!shopIdString.contentEquals("null"))
+                        shopId = Long.parseLong(shopIdString);
+
                     String totalValueString = (String) cart.get("totalItems");
                     int totalItems = Integer.parseInt(totalValueString);
                     Double totalValue = (Double) cart.get("totalValue");
@@ -197,6 +200,7 @@ public class HomePage extends AppCompatActivity {
                     itemCount.setVisibility(View.VISIBLE);
                     cartImage.setVisibility(View.VISIBLE);
                     System.out.println(CartService.GetInstance().getListOfItems().size());
+                    System.out.println("here not but why");
                 }catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -234,7 +238,7 @@ public class HomePage extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false);
 
-        shopRecycler.setHasFixedSize(true);
+        shopRecycler.setHasFixedSize(false);
         shopRecycler.setLayoutManager(linearLayoutManager);
 
 

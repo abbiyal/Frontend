@@ -1,5 +1,6 @@
 package medmart.loginmedmart.CartManagement;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class CartService {
@@ -82,7 +83,8 @@ public class CartService {
     }
 
     public void setTotalValue(double totalValue) {
-        this.totalValue = totalValue;
+        DecimalFormat decimalFormat = new DecimalFormat("##.00");
+        this.totalValue = Double.parseDouble(decimalFormat.format(totalValue));
     }
 
     public HashMap<String, CartItem> getListOfItems() {
