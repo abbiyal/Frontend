@@ -13,12 +13,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.razorpay.Checkout;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import medmart.loginmedmart.CartActivity.HelperClasses.CartAdapter;
@@ -70,10 +72,36 @@ public class Cart extends AppCompatActivity {
 
     public void OpenShop(View view) {
         // todo backend to get shop name and address using id from cart
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        final String[] shopName = {""};
+        final String[] shopAddress = {""};
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("shopid",String.valueOf(CartService.GetInstance().getShopId()));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String,String>> shopDetailCall = retrofitInterface.findShopDetails(jwt,params);
+        shopDetailCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                HashMap<String,String> details = response.body();
+                if(details.get("response").contentEquals("Error")){
+                    Toast.makeText(getApplicationContext(),"Shop Details Error",Toast.LENGTH_SHORT);
+                }
+                else{
+                    shopName[0] = details.get("shopName");
+                    shopAddress[0] = details.get("shopAddress");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+            }
+        });
         Intent intent = new Intent(getApplicationContext(), ShopInventory.class);
         intent.putExtra("shopid", CartService.GetInstance().getShopId());
-        intent.putExtra("shopname", "");
-        intent.putExtra("shopaddress", "");
+        intent.putExtra("shopname", shopName[0]);
+        intent.putExtra("shopaddress", shopAddress[0]);
         intent.putExtra("productname", "null");
         startActivity(intent);
     }
