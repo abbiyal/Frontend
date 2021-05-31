@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import medmart.loginmedmart.CartActivity.Cart;
 import medmart.loginmedmart.CartManagement.CartItem;
 import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
@@ -87,6 +88,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
             holder.medicineImage.setImageResource(R.drawable.powder);
         }
 
+        holder.deleteItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RemoveItem(productCatalogue, holder);
+            }
+        });
 
         holder.quantity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +155,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
                 if (response.body().get("response").contentEquals("success")) {
                     Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
                     UpdateCartOnFrontend(product, holder, quantity);
-                    // todo cart ui setting
+                    ((Cart) context).SetUi();
                 } else
                     Toast.makeText(context, "Error adding in cart", Toast.LENGTH_SHORT).show();
             }
@@ -197,7 +204,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
                     productCatalogues.remove(holder.getAdapterPosition());
                     notifyItemRemoved(holder.getAdapterPosition());
                     notifyItemRangeChanged(holder.getAdapterPosition(), productCatalogues.size());
-                    // todo cart ui setting
+                    ((Cart) context).SetUi();
                 }
                 else
                     Toast.makeText(context,"Error removing",Toast.LENGTH_LONG).show();

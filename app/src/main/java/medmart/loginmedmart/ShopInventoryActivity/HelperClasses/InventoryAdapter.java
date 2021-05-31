@@ -150,7 +150,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             @Override
             public void onClick(View v) {
                 if (CartService.GetInstance().getTotalItems() > 0 && CartService.GetInstance().getShopId() != shopId) {
-                    // todo add item from new shop,, empty cart and add this nd tell backend as well
                     new AlertDialog.Builder(context)
                             .setTitle("Discard Cart")
                             .setMessage("Items have been added from different shop. Are you sure you want to " +
@@ -161,7 +160,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                     ClearBackendCart(search, holder);
-                                    dialog.dismiss();
                                 }
                             })
                             .setNegativeButton("No", new DialogInterface.OnClickListener() {

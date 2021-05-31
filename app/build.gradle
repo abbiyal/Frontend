@@ -53,5 +53,4 @@ dependencies {
     implementation 'com.chaos.view:pinview:1.4.3'
     implementation 'com.google.android.libraries.places:places:2.4.0'
     implementation 'com.razorpay:checkout:1.6.6'
-
 }
