@@ -87,5 +87,7 @@ public interface RetrofitInterface {
     @GET("/med-inventory/getShop")
     Call<HashMap<String,String>> findShopDetails(@Header("Authorization") String token, @QueryMap Map<String, String> params);
 
+    @GET("/med-orders/orders/generateOrderId")
+    Call<HashMap<String,String>> generateOrderId(@Header("Authorization") String token, @QueryMap Map<String, String> params);
 
 }

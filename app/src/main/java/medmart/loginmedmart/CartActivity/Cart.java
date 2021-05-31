@@ -122,8 +122,27 @@ public class Cart extends AppCompatActivity {
         });
     }
 
-    private void GetOrderId() {
-        
+    private String GetOrderId(String amount) {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("amount",amount);
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String,String>> getOrderIdCall = retrofitInterface.generateOrderId(jwt,params);
+        final String[] orderID = {""};
+        getOrderIdCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    HashMap<String,String> orderId = response.body();
+                    orderID[0] = orderId.get("orderid");
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+            }
+        });
+        return orderID[0];
     }
 
     @Override
@@ -170,8 +189,7 @@ public class Cart extends AppCompatActivity {
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
 
-            }
-        });
+        }});
         Intent intent = new Intent(getApplicationContext(), ShopInventory.class);
         intent.putExtra("shopid", CartService.GetInstance().getShopId());
         intent.putExtra("shopname", shopName[0]);
@@ -179,6 +197,7 @@ public class Cart extends AppCompatActivity {
         intent.putExtra("productname", "null");
         startActivity(intent);
     }
+
 
 
     public void SetUi() {
