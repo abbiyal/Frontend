@@ -130,11 +130,11 @@ public class HomePage extends AppCompatActivity {
         PopulateCataegoryRecycler();
         OnMyLocationAccessListener();
         Intent intent = getIntent();
+        GetCartData();
 
         if (intent.getExtras().containsKey("class") &&
                 intent.getStringExtra("class").contentEquals("login")) {
-
-            GetCartData();
+            
             CheckLocationPermission();
             if (mLocationPermission) {
                 LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);

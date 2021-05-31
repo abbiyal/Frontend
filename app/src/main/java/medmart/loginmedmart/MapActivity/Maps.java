@@ -133,14 +133,17 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     public void Back(View view) {
-        Intent intent = new Intent(this, PlacesSearch.class);
+        Intent intent = getIntent();
+        intent.setClass(this, PlacesSearch.class);
         startActivity(intent);
         finish();
     }
 
     public void ChangeLocation(View view) {
-        Intent intent = new Intent(getApplicationContext(), PlacesSearch.class);
+        Intent intent = getIntent();
+        intent.setClass(this, PlacesSearch.class);
         startActivity(intent);
+        finish();
     }
 
     @Override

@@ -136,7 +136,7 @@
                 android:backgroundTint="@color/lightWhite"
                 android:text="Powder"
                 android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
         </LinearLayout>
 
     </LinearLayout>

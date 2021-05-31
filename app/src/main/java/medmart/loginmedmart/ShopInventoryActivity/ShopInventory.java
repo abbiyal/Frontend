@@ -63,6 +63,7 @@ public class ShopInventory extends AppCompatActivity {
     private Long SHOP_ID;
     private TextView shopNameTV, shopAddressTV, cartItemCount, cartValue;
     private String shopName, shopAddress;
+
     private String productName;
 
     public ShopInventory() {
@@ -184,19 +185,27 @@ public class ShopInventory extends AppCompatActivity {
         params.put("query", query);
         params.put("shopId", String.valueOf(SHOP_ID));
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<List<ProductCatalogue>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
-        searchResultsCall.enqueue(new Callback<List<ProductCatalogue>>() {
+        Call<List<HashMap<String,String>>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
+        searchResultsCall.enqueue(new Callback<List<HashMap<String, String>>>() {
             @Override
-            public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
-                List<ProductCatalogue> searchResults = response.body();
-                if (searchResults.size() != 0) {
-                    for (int i = 0; i < searchResults.size(); i++) {
-                        ProductCatalogue productCatalogue = searchResults.get(i);
-                        SearchCard searchCard = new SearchCard(-1, productCatalogue.getProductName(), productCatalogue.getCompanyName(),
-                                productCatalogue.getSize(), productCatalogue.getProductId(), productCatalogue.getProductName());
-                        searchCard.setType(productCatalogue.getType());
-                        searchInventory.add(searchCard);
-
+            public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
+                List<HashMap<String,String>> products = response.body();
+                if (products.size() != 0) {
+                    if (!products.isEmpty()) {
+                        ArrayList<SearchCard> searchCards = new ArrayList<>();
+                        for (int i = 0; i < products.size(); i++) {
+                            HashMap<String, String> product = products.get(i);
+                            String productId = product.get("id");
+                            String companyName = product.get("companyName");
+                            String Dosestrength = product.get("doseStrength");
+                            String productName = product.get("productName");
+                            String size = product.get("size");
+                            String type = product.get("type");
+                            String price = product.get("price");
+                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
+                            searchCard.setType(type);
+                            searchInventory.add(searchCard);
+                        }
                     }
 
                     if (inventoryAdapter == null) {
@@ -218,8 +227,8 @@ public class ShopInventory extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "connection Error !!", Toast.LENGTH_LONG).show();
+            public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
+
             }
         });
     }

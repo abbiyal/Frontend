@@ -79,7 +79,7 @@ public interface RetrofitInterface {
     Call<HashMap<String,String>> deleteItemInCart(@Header("Authorization") String token, @QueryMap Map<String, String> params);
 
     @POST("/med-inventory/search/searchWithinShop")
-    Call<List<ProductCatalogue>> searchProductsWihinShop(@Header("Authorization") String token, @Body Map<String, String> params);
+    Call<List<HashMap<String,String>>> searchProductsWihinShop(@Header("Authorization") String token, @Body Map<String, String> params);
 
     @POST("/med-inventory/search/findProductById")
     Call<List<ProductCatalogue>> findPrdocutsById(@Header("Authorization") String jwt, @Body List<String> productIdArray);

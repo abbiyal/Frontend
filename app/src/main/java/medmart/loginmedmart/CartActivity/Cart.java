@@ -14,6 +14,10 @@ import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.razorpay.Checkout;
+
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,5 +110,9 @@ public class Cart extends AppCompatActivity {
             }
         });
 
+    }
+    public void IntitatePayment(){
+        Checkout checkout = new Checkout();
+        checkout.setKeyID("<YOUR_KEY_ID>");
     }
 }
