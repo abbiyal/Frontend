@@ -78,7 +78,7 @@ public class CartService {
         this.totalItems = totalItems;
     }
 
-    public double getTotalValue() {
+    public Double getTotalValue() {
         return totalValue;
     }
 

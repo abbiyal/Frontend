@@ -32,6 +32,7 @@ import com.razorpay.PaymentResultListener;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
     LinearLayout emptyCartLayout;
     ConstraintLayout constraintLayout;
     NestedScrollView nestedScrollView;
+    DecimalFormat decimalFormat = new DecimalFormat("##");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +86,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         proceedCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GetOrderId();
-                StartPayment();
+                GetOrderId(decimalFormat.format(CartService.GetInstance().getTotalValue() * 100));
             }
         });
 
@@ -139,9 +140,14 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         /**
          * Add your logic here for a failed payment response
          */
+        try {
+            Toast.makeText(this, "Payment failed: " + code + " " + response, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e("paymeterror", "Exception in onPaymentError", e);
+        }
     }
 
-    public void StartPayment() {
+    public void StartPayment(String orderId, Double amount) {
         /**
          * Instantiate Checkout
          */
@@ -151,7 +157,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         /**
          * Set your logo here
          */
-        checkout.setImage(R.drawable.emptycart);
+        checkout.setImage(R.drawable.app_logo);
 
         /**
          * Reference to current activity
@@ -167,16 +173,17 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
             options.put("name", "MedMart");
             options.put("description", "Reference No. #123456");
             options.put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.png");
-            options.put("order_id", "order_DBJOWzybf0sJbb");//from response of step 3.
+            options.put("order_id", orderId);//from response of step 3.
             options.put("theme.color", "#3399cc");
             options.put("currency", "INR");
-            options.put("amount", "50000");//pass amount in currency subunits
-            options.put("prefill.email", "gaurav.kumar@example.com");
-            options.put("prefill.contact", "9988776655");
-            JSONObject retryObj = new JSONObject();
-            retryObj.put("enabled", true);
-            retryObj.put("max_count", 3);
-            options.put("retry", retryObj);
+            options.put("amount", decimalFormat.format(amount * 100));//pass amount in currency subunits
+            options.put("prefill.email", );
+            options.put("prefill.contact", "7009964216");
+            options.put("send_sms_hash", true);
+//            JSONObject retryObj = new JSONObject();
+//            retryObj.put("enabled", true);
+//            retryObj.put("max_count", 3);
+//            options.put("retry", retryObj);
 
             checkout.open(activity, options);
 
@@ -185,13 +192,40 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         }
     }
 
-    private void GetOrderId() {
+    private void GetOrderId(String amount) {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("amount", amount);
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> getOrderIdCall = retrofitInterface.generateOrderId(jwt, params);
+        final String[] orderID = {""};
+        getOrderIdCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                HashMap<String, String> orderId = response.body();
+                orderID[0] = orderId.get("orderid");
+                StartPayment(orderID[0], CartService.GetInstance().getTotalValue());
+            }
 
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (completeAddress.getEditableText().toString().length() > 0) {
+            addAddress.setVisibility(View.INVISIBLE);
+            proceedCheckout.setVisibility(View.VISIBLE);
+        } else {
+            addAddress.setVisibility(View.VISIBLE);
+            proceedCheckout.setVisibility(View.INVISIBLE);
+        }
+
         GetCartData();
     }
 
@@ -209,10 +243,35 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
 
     public void OpenShop(View view) {
         // todo backend to get shop name and address using id from cart
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        final String[] shopName = {""};
+        final String[] shopAddress = {""};
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("shopid", String.valueOf(CartService.GetInstance().getShopId()));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<HashMap<String, String>> shopDetailCall = retrofitInterface.findShopDetails(jwt, params);
+        shopDetailCall.enqueue(new Callback<HashMap<String, String>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                HashMap<String, String> details = response.body();
+                if (details.get("response").contentEquals("Error")) {
+                    Toast.makeText(getApplicationContext(), "Shop Details Error", Toast.LENGTH_SHORT);
+                } else {
+                    shopName[0] = details.get("shopName");
+                    shopAddress[0] = details.get("shopAddress");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+
+            }
+        });
         Intent intent = new Intent(getApplicationContext(), ShopInventory.class);
         intent.putExtra("shopid", CartService.GetInstance().getShopId());
-        intent.putExtra("shopname", "");
-        intent.putExtra("shopaddress", "");
+        intent.putExtra("shopname", shopName[0]);
+        intent.putExtra("shopaddress", shopAddress[0]);
         intent.putExtra("productname", "null");
         startActivity(intent);
     }

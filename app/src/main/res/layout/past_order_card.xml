@@ -1,66 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
-    android:layout_marginTop="2dp"
+    android:layout_height="150dp"
     android:paddingLeft="2dp"
     android:paddingRight="2dp"
+    android:layout_marginTop="5dp"
+    android:backgroundTint="@color/white"
     app:cardCornerRadius="2dp"
     app:cardElevation="8dp">
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_marginTop="10dp">
 
-        <LinearLayout
-            android:id="@+id/order_card"
+        <TextView
+            android:id="@+id/shop_name"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="10dp"
-            android:background="@color/white"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/sample_medicine_name"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/order_price"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/medicine_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/sample_medicine_name"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/medicine_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/bungee"
-                android:text="Rs. 24"
-                android:textColor="@color/black"
-                android:textSize="15sp" />
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/add_to_cart"
+        <TextView
+            android:id="@+id/order_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@id/order_card"
+            android:fontFamily="@font/bungee"
+            android:layout_marginEnd="10dp"
+            android:text="Rs. 102.36"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/black"
+            android:text="ordered on"
+            android:textAllCaps="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shop_name" />
+
+        <TextView
+            android:id="@+id/datetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/bungee"
+            android:text="10 May 2021 at 11:30 pm"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:text="Pending"
+            android:textSize="17sp"
+            android:textAllCaps="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/datetime" />
+
+        <Button
+            android:id="@+id/view_details"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="45dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="17dp"
             android:backgroundTint="@color/teal_700"
             android:text="View Details"
-            android:textColor="@color/white" />
-    </RelativeLayout>
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.863"
+            app:layout_constraintStart_toEndOf="@+id/datetime"
+            app:layout_constraintTop_toBottomOf="@+id/order_price"
+            app:layout_constraintVertical_bias="0.888" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

@@ -190,9 +190,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="25dp"
                 android:layout_marginStart="10dp"
+                android:text="Orders History"
+                android:onClick="OrderHistory"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                android:text="Orders History" />
+                android:textStyle="bold" />
 
         </LinearLayout>
 

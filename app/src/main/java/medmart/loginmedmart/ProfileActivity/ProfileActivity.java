@@ -26,6 +26,7 @@ import com.basgeekball.awesomevalidation.utility.RegexTemplate;
 import java.util.HashMap;
 
 import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
+import medmart.loginmedmart.ManageOrderActivity.ManageOrder;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -269,5 +270,10 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    public void OrderHistory(View view) {
+        Intent intent = new Intent(this, ManageOrder.class);
+        startActivity(intent);
     }
 }
