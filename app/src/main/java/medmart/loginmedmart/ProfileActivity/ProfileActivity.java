@@ -192,7 +192,6 @@ public class ProfileActivity extends AppCompatActivity {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("email", email);
         params.put("name", name);
-        ProgressDialog dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");//todo populate jwt from cache
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
@@ -203,7 +202,6 @@ public class ProfileActivity extends AppCompatActivity {
                 if (response.body().get("response").contentEquals("success")) {
                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
                     Utility.StoreDataInCache(getApplicationContext(), "name", name);
-                    dialog.dismiss();
                 }
             }
 

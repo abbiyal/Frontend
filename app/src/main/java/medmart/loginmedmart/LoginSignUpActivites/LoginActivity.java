@@ -1,6 +1,7 @@
 package medmart.loginmedmart.LoginSignUpActivites;
 
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -60,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         Button login = (Button) findViewById(R.id.login_button);
 
         login.setOnClickListener(new View.OnClickListener() {
+            ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Loading", "Please wait...", true);
             public void onClick(View view) {
                 //OnCLick Stuff
                 if (awesomeValidation.validate()) {
@@ -68,9 +70,13 @@ public class LoginActivity extends AppCompatActivity {
                     String user = username.getText().toString();
                     String psswd = password.getText().toString();
                     Utility.login(user, psswd, getApplicationContext());
+                    dialog.dismiss();
                 }
+
             }
+
         });
+
 
         Button signUp = (Button) findViewById(R.id.signup_button);
 

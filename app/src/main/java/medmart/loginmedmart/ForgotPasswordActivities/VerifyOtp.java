@@ -2,6 +2,7 @@ package medmart.loginmedmart.ForgotPasswordActivities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ public class VerifyOtp extends AppCompatActivity {
         String email = getIntent().getStringExtra("Email");
         requestObject.put("email", email);
         Call<HashMap<String, String>> forgotCall = retrofitInstance.sendToken(requestObject);
-
+        ProgressDialog dialog = ProgressDialog.show(this, "SendingOTP", "Please wait...", true);
         forgotCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
@@ -55,6 +56,8 @@ public class VerifyOtp extends AppCompatActivity {
                 System.out.println("Connection Error !!!");
             }
         });
+        dialog.dismiss();
+
     }
 
     @Override
@@ -81,6 +84,7 @@ public class VerifyOtp extends AppCompatActivity {
                 Call<HashMap<String, String>> verifyOtpCall = retrofitInterface.verifyOtp(otp);
                 String token = ((PinView) findViewById(R.id.otp)).getEditableText().toString();
                 otp.put("otp", token);
+                ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "VerifyingOTP", "Please wait...", true);
                 verifyOtpCall.enqueue(new Callback<HashMap<String, String>>() {
                     @Override
                     public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
@@ -106,6 +110,7 @@ public class VerifyOtp extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Wrong OTP", Toast.LENGTH_LONG).show();
                     }
                 });
+                dialog.dismiss();
             }
         });
 

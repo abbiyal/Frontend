@@ -1,5 +1,6 @@
 package medmart.loginmedmart.ShopInventoryActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -186,6 +187,7 @@ public class ShopInventory extends AppCompatActivity {
         params.put("shopId", String.valueOf(SHOP_ID));
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<List<HashMap<String,String>>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
+        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "LoadingItems", "Please wait...", true);
         searchResultsCall.enqueue(new Callback<List<HashMap<String, String>>>() {
             @Override
             public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
@@ -231,6 +233,7 @@ public class ShopInventory extends AppCompatActivity {
 
             }
         });
+        dialog.dismiss();
     }
 
     public void CheckCartUi() {
@@ -424,6 +427,7 @@ public class ShopInventory extends AppCompatActivity {
             String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
             RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
             Call<List<HashMap<String, String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt, params);
+            ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "FetchingResults", "Please wait...", true);
             shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
                 @Override
                 public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
@@ -479,6 +483,7 @@ public class ShopInventory extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                 }
             });
+            dialog.dismiss();
         } else {
             if (inventoryAdapter == null) {
                 inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
