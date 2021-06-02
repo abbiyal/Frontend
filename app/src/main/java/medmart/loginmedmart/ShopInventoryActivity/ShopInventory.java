@@ -39,7 +39,6 @@ import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CommonAdapter.SearchCard;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.ShopInventoryActivity.HelperClasses.InventoryAdapter;
-import medmart.loginmedmart.UtilityClasses.ProductCatalogue;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
 import retrofit2.Call;
@@ -186,12 +185,20 @@ public class ShopInventory extends AppCompatActivity {
         params.put("query", query);
         params.put("shopId", String.valueOf(SHOP_ID));
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-        Call<List<HashMap<String,String>>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
-        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "LoadingItems", "Please wait...", true);
+        Call<List<HashMap<String, String>>> searchResultsCall = retrofitInterface.searchProductsWihinShop(jwt, params);
+
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         searchResultsCall.enqueue(new Callback<List<HashMap<String, String>>>() {
             @Override
             public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
-                List<HashMap<String,String>> products = response.body();
+                List<HashMap<String, String>> products = response.body();
                 if (products.size() != 0) {
                     if (!products.isEmpty()) {
                         ArrayList<SearchCard> searchCards = new ArrayList<>();
@@ -214,7 +221,7 @@ public class ShopInventory extends AppCompatActivity {
                         inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
                         inventoryRecycler.setAdapter(inventoryAdapter);
                     }
-
+                    progressDialog.dismiss();
                     inventoryAdapter.SetContent(searchInventory);
                 } else {
                     Toast.makeText(getApplicationContext(), "No Products Found", Toast.LENGTH_LONG).show();
@@ -223,7 +230,7 @@ public class ShopInventory extends AppCompatActivity {
                         inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
                         inventoryRecycler.setAdapter(inventoryAdapter);
                     }
-
+                    progressDialog.dismiss();
                     inventoryAdapter.SetContent(new ArrayList<SearchCard>());
                 }
             }
@@ -233,7 +240,6 @@ public class ShopInventory extends AppCompatActivity {
 
             }
         });
-        dialog.dismiss();
     }
 
     public void CheckCartUi() {
@@ -328,7 +334,6 @@ public class ShopInventory extends AppCompatActivity {
         SetShopUi();
         GetCartData();
 
-
         if (productName.contentEquals("null")) {
             categoryOnFocus = categoryButtons[categoryOnFocusIndex];
             categoryButtons[0].setBackgroundColor(getColor(R.color.black));
@@ -379,7 +384,9 @@ public class ShopInventory extends AppCompatActivity {
                     HashMap<String, Object> cart = response.body();
                     String cartId = (String) cart.get("cartId");
                     String shopIdString = (String) cart.get("shopId");
-                    long shopId = Long.parseLong(shopIdString);
+                    long shopId = -9;
+                    if (!shopIdString.contentEquals("null"))
+                        shopId = Long.parseLong(shopIdString);
                     String totalValueString = (String) cart.get("totalItems");
                     int totalItems = Integer.parseInt(totalValueString);
                     Double totalValue = (Double) cart.get("totalValue");
@@ -427,7 +434,15 @@ public class ShopInventory extends AppCompatActivity {
             String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
             RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
             Call<List<HashMap<String, String>>> shopInventoryCall = retrofitInterface.findShopProducts(jwt, params);
-            ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "FetchingResults", "Please wait...", true);
+
+            ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.show();
+            progressDialog.setContentView(R.layout.progress_bar);
+            progressDialog.setCancelable(false);
+            progressDialog.getWindow().setBackgroundDrawableResource(
+                    android.R.color.transparent
+            );
+
             shopInventoryCall.enqueue(new Callback<List<HashMap<String, String>>>() {
                 @Override
                 public void onResponse(Call<List<HashMap<String, String>>> call, Response<List<HashMap<String, String>>> response) {
@@ -466,24 +481,25 @@ public class ShopInventory extends AppCompatActivity {
                         }
 
                         System.out.println("size is " + categoryInventory.get(Category.POWDER.getValue()).size());
-
                         if (inventoryAdapter == null) {
                             inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
                             inventoryRecycler.setAdapter(inventoryAdapter);
                         }
 
                         inventoryAdapter.SetContent(categoryInventory.get(category));
+                        progressDialog.dismiss();
                     } else {
+                        progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "No products Found", Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<HashMap<String, String>>> call, Throwable t) {
+                    progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                 }
             });
-            dialog.dismiss();
         } else {
             if (inventoryAdapter == null) {
                 inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);

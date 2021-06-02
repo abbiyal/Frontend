@@ -52,12 +52,20 @@ public class SetNewPassword extends AppCompatActivity {
                     map.put("email", email);
                     map.put("password",((TextInputLayout)(findViewById(R.id.login_password))).getEditText().getText().toString());
                     Call<HashMap<String,String>> updatePasswordCall=retrofitInterface.updatePassword(map);
-                    ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "UpdatingPassword", "Please wait...", true);
+                    ProgressDialog progressDialog = new ProgressDialog(SetNewPassword.this);
+                    progressDialog.show();
+                    progressDialog.setContentView(R.layout.progress_bar);
+                    progressDialog.setCancelable(false);
+                    progressDialog.getWindow().setBackgroundDrawableResource(
+                            android.R.color.transparent
+                    );
+
                     updatePasswordCall.enqueue(new Callback<HashMap<String, String>>() {
                         @Override
                         public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                             String ans=response.body().get("response");
                             System.out.println(ans);
+                            progressDialog.dismiss();
                             if(response.body().get("response").contentEquals("success")){
                                 Intent intent = new Intent(getApplicationContext(), ForgetPasswordSuccessMessage.class);
                                 startActivity(intent);
@@ -70,10 +78,11 @@ public class SetNewPassword extends AppCompatActivity {
 
                         @Override
                         public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                            progressDialog.dismiss();
                             Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
                         }
                     });
-                    dialog.dismiss();
+
                     // if success then let it go to next activity.. code written nd if not do as required
 
                 }

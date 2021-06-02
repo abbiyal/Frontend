@@ -25,6 +25,7 @@ import java.util.List;
 
 import medmart.loginmedmart.CommonAdapter.ShopAdapter;
 import medmart.loginmedmart.CommonAdapter.ShopCard;
+import medmart.loginmedmart.ForgotPasswordActivities.VerifyOtp;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.MapActivity.PlacesSearch;
 import medmart.loginmedmart.R;
@@ -114,7 +115,14 @@ public class ProductResult extends AppCompatActivity {
         params.put("location",location);
         params.put("productid",productId);
         Call<List<NearbyShopResponse>> shopsHavingProducts = retrofitInterface.getShopsHavingProducts(jwt,params);
-        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "SendingOTP", "Please wait...", true);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         shopsHavingProducts.enqueue(new Callback<List<NearbyShopResponse>>() {
             @Override
             public void onResponse(Call<List<NearbyShopResponse>> call, Response<List<NearbyShopResponse>> response) {
@@ -133,16 +141,17 @@ public class ProductResult extends AppCompatActivity {
                     shopRecycler.setAdapter(shopAdapter);
                 }
 
+                progressDialog.dismiss();
                 NotifyShopRecycler(shopCards);
                 resultString.setText(shopAdapter.getItemCount() + " store delivering " + medicineName);
             }
 
             @Override
             public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
-
+                progressDialog.dismiss();
             }
         });
-        dialog.dismiss();
+
 
 //        ArrayList<ShopCard> shopCards = new ArrayList<>();
 //        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));

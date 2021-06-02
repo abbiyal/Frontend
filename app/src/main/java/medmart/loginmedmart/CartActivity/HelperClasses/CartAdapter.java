@@ -2,6 +2,7 @@ package medmart.loginmedmart.CartActivity.HelperClasses;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -139,6 +140,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
     }
 
     private void SetQuantity(ProductCatalogue product, CartViewModel holder, String quantity) {
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
@@ -152,6 +161,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
         updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                progressDialog.dismiss();
                 if (response.body().get("response").contentEquals("success")) {
                     Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
                     UpdateCartOnFrontend(product, holder, quantity);
@@ -162,7 +172,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
+                progressDialog.dismiss();
             }
         });
     }
@@ -182,6 +192,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
     }
 
     private void RemoveItem(ProductCatalogue product, CartViewModel holder) {
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
@@ -193,6 +211,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
         delteIteminCartCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                progressDialog.dismiss();
                 if(response.body().get("response").contentEquals("success")) {
                     Toast.makeText(context,"Item Removed !!",Toast.LENGTH_LONG).show();
                     CartService cartService = CartService.GetInstance();
@@ -212,6 +231,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewModel>
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(context,"Connection Error !!1",Toast.LENGTH_LONG).show();
             }
         });

@@ -148,34 +148,13 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:src="@drawable/ic_baseline_home_24"
-                app:tint="@color/teal_700" />
-
-            <TextView
-                android:id="@+id/manage_addresses"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_marginStart="10dp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:text=" Manage Addresses" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginTop="20dp"
+            android:onClick="OrderHistory"
             android:orientation="horizontal">
 
             <ImageView

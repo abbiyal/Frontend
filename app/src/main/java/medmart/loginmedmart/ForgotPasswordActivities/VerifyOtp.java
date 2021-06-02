@@ -1,7 +1,5 @@
 package medmart.loginmedmart.ForgotPasswordActivities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,12 +9,12 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.chaos.view.PinView;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
-import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -38,10 +36,19 @@ public class VerifyOtp extends AppCompatActivity {
         String email = getIntent().getStringExtra("Email");
         requestObject.put("email", email);
         Call<HashMap<String, String>> forgotCall = retrofitInstance.sendToken(requestObject);
-        ProgressDialog dialog = ProgressDialog.show(this, "SendingOTP", "Please wait...", true);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         forgotCall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                progressDialog.dismiss();
+
                 if (response.body().get("response").contentEquals("success")) {
                     Toast.makeText(getApplicationContext(), "OTP SENT !!", Toast.LENGTH_LONG);
                 } else if (response.body().get("response").contentEquals("No User Found")) {
@@ -53,10 +60,11 @@ public class VerifyOtp extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                progressDialog.dismiss();
                 System.out.println("Connection Error !!!");
             }
         });
-        dialog.dismiss();
+
 
     }
 
@@ -84,10 +92,19 @@ public class VerifyOtp extends AppCompatActivity {
                 Call<HashMap<String, String>> verifyOtpCall = retrofitInterface.verifyOtp(otp);
                 String token = ((PinView) findViewById(R.id.otp)).getEditableText().toString();
                 otp.put("otp", token);
-                ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "VerifyingOTP", "Please wait...", true);
+                ProgressDialog progressDialog = new ProgressDialog(VerifyOtp.this);
+                progressDialog.show();
+                progressDialog.setContentView(R.layout.progress_bar);
+                progressDialog.setCancelable(false);
+                progressDialog.getWindow().setBackgroundDrawableResource(
+                        android.R.color.transparent
+                );
+
                 verifyOtpCall.enqueue(new Callback<HashMap<String, String>>() {
                     @Override
                     public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                        progressDialog.dismiss();
+
                         if (response.body().get("response").contentEquals("Valid")) {
                             IsOtpVerified = true;
                             if (parentActivity.contentEquals("signup")) {
@@ -101,6 +118,7 @@ public class VerifyOtp extends AppCompatActivity {
                                 finish();
                             }
                         } else {
+                            progressDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Wrong OTP", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -110,11 +128,11 @@ public class VerifyOtp extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Wrong OTP", Toast.LENGTH_LONG).show();
                     }
                 });
-                dialog.dismiss();
             }
         });
 
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

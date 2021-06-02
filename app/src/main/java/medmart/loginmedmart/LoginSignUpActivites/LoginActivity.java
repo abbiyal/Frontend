@@ -17,6 +17,7 @@ import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 
 import medmart.loginmedmart.ForgotPasswordActivities.ForgetPassword;
+import medmart.loginmedmart.ForgotPasswordActivities.VerifyOtp;
 import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.Utility;
@@ -61,16 +62,21 @@ public class LoginActivity extends AppCompatActivity {
         Button login = (Button) findViewById(R.id.login_button);
 
         login.setOnClickListener(new View.OnClickListener() {
-            ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Loading", "Please wait...", true);
             public void onClick(View view) {
-                //OnCLick Stuff
                 if (awesomeValidation.validate()) {
+                    ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+                    progressDialog.show();
+                    progressDialog.setContentView(R.layout.progress_bar);
+                    progressDialog.setCancelable(false);
+                    progressDialog.getWindow().setBackgroundDrawableResource(
+                            android.R.color.transparent
+                    );
                     EditText username = findViewById(R.id.login_username);
                     EditText password = findViewById(R.id.login_password);
                     String user = username.getText().toString();
                     String psswd = password.getText().toString();
                     Utility.login(user, psswd, getApplicationContext());
-                    dialog.dismiss();
+                    progressDialog.dismiss();
                 }
 
             }

@@ -98,11 +98,18 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         emptyCartLayout = findViewById(R.id.empty_cart_layout);
         nestedScrollView = findViewById(R.id.cart_scrollview);
         constraintLayout = findViewById(R.id.mainlayout);
+        Utility.StoreDataInCache(this, "ispaymentsuccess", "false");
 
         proceedCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog = ProgressDialog.show(getApplicationContext(), "Loading Payment", "Please wait...", true);
+                progressDialog = new ProgressDialog(Cart.this);
+                progressDialog.show();
+                progressDialog.setContentView(R.layout.progress_bar);
+                progressDialog.setCancelable(false);
+                progressDialog.getWindow().setBackgroundDrawableResource(
+                        android.R.color.transparent
+                );
                 VerifyQuantity();
             }
         });
@@ -174,21 +181,46 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
             @Override
             public void onResponse(Call<HashMap<String, List<String>>> call, Response<HashMap<String, List<String>>> response) {
                 List<String> verifyResponse = response.body().get("response");
-
                 if (verifyResponse.size() == 0) {
                     // todo success
                     GetOrderMetaData(decimalFormat.format(CartService.GetInstance().getTotalValue() * 100));
                 } else if (verifyResponse.size() == 1) {
-                    // todo multiple failure
-                    Toast.makeText(getApplicationContext(), "multiple not in stock", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    new AlertDialog.Builder(Cart.this)
+                            .setTitle("Out Of Stock")
+                            .setMessage("Multiple items not available Buy from another shop")
+                            .setCancelable(false)
+                            .setPositiveButton("Go to Home", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    Intent intent = new Intent(getApplicationContext(), HomePage.class);
+                                    intent.putExtra("class", "cart");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                }
+                            })
+                            .create().show();
+
                 } else {
-                    // todo 1 item fail
-                    Toast.makeText(getApplicationContext(), "1 not in stock", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    new AlertDialog.Builder(Cart.this)
+                            .setTitle("Out Of Stock")
+                            .setMessage("Only " + verifyResponse.get(1) + " " + verifyResponse.get(0) + " available")
+                            .setCancelable(false)
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .create().show();
                 }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, List<String>>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(getApplicationContext(), "Please Try Again", Toast.LENGTH_SHORT).show();
             }
         });
@@ -201,6 +233,15 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
          * Add your logic here for a successful payment response
          */
         try {
+            Utility.StoreDataInCache(this, "ispaymentsuccess", "true");
+            progressDialog = new ProgressDialog(Cart.this);
+            progressDialog.show();
+            progressDialog.setContentView(R.layout.progress_bar);
+            progressDialog.setCancelable(false);
+            progressDialog.getWindow().setBackgroundDrawableResource(
+                    android.R.color.transparent
+            );
+
             SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
             String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
             HashMap<String, String> params = new HashMap<String, String>();
@@ -266,6 +307,8 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                         params.put("priceIds", new ArrayList<String>(priceList));
                         params.put("quantityIds", new ArrayList<String>(quantityList));
                         System.out.println("god dont do this to us " + productIdList.size());
+
+
                         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
                         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
                         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
@@ -273,6 +316,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                         saveOrder.enqueue(new Callback<HashMap<String, String>>() {
                             @Override
                             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                                progressDialog.dismiss();
                                 if (response.body().get("response").contentEquals("success")) {
                                     Toast.makeText(getApplicationContext(), "success for order save", Toast.LENGTH_SHORT).show();
                                     ClearBackendCart();
@@ -281,6 +325,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
 
                             @Override
                             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(), "success for order save", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -331,6 +376,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                                     dialog.dismiss();
                                     Intent intent = new Intent(getApplicationContext(), ManageOrder.class);
                                     startActivity(intent);
+                                    finish();
                                 }
                             })
                             .create().show();
@@ -344,6 +390,29 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
 
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (Utility.GetDataFromCache(this, "ispaymentsuccess", "false").contentEquals("false")) {
+            SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+            String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("orderId", receiptId);
+            RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+            Call<HashMap<String, String>> deleteOrder = retrofitInterface.DeleteOrder(jwt, params);
+            deleteOrder.enqueue(new Callback<HashMap<String, String>>() {
+                @Override
+                public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    IncreaseQuantityBackend();
+                }
+
+                @Override
+                public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                }
+            });
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -361,6 +430,14 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
 
+                            progressDialog = new ProgressDialog(Cart.this);
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.progress_bar);
+                            progressDialog.setCancelable(false);
+                            progressDialog.getWindow().setBackgroundDrawableResource(
+                                    android.R.color.transparent
+                            );
+
                             SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
                             String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
                             HashMap<String, String> params = new HashMap<String, String>();
@@ -370,12 +447,12 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                             deleteOrder.enqueue(new Callback<HashMap<String, String>>() {
                                 @Override
                                 public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                                    Toast.makeText(getApplicationContext(), "order deletd", Toast.LENGTH_SHORT).show();
                                     IncreaseQuantityBackend();
                                 }
 
                                 @Override
                                 public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                                    progressDialog.dismiss();
                                     Toast.makeText(getApplicationContext(), "order deletion Error", Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -411,6 +488,8 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 Toast.makeText(getApplicationContext(), "success in quantity increase", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                Utility.StoreDataInCache(getApplicationContext(), "ispaymentsuccess", "true");
             }
 
             @Override
@@ -424,6 +503,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         /**
          * Instantiate Checkout
          */
+        System.out.println("in payment");
         Checkout checkout = new Checkout();
         checkout.setKeyID("rzp_test_eutwk0rpzPmlAl");
 
@@ -450,6 +530,9 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
             options.put("theme.color", "#3399cc");
             options.put("currency", "INR");
             options.put("amount", decimalFormat.format(CartService.GetInstance().getTotalValue() * 100));//pass amount in currency subunits
+
+            System.out.println(Utility.GetDataFromCache(this, "email", "Please enter"));
+            System.out.println(Utility.GetDataFromCache(this, "phone", "Please enter"));
             options.put("prefill.email", Utility.GetDataFromCache(this, "email", "Please enter"));
             options.put("prefill.contact", Utility.GetDataFromCache(this, "phone", "Please enter"));
             options.put("send_sms_hash", true);
@@ -636,9 +719,6 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
     }
 
     public void getProductsForCart() {
-        productIdList.clear();
-        quantityList.clear();
-        priceList.clear();
         List<String> productsIds = new ArrayList<String>(CartService.GetInstance().getListOfItems().keySet());
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
@@ -657,6 +737,9 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                     }
 
                     cartAdapter.SetContent(new ArrayList<ProductCatalogue>(productList));
+                    productIdList.clear();
+                    quantityList.clear();
+                    priceList.clear();
 
                     for (int i = 0; i < productList.size(); i++) {
                         productIdList.add(productList.get(i).getProductId());

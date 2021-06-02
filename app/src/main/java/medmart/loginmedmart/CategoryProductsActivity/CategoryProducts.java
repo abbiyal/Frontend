@@ -89,7 +89,13 @@ public class CategoryProducts extends AppCompatActivity {
         System.out.println(categoryName);
         params.put("category",categoryName.toUpperCase().split(" ")[0]);
         Call<List<ProductCatalogue>> productsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
-        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "FetchingProductss", "Please wait...", true);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
         productsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -106,16 +112,16 @@ public class CategoryProducts extends AppCompatActivity {
                     categoryRecycler.setAdapter(categorySearchAdapter);
                 }
 
+                progressDialog.dismiss();
                 NotifyRecycler(completeListOfProducts);
             }
 
             @Override
             public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG);
             }
         });
-        dialog.dismiss();
-
     }
 
     private void NotifyRecycler(ArrayList<SearchCard> lisOfProducts) {
@@ -139,7 +145,13 @@ public class CategoryProducts extends AppCompatActivity {
         params.put("category",categoryName.getText().toString().toUpperCase().split(" ")[0]);
         params.put("query",query);
         Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsWithinCategory(jwt,params);
-        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Searching", "Please wait...", true);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
         searchProductsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -151,15 +163,17 @@ public class CategoryProducts extends AppCompatActivity {
                     System.out.println(searchCard);
                     searchResults.add(searchCard);
                 }
+
+                progressDialog.dismiss();
                 NotifyRecycler(searchResults);
             }
 
             @Override
             public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(),"Connection Error !",Toast.LENGTH_LONG);
             }
         });
-        dialog.dismiss();
     }
 
     private ArrayList<SearchCard> GenerateSampleData() {

@@ -84,7 +84,15 @@ public class Search extends AppCompatActivity {
         System.out.println(jwt);
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<List<ProductCatalogue>> searchCall = retrofitInterface.getSearchResults(jwt, params);
-        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Searching", "Please wait...", true);
+
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         searchCall.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -119,16 +127,16 @@ public class Search extends AppCompatActivity {
                     searchRecycler.setAdapter(searchAdapter);
                 }
 
+                progressDialog.dismiss();
                 NotifyRecycler(searchResults);
             }
 
             @Override
             public void onFailure(Call<List<ProductCatalogue>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(getApplicationContext(), "connection Error !!!", Toast.LENGTH_LONG).show();
             }
         });
-        dialog.dismiss();
-
     }
 
     private void NotifyRecycler(ArrayList<SearchCard> searchResult) {

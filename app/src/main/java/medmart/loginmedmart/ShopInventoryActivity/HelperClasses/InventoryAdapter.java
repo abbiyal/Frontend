@@ -2,6 +2,7 @@ package medmart.loginmedmart.ShopInventoryActivity.HelperClasses;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -59,6 +60,14 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     }
 
     private void RemoveItem(SearchCard product, InventoryViewModel holder) {
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email FOUND");
@@ -71,6 +80,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                         if(response.body().get("response").contentEquals("success")) {
+                            progressDialog.dismiss();
                             Toast.makeText(context,"Item Removed !!",Toast.LENGTH_LONG).show();
                             CartService cartService = CartService.GetInstance();
                             int prevQuantity = cartService.getListOfItems().get(product.getProductId()).getQuantity();
@@ -82,12 +92,15 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             holder.addToCart.setVisibility(View.VISIBLE);
                             ((ShopInventory) context).CheckCartUi();
                         }
-                        else
-                            Toast.makeText(context,"Error removing",Toast.LENGTH_LONG).show();
+                        else {
+                            progressDialog.dismiss();
+                            Toast.makeText(context, "Error removing", Toast.LENGTH_LONG).show();
+                        }
             }
 
             @Override
             public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(context,"Connection Error !!1",Toast.LENGTH_LONG).show();
             }
         });
@@ -238,6 +251,15 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     }
 
     private void SetQuantity(SearchCard product, InventoryViewModel holder, String quantity) {
+
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         Boolean isProductPresent = CartService.GetInstance().getListOfItems().containsKey(product.getProductId());
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("Login_Cookie", MODE_PRIVATE);
@@ -258,6 +280,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             addItemCall.enqueue(new Callback<HashMap<String, String>>() {
                 @Override
                 public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    progressDialog.dismiss();
                     if (response.body().get("response").contentEquals("success")) {
                         Toast.makeText(context, "Item Added To Cart", Toast.LENGTH_SHORT).show();
                         UpdateCartOnFrontend(product, holder, quantity, isProductPresent);
@@ -268,7 +291,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
 
                 @Override
                 public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
+                    progressDialog.dismiss();
                 }
             });
         } else {
@@ -277,6 +300,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             updateItemCall.enqueue(new Callback<HashMap<String, String>>() {
                 @Override
                 public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                    progressDialog.dismiss();
                     if (response.body().get("response").contentEquals("success")) {
                         Toast.makeText(context, "Item Updated In Cart", Toast.LENGTH_SHORT).show();
                         UpdateCartOnFrontend(product, holder, quantity, isProductPresent);
@@ -287,7 +311,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
 
                 @Override
                 public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-
+                    progressDialog.dismiss();
                 }
             });
 

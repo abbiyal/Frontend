@@ -54,7 +54,14 @@ public class SignUp extends AppCompatActivity {
     private void RegisterUser(HashMap<String, String> jsonObject) {
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<HashMap<String, String>> addusercall = retrofitInterface.addUser(jsonObject);
-        ProgressDialog dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         addusercall.enqueue(new Callback<HashMap<String, String>>() {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
@@ -63,7 +70,7 @@ public class SignUp extends AppCompatActivity {
                     intent.putExtra("Email", jsonObject.get("username"));
                     intent.putExtra("password", jsonObject.get("password"));
                     intent.putExtra("class", "signup");
-                    dialog.dismiss();
+                    progressDialog.dismiss();
                     startActivity(intent);
                 } else if (response.body().get("response").contentEquals("already exist")) {
                     Toast.makeText(getApplicationContext(), "User already exist please login", Toast.LENGTH_LONG).show();

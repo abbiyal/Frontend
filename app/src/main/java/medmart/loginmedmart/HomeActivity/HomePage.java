@@ -21,7 +21,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -51,8 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 import medmart.loginmedmart.CartActivity.Cart;
-import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CartManagement.CartItem;
+import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.CommonAdapter.ShopAdapter;
 import medmart.loginmedmart.CommonAdapter.ShopCard;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
@@ -68,8 +66,6 @@ import medmart.loginmedmart.UtilityClasses.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static java.lang.Character.getType;
 
 public class HomePage extends AppCompatActivity {
 
@@ -130,6 +126,7 @@ public class HomePage extends AppCompatActivity {
         cartImage = findViewById(R.id.cart_icon);
         SetOnEditorAction();
         AttachHooksAndAdapters();
+        progressDialog = new ProgressDialog(this);
 
         PopulateCataegoryRecycler();
         OnMyLocationAccessListener();
@@ -138,7 +135,7 @@ public class HomePage extends AppCompatActivity {
 
         if (intent.getExtras().containsKey("class") &&
                 intent.getStringExtra("class").contentEquals("login")) {
-            
+
             CheckLocationPermission();
             if (mLocationPermission) {
                 LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
@@ -158,7 +155,7 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void GetCartData() {
-        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Loading cart", Toast.LENGTH_SHORT).show();
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email");
@@ -189,12 +186,13 @@ public class HomePage extends AppCompatActivity {
 
                     for (int i = 0; i < items.size(); i++) {
                         Gson gson = new Gson();
-                        Type type = new TypeToken<Map<String, String>>(){}.getType();
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
                         Map<String, String> productMap = gson.fromJson(gson.toJson(items.get(i)), type);
                         String productId = productMap.get("productId");
                         Double price = Double.parseDouble(productMap.get("price"));
-                        int quantity = (int)(Double.parseDouble(productMap.get("quantity")));
-                        CartItem cartItem = new CartItem(quantity,price,productId);
+                        int quantity = (int) (Double.parseDouble(productMap.get("quantity")));
+                        CartItem cartItem = new CartItem(quantity, price, productId);
                         listofItems.put(productId, cartItem);
                     }
 
@@ -205,7 +203,7 @@ public class HomePage extends AppCompatActivity {
                     cartImage.setVisibility(View.VISIBLE);
                     System.out.println(CartService.GetInstance().getListOfItems().size());
                     System.out.println("here not but why");
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -258,12 +256,16 @@ public class HomePage extends AppCompatActivity {
     }
 
     public void GetDeviceLocation() {
-         progressDialog = ProgressDialog.show(this, "Fetching Location",
-                "Please wait... ", true);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         try {
             if (mLocationPermission) {
-                Toast.makeText(HomePage.this, "Please wait loading nearby shops", Toast.LENGTH_LONG).show();
-
+//                Toast.makeText(HomePage.this, "Please wait loading nearby shops", Toast.LENGTH_LONG).show();
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Task<Location> task = mFusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
                         cancellationTokenSource.getToken());
@@ -291,6 +293,7 @@ public class HomePage extends AppCompatActivity {
 
                             OnMyLocationAccessListener();
                         } else {
+                            progressDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Couldn't get Location enter manually", Toast.LENGTH_SHORT).show();
                             cancellationTokenSource.cancel();
                         }
@@ -303,6 +306,17 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void OnMyLocationAccessListener() {
+        Intent intent = getIntent();
+        if (!(intent.getExtras().containsKey("class") &&
+                intent.getStringExtra("class").contentEquals("login"))) {
+            progressDialog.show();
+            progressDialog.setContentView(R.layout.progress_bar);
+            progressDialog.setCancelable(false);
+            progressDialog.getWindow().setBackgroundDrawableResource(
+                    android.R.color.transparent
+            );
+        }
+
         String address = Utility.GetDataFromCache(getApplicationContext(), "useraddress", mDefaultLocationName);
         currentAddress.setText(address);
 
@@ -312,7 +326,6 @@ public class HomePage extends AppCompatActivity {
                 String.valueOf(mDefaultLocation.longitude)));
         mCurrentLocation = new LatLng(latitude, longitude);
         String location = String.valueOf(mCurrentLocation.latitude) + ',' + String.valueOf(mCurrentLocation.longitude);
-
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("location", "\"" + location + "\"");
@@ -340,12 +353,13 @@ public class HomePage extends AppCompatActivity {
                     shopRecycler.setAdapter(shopAdapter);
                 }
 
-                progressDialog.dismiss();
                 NotifyShopRecycler(shopCards);
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<List<NearbyShopResponse>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(getApplicationContext(), "Connection error !!!", Toast.LENGTH_LONG).show();
             }
         });

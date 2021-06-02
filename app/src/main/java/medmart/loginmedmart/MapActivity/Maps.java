@@ -1,11 +1,5 @@
 package medmart.loginmedmart.MapActivity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -13,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -27,6 +20,12 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -44,9 +43,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 import medmart.loginmedmart.HomeActivity.HomePage;
 import medmart.loginmedmart.ProductResultActivity.ProductResult;
@@ -115,16 +112,13 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
 
                 if (intent.getStringExtra("class").contentEquals("homepage")) {
                     intent.setClass(getApplicationContext(), HomePage.class);
-                }
-                else {
+                } else {
                     intent.setClass(getApplicationContext(), ProductResult.class);
                 }
 
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("class", "map");
                 startActivity(intent);
-                Toast.makeText(Maps.this, "Please wait loading nearby shops", Toast.LENGTH_SHORT).show();
-                finish();
             }
         });
 
@@ -188,7 +182,14 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     public void GetDeviceLocation() {
-        progressDialog = ProgressDialog.show(getApplicationContext(), "Fetching Location", "Please wait... ", true);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
@@ -206,8 +207,8 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
                             marker.setPosition(mCurrentLocation);
                             SetUiWithCurrentLocation();
-                        }
-                        else {
+                        } else {
+                            progressDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Couldn't get location Please try again", Toast.LENGTH_SHORT).show();
                             cancellationTokenSource.cancel();
                         }

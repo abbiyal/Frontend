@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -62,10 +63,17 @@ public class ManageOrder extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         GetPastOrders();
-        pastOrderAdapter.SetContent(pastOrders);
     }
 
     private void GetPastOrders() {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         HashMap<String, String> params = new HashMap<String, String>();
@@ -77,11 +85,12 @@ public class ManageOrder extends AppCompatActivity {
             public void onResponse(Call<List<PastOrderCard>> call, Response<List<PastOrderCard>> response) {
                  pastOrders = new ArrayList<>(response.body());
                  pastOrderAdapter.SetContent(pastOrders);
+                 progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<List<PastOrderCard>> call, Throwable t) {
-
+                progressDialog.dismiss();
             }
         });
     }
