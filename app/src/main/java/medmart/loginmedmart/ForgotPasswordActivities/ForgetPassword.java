@@ -2,6 +2,7 @@ package medmart.loginmedmart.ForgotPasswordActivities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -48,7 +49,7 @@ public class ForgetPassword extends AppCompatActivity {
                         String email=((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString();
                         requestObject.put("email",email);
                         Call<HashMap<String,String>> forgotCall=retrofitInstance.sendToken(requestObject);
-
+                        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "SendingOTP", "Please wait...", true);
                         forgotCall.enqueue(new Callback<HashMap<String, String>>() {
                             @Override
                             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
@@ -71,6 +72,7 @@ public class ForgetPassword extends AppCompatActivity {
                                         System.out.println("Connection Error !!!");
                             }
                         });
+                        dialog.dismiss();
 
                     }
             }

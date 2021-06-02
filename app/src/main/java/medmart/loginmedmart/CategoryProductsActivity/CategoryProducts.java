@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -88,6 +89,7 @@ public class CategoryProducts extends AppCompatActivity {
         System.out.println(categoryName);
         params.put("category",categoryName.toUpperCase().split(" ")[0]);
         Call<List<ProductCatalogue>> productsInCategory = retrofitInterface.getProductsOfCategory(jwt,params);
+        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "FetchingProductss", "Please wait...", true);
         productsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -112,6 +114,7 @@ public class CategoryProducts extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),"Connection Error",Toast.LENGTH_LONG);
             }
         });
+        dialog.dismiss();
 
     }
 
@@ -136,6 +139,7 @@ public class CategoryProducts extends AppCompatActivity {
         params.put("category",categoryName.getText().toString().toUpperCase().split(" ")[0]);
         params.put("query",query);
         Call<List<ProductCatalogue>> searchProductsInCategory = retrofitInterface.getProductsWithinCategory(jwt,params);
+        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Searching", "Please wait...", true);
         searchProductsInCategory.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -155,7 +159,7 @@ public class CategoryProducts extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Connection Error !",Toast.LENGTH_LONG);
             }
         });
-
+        dialog.dismiss();
     }
 
     private ArrayList<SearchCard> GenerateSampleData() {

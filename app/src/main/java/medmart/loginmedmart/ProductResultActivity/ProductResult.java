@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -113,6 +114,7 @@ public class ProductResult extends AppCompatActivity {
         params.put("location",location);
         params.put("productid",productId);
         Call<List<NearbyShopResponse>> shopsHavingProducts = retrofitInterface.getShopsHavingProducts(jwt,params);
+        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "SendingOTP", "Please wait...", true);
         shopsHavingProducts.enqueue(new Callback<List<NearbyShopResponse>>() {
             @Override
             public void onResponse(Call<List<NearbyShopResponse>> call, Response<List<NearbyShopResponse>> response) {
@@ -140,6 +142,7 @@ public class ProductResult extends AppCompatActivity {
 
             }
         });
+        dialog.dismiss();
 
 //        ArrayList<ShopCard> shopCards = new ArrayList<>();
 //        shopCards.add(new ShopCard(R.drawable.biyal_shop__1_, "Biyal Pharmaceuticals", "2.3Km"));

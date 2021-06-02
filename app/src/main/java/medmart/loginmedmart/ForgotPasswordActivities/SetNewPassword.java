@@ -2,6 +2,7 @@ package medmart.loginmedmart.ForgotPasswordActivities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -51,6 +52,7 @@ public class SetNewPassword extends AppCompatActivity {
                     map.put("email", email);
                     map.put("password",((TextInputLayout)(findViewById(R.id.login_password))).getEditText().getText().toString());
                     Call<HashMap<String,String>> updatePasswordCall=retrofitInterface.updatePassword(map);
+                    ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "UpdatingPassword", "Please wait...", true);
                     updatePasswordCall.enqueue(new Callback<HashMap<String, String>>() {
                         @Override
                         public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
@@ -71,6 +73,7 @@ public class SetNewPassword extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
                         }
                     });
+                    dialog.dismiss();
                     // if success then let it go to next activity.. code written nd if not do as required
 
                 }

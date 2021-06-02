@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -83,6 +84,7 @@ public class Search extends AppCompatActivity {
         System.out.println(jwt);
         RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
         Call<List<ProductCatalogue>> searchCall = retrofitInterface.getSearchResults(jwt, params);
+        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "Searching", "Please wait...", true);
         searchCall.enqueue(new Callback<List<ProductCatalogue>>() {
             @Override
             public void onResponse(Call<List<ProductCatalogue>> call, Response<List<ProductCatalogue>> response) {
@@ -125,7 +127,7 @@ public class Search extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "connection Error !!!", Toast.LENGTH_LONG).show();
             }
         });
-
+        dialog.dismiss();
 
     }
 
