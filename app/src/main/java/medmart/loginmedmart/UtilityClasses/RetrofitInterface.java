@@ -1,7 +1,5 @@
 package medmart.loginmedmart.UtilityClasses;
 
-import org.json.JSONArray;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +7,8 @@ import java.util.Map;
 import medmart.loginmedmart.HomeActivity.HelperClasses.NearbyShopResponse;
 import medmart.loginmedmart.LoginSignUpActivites.Jwt;
 import medmart.loginmedmart.LoginSignUpActivites.LoginCredentials;
+import medmart.loginmedmart.ManageOrderActivity.HelperClasses.OrderDetailCard;
+import medmart.loginmedmart.ManageOrderActivity.HelperClasses.PastOrderCard;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -90,4 +90,21 @@ public interface RetrofitInterface {
     @GET("/med-orders/orders/generateOrderId")
     Call<HashMap<String,String>> generateOrderId(@Header("Authorization") String token, @QueryMap Map<String, String> params);
 
+    @POST("/med-inventory/inventory/verifyquantity")
+    Call<HashMap<String, List<String>>> VerifiyAndDecreaseQuantity(@Header("Authorization") String jwt, @Body HashMap<String, List<String>> params);
+
+    @POST("/med-orders/orders/success")
+    Call<HashMap<String, String>> AddOrder(@Header("Authorization") String jwt, @Body HashMap<String, List<String>> params);
+
+    @GET("/med-orders/orders/failure")
+    Call<HashMap<String, String>> DeleteOrder(@Header("Authorization") String jwt, @QueryMap HashMap<String, String> params);
+
+    @POST("/med-inventory/inventory/increasequantity")
+    Call<HashMap<String, String>> IncreaseQuantityOnFailure(@Header("Authorization") String jwt, @Body HashMap<String, List<String>> params);
+
+    @GET("/med-orders/orders/getorders")
+    Call<List<PastOrderCard>> GetPastOrders(@Header("Authorization") String jwt, @QueryMap HashMap<String, String> params);
+
+    @GET("/med-orders/orders/orderdetails")
+    Call<List<OrderDetailCard>> GetOrderDetail(@Header("Authorization") String jwt, @QueryMap HashMap<String, String> params);
 }

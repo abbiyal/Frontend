@@ -1,6 +1,7 @@
 package medmart.loginmedmart.ManageOrderActivity.HelperClasses;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 import medmart.loginmedmart.CartActivity.HelperClasses.CartAdapter;
+import medmart.loginmedmart.ManageOrderActivity.OrderDetail;
 import medmart.loginmedmart.R;
 
 public class PastOrderAdapter extends RecyclerView.Adapter<PastOrderAdapter.PastOrderViewHolder> {
@@ -29,6 +31,7 @@ public class PastOrderAdapter extends RecyclerView.Adapter<PastOrderAdapter.Past
 
     public void SetContent(ArrayList<PastOrderCard> pastOrderCards) {
         this.pastOrderCards = pastOrderCards;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -45,11 +48,20 @@ public class PastOrderAdapter extends RecyclerView.Adapter<PastOrderAdapter.Past
 
         holder.shopName.setText(pastOrderCard.getShopName());
         holder.price.setText("Rs. " + String.valueOf(pastOrderCard.getPrice()));
+        holder.status.setText(pastOrderCard.getStatus());
+        holder.dateTime.setText(pastOrderCard.getDateTime());
 
         holder.viewDetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo call new activity with details
+                Intent intent = new Intent(context, OrderDetail.class);
+                intent.putExtra("orderId", pastOrderCard.getOrderId());
+                intent.putExtra("shopName", pastOrderCard.getShopName());
+                intent.putExtra("shopAddress", pastOrderCard.getShopAddress());
+                intent.putExtra("deliveryAddress", pastOrderCard.getDeliveryAddress());
+                intent.putExtra("dateTime", pastOrderCard.getDateTime());
+                intent.putExtra("totalValue", String.valueOf(pastOrderCard.getPrice()));
+                context.startActivity(intent);
             }
         });
     }
@@ -60,7 +72,7 @@ public class PastOrderAdapter extends RecyclerView.Adapter<PastOrderAdapter.Past
     }
 
     public class PastOrderViewHolder extends RecyclerView.ViewHolder {
-        TextView shopName, price;
+        TextView shopName, price, status, dateTime;
         Button viewDetails;
 
         public PastOrderViewHolder(@NonNull @NotNull View itemView) {
@@ -68,6 +80,8 @@ public class PastOrderAdapter extends RecyclerView.Adapter<PastOrderAdapter.Past
 
             shopName = itemView.findViewById(R.id.shop_name);
             price = itemView.findViewById(R.id.order_price);
+            status = itemView.findViewById(R.id.status);
+            dateTime = itemView.findViewById(R.id.datetime);
             viewDetails = itemView.findViewById(R.id.view_details);
         }
     }

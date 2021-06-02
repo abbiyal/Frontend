@@ -331,7 +331,6 @@ public class ShopInventory extends AppCompatActivity {
             categoryButtons[0].setBackgroundColor(getColor(R.color.black));
             categoryButtons[0].setTextColor(getColor(R.color.white));
             HandleCategoryClick(findViewById(R.id.all));
-            PopulateRecyclerView(0);
         } else {
             setFocus(categoryButtons[0], categoryButtons[0]);
             search.setText(productName);
@@ -440,6 +439,7 @@ public class ShopInventory extends AppCompatActivity {
                             String size = product.get("size");
                             String type = product.get("type");
                             String price = product.get("price");
+                            System.out.println(price);
                             SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
                             searchCard.setType(type);
                             searchCards.add(searchCard);
@@ -460,6 +460,8 @@ public class ShopInventory extends AppCompatActivity {
                                 categoryInventory.get(Category.POWDER.getValue()).add(categoryInventory.get(0).get(i));
                             }
                         }
+
+                        System.out.println("size is " + categoryInventory.get(Category.POWDER.getValue()).size());
 
                         if (inventoryAdapter == null) {
                             inventoryAdapter = new InventoryAdapter(ShopInventory.this, SHOP_ID);
@@ -483,6 +485,7 @@ public class ShopInventory extends AppCompatActivity {
                 inventoryRecycler.setAdapter(inventoryAdapter);
             }
 
+            System.out.println("size in cat" + categoryInventory.get(category).size());
             inventoryAdapter.SetContent(categoryInventory.get(category));
         }
     }

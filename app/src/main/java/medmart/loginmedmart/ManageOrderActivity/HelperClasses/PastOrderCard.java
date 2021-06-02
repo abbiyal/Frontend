@@ -4,8 +4,10 @@ public class PastOrderCard {
     String orderId;
     Double price;
     String shopName;
+    String shopAddress;
     String status;
     String dateTime;
+    String deliveryAddress;
 
     public String getStatus() {
         return status;
@@ -25,12 +27,15 @@ public class PastOrderCard {
 
 
 
-    public PastOrderCard(String orderId, Double price, String shopName, String dateTime, String status) {
+    public PastOrderCard(String orderId, Double price, String shopName, String dateTime, String status,
+                         String shopAddress, String deliveryAddress) {
         this.orderId = orderId;
         this.price = price;
         this.shopName = shopName;
         this.dateTime = dateTime;
         this.status = status;
+        this.shopAddress = shopAddress;
+        this.deliveryAddress = deliveryAddress;
     }
 
     @Override
@@ -40,6 +45,22 @@ public class PastOrderCard {
                 ", price=" + price +
                 ", shopName='" + shopName + '\'' +
                 '}';
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getShopAddress() {
+        return shopAddress;
+    }
+
+    public void setShopAddress(String shopAddress) {
+        this.shopAddress = shopAddress;
     }
 
     public String getOrderId() {

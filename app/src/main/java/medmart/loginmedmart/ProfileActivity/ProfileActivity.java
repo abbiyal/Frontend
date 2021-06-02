@@ -228,7 +228,8 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
                 if (response.body().get("response").contentEquals("success")) {
-                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                    Utility.StoreDataInCache(getApplicationContext(), "phone", phone);
                 }
             }
 

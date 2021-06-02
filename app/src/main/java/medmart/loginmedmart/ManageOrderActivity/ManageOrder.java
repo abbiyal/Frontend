@@ -5,22 +5,35 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
+import medmart.loginmedmart.CartManagement.CartService;
 import medmart.loginmedmart.HomeActivity.HelperClasses.CategoryAdapter;
 import medmart.loginmedmart.ManageOrderActivity.HelperClasses.PastOrderAdapter;
 import medmart.loginmedmart.ManageOrderActivity.HelperClasses.PastOrderCard;
 import medmart.loginmedmart.R;
+import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
+import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
+import medmart.loginmedmart.UtilityClasses.Utility;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ManageOrder extends AppCompatActivity {
     RecyclerView pastOrderRV;
     PastOrderAdapter pastOrderAdapter;
     ArrayList<PastOrderCard> pastOrders;
+    String shopName, shopAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +61,29 @@ public class ManageOrder extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        GenerateRandomData();
+        GetPastOrders();
         pastOrderAdapter.SetContent(pastOrders);
     }
 
-    private void GenerateRandomData() {
-        for (int i = 0; i < 10; i++) {
-            pastOrders.add(new PastOrderCard("100", 23.7, "Biyal Pharma",
-                    "10 Mar 2021 at 11:30 pm", "Pending"));
-        }
+    private void GetPastOrders() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
+        String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("userId", Utility.GetDataFromCache(this, "email", "no user"));
+        RetrofitInterface retrofitInterface = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+        Call<List<PastOrderCard>> getPastOrders = retrofitInterface.GetPastOrders(jwt, params);
+        getPastOrders.enqueue(new Callback<List<PastOrderCard>>() {
+            @Override
+            public void onResponse(Call<List<PastOrderCard>> call, Response<List<PastOrderCard>> response) {
+                 pastOrders = new ArrayList<>(response.body());
+                 pastOrderAdapter.SetContent(pastOrders);
+            }
+
+            @Override
+            public void onFailure(Call<List<PastOrderCard>> call, Throwable t) {
+
+            }
+        });
     }
 
     public void GoBack(View view) {
