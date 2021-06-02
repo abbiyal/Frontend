@@ -2,6 +2,7 @@ package medmart.loginmedmart.CartActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -76,6 +77,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
     List<String> quantityList = new ArrayList<>();
     List<String> priceList = new ArrayList<>();
     List<String> nameList = new ArrayList<>();
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +102,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
         proceedCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialog = ProgressDialog.show(getApplicationContext(), "Loading Payment", "Please wait...", true);
                 VerifyQuantity();
             }
         });
@@ -450,6 +453,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
             options.put("prefill.email", Utility.GetDataFromCache(this, "email", "Please enter"));
             options.put("prefill.contact", Utility.GetDataFromCache(this, "phone", "Please enter"));
             options.put("send_sms_hash", true);
+            progressDialog.dismiss();
             checkout.open(activity, options);
 
         } catch (Exception e) {

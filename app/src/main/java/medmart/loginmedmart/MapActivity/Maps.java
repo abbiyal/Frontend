@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -69,6 +70,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     private final int DEFAULT_ZOOM = 15;
     private int ACTIVITY_CODE = 2;
     TextView currentLocation;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +188,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     public void GetDeviceLocation() {
+        progressDialog = ProgressDialog.show(getApplicationContext(), "Fetching Location", "Please wait... ", true);
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
@@ -198,6 +201,7 @@ public class Maps extends AppCompatActivity implements OnMapReadyCallback {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
+                            progressDialog.dismiss();
                             mCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation, DEFAULT_ZOOM));
                             marker.setPosition(mCurrentLocation);

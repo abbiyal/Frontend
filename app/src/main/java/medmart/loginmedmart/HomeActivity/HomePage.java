@@ -2,6 +2,7 @@ package medmart.loginmedmart.HomeActivity;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +21,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -82,6 +85,7 @@ public class HomePage extends AppCompatActivity {
     private static FusedLocationProviderClient mFusedLocationProviderClient;
     TextView currentAddress, itemCount;
     ImageView cartImage;
+    ProgressDialog progressDialog;
 
     RecyclerView categoryRecycler;
     CategoryAdapter categoryAdapter;
@@ -254,6 +258,8 @@ public class HomePage extends AppCompatActivity {
     }
 
     public void GetDeviceLocation() {
+         progressDialog = ProgressDialog.show(this, "Fetching Location",
+                "Please wait... ", true);
         try {
             if (mLocationPermission) {
                 Toast.makeText(HomePage.this, "Please wait loading nearby shops", Toast.LENGTH_LONG).show();
@@ -334,6 +340,7 @@ public class HomePage extends AppCompatActivity {
                     shopRecycler.setAdapter(shopAdapter);
                 }
 
+                progressDialog.dismiss();
                 NotifyShopRecycler(shopCards);
             }
 
