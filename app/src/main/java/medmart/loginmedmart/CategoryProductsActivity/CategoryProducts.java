@@ -102,8 +102,28 @@ public class CategoryProducts extends AppCompatActivity {
                 List<ProductCatalogue> productsInCategory = response.body();
                 completeListOfProducts = new ArrayList<SearchCard>();
                 for(int i=0;i<productsInCategory.size();i++) {
+
+                    String sizeString = "";
+                    switch (productsInCategory.get(i).getType()) {
+                        case "GEL":
+                            sizeString = productsInCategory.get(i).getSize() + " " + getString(R.string.Gel_Size);
+                            break;
+                        case "POWDER":
+                            sizeString = productsInCategory.get(i).getSize() + " " + getString(R.string.Powder_Size);
+                            break;
+                        case "SYRUP":
+                        case "SPRAY":
+                            sizeString = productsInCategory.get(i).getSize() + " " + getString(R.string.Syrup_Spray_Size);
+                            break;
+                        case "TABLET":
+                            sizeString = productsInCategory.get(i).getSize() + " " + getString(R.string.Tablet_Size);
+                            break;
+                        default:
+                            sizeString = productsInCategory.get(i).getSize() + " UNITS";
+                    }
+
                     SearchCard searchCard = new SearchCard(R.drawable.crocin, productsInCategory.get(i).getProductName(),
-                            productsInCategory.get(i).getCompanyName(), productsInCategory.get(i).getSize(), productsInCategory.get(i).getProductId());
+                            productsInCategory.get(i).getCompanyName(), sizeString, productsInCategory.get(i).getProductId());
                     System.out.println(searchCard);
                     completeListOfProducts.add(searchCard);
                 }

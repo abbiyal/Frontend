@@ -746,18 +746,42 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                         cartRecyclerView.setAdapter(cartAdapter);
                     }
 
-                    cartAdapter.SetContent(new ArrayList<ProductCatalogue>(productList));
-                    productIdList.clear();
-                    quantityList.clear();
-                    priceList.clear();
-
                     for (int i = 0; i < productList.size(); i++) {
                         productIdList.add(productList.get(i).getProductId());
                         nameList.add(productList.get(i).getProductName());
                         CartItem cartItem = CartService.GetInstance().getListOfItems().get(productList.get(i).getProductId());
                         quantityList.add(String.valueOf(cartItem.getQuantity()));
                         priceList.add(String.valueOf(cartItem.getPrice()));
+
+                        String sizeString = productList.get(i).getSize();
+
+                        switch (productList.get(i).getType()) {
+                            case "GEL":
+                                sizeString +=  " " + getString(R.string.Gel_Size);
+                                break;
+                            case "POWDER":
+                                sizeString += " " + getString(R.string.Powder_Size);
+                                break;
+                            case "SYRUP":
+                            case "SPRAY":
+                                sizeString += " " + getString(R.string.Syrup_Spray_Size);
+                                break;
+                            case "TABLET":
+                                sizeString += " " + getString(R.string.Tablet_Size);
+                                break;
+                            default:
+                                sizeString += " UNITS";
+                        }
+
+                        productList.get(i).setSize(sizeString);
                     }
+
+                    cartAdapter.SetContent(new ArrayList<ProductCatalogue>(productList));
+                    productIdList.clear();
+                    quantityList.clear();
+                    priceList.clear();
+
+
 
                     System.out.println("please god no here as well " + productIdList.size());
                 }

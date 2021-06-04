@@ -209,9 +209,29 @@ public class ShopInventory extends AppCompatActivity {
                             String Dosestrength = product.get("doseStrength");
                             String productName = product.get("productName");
                             String size = product.get("size");
+                            String sizeString = "";
+
+                            switch (product.get("type")) {
+                                case "GEL":
+                                    sizeString = size + " " + getString(R.string.Gel_Size);
+                                    break;
+                                case "POWDER":
+                                    sizeString = size + " " + getString(R.string.Powder_Size);
+                                    break;
+                                case "SYRUP":
+                                case "SPRAY":
+                                    sizeString = size + " " + getString(R.string.Syrup_Spray_Size);
+                                    break;
+                                case "TABLET":
+                                    sizeString = size + " " + getString(R.string.Tablet_Size);
+                                    break;
+                                default:
+                                    sizeString = size + " UNITS";
+                            }
+
                             String type = product.get("type");
                             String price = product.get("price");
-                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
+                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, sizeString, productId, price);
                             searchCard.setType(type);
                             searchInventory.add(searchCard);
                         }
@@ -456,10 +476,30 @@ public class ShopInventory extends AppCompatActivity {
                             String Dosestrength = product.get("doseStrength");
                             String productName = product.get("productName");
                             String size = product.get("size");
+                            String sizeString = "";
+
+                            switch (product.get("type")) {
+                                case "GEL":
+                                    sizeString = size + " " + getString(R.string.Gel_Size);
+                                    break;
+                                case "POWDER":
+                                    sizeString = size + " " + getString(R.string.Powder_Size);
+                                    break;
+                                case "SYRUP":
+                                case "SPRAY":
+                                    sizeString = size + " " + getString(R.string.Syrup_Spray_Size);
+                                    break;
+                                case "TABLET":
+                                    sizeString = size + " " + getString(R.string.Tablet_Size);
+                                    break;
+                                default:
+                                    sizeString = size + " UNITS";
+                            }
+
                             String type = product.get("type");
                             String price = product.get("price");
                             System.out.println(price);
-                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, size, productId, price);
+                            SearchCard searchCard = new SearchCard(R.drawable.syrup3, productName, companyName, sizeString, productId, price);
                             searchCard.setType(type);
                             searchCards.add(searchCard);
                         }
