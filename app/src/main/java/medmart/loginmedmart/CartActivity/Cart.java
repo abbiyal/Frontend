@@ -746,6 +746,10 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                         cartRecyclerView.setAdapter(cartAdapter);
                     }
 
+                    productIdList.clear();
+                    quantityList.clear();
+                    priceList.clear();
+
                     for (int i = 0; i < productList.size(); i++) {
                         productIdList.add(productList.get(i).getProductId());
                         nameList.add(productList.get(i).getProductName());
@@ -777,11 +781,6 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                     }
 
                     cartAdapter.SetContent(new ArrayList<ProductCatalogue>(productList));
-                    productIdList.clear();
-                    quantityList.clear();
-                    priceList.clear();
-
-
 
                     System.out.println("please god no here as well " + productIdList.size());
                 }
