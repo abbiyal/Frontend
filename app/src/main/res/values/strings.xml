@@ -7,13 +7,26 @@
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_username">Please enter valid username</string>
+    <string name="invalid_password">Please enter 5 digit password</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="default_info_title">Default Location</string>
+    <string name="default_info_snippet">No places found, because location permission is disabled.</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
     <string name="hello_world">Hello Square World!</string>
+    <string name="invalid_name">Please enter valid name</string>
+    <string name="invalid_phone">Please enter valid phone number</string>
+    <string name="invalid_confrim_password">Password does not match</string>
+    <string name="sample_medicine_name">Crocin 650mg Advance</string>
+    <string name="sample_medicine_company">By CIPLA</string>
+    <string name="sample_medicine_size">15 TABLET(S) IN STRIP</string>
+    <string name="Syrup_Spray_Size">IN BOTTLE</string>
+    <string name="Powder_Size">POWDER IN BOTTLE</string>
+    <string name="Gel_Size">GEL IN TUBE</string>
+    <string name="Tablet_Size">TABLET(S) IN STRIP</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
