@@ -660,6 +660,14 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
     }
 
     private void GetCartData() {
+        ProgressDialog progressDialog = new ProgressDialog(Cart.this);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_bar);
+        progressDialog.setCancelable(false);
+        progressDialog.getWindow().setBackgroundDrawableResource(
+                android.R.color.transparent
+        );
+
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Login_Cookie", MODE_PRIVATE);
         String jwt = "Bearer " + sharedPreferences.getString("jwt", "No JWT FOUND");
         String email = sharedPreferences.getString("email", "No email");
@@ -704,6 +712,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
                     CartService.GetInstance().setListOfItems(listofItems);
                     CartService.GetInstance().setCartLoaded(true);
                     currentLocation.setText(Utility.GetDataFromCache(getApplicationContext(), "useraddress", "Chandigarh"));
+                    progressDialog.dismiss();
                     SetUi();
                     getProductsForCart();
                 } catch (Exception e) {
@@ -713,6 +722,7 @@ public class Cart extends AppCompatActivity implements PaymentResultListener {
 
             @Override
             public void onFailure(Call<HashMap<String, Object>> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(getApplicationContext(), "Conenction Error !! ", Toast.LENGTH_LONG).show();
             }
         });

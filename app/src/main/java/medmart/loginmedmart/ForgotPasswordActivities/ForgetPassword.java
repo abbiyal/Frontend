@@ -1,7 +1,5 @@
 package medmart.loginmedmart.ForgotPasswordActivities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,13 +9,14 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.HashMap;
 
-import medmart.loginmedmart.LoginSignUpActivites.LoginActivity;
 import medmart.loginmedmart.R;
 import medmart.loginmedmart.UtilityClasses.RetrofitInstance;
 import medmart.loginmedmart.UtilityClasses.RetrofitInterface;
@@ -43,38 +42,44 @@ public class ForgetPassword extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                    if (awesomeValidation.validate()) {
-                        RetrofitInterface retrofitInstance=RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
-                        HashMap<String,String> requestObject=new HashMap<>();
-                        String email=((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString();
-                        requestObject.put("email",email);
-                        Call<HashMap<String,String>> forgotCall=retrofitInstance.sendToken(requestObject);
-                        ProgressDialog dialog = ProgressDialog.show(getApplicationContext(), "SendingOTP", "Please wait...", true);
-                        forgotCall.enqueue(new Callback<HashMap<String, String>>() {
-                            @Override
-                            public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                                if(response.body().get("response").contentEquals("success")) {
-                                    Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
-                                    intent.putExtra("Email", ((TextInputLayout)findViewById(R.id.login_username)).getEditText().getText().toString());
-                                    intent.putExtra("class", "forgetpassword");
-                                    startActivity(intent);
-                                }
-                                else if(response.body().get("response").contentEquals("No User Found")){
-                                    Toast.makeText(getApplicationContext(),"User Not Found",Toast.LENGTH_LONG);
-                                }
-                                else if(response.body().get("response").contentEquals("Connetion Error !!")){
-                                    Toast.makeText(getApplicationContext(),"Connection Error Retry",Toast.LENGTH_LONG);
-                                }
-                            }
+                if (awesomeValidation.validate()) {
+                    RetrofitInterface retrofitInstance = RetrofitInstance.getRetrofitInstance().create(RetrofitInterface.class);
+                    HashMap<String, String> requestObject = new HashMap<>();
+                    String email = ((TextInputLayout) findViewById(R.id.login_username)).getEditText().getText().toString();
+                    requestObject.put("email", email);
+                    Call<HashMap<String, String>> forgotCall = retrofitInstance.sendToken(requestObject);
 
-                            @Override
-                            public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                                        System.out.println("Connection Error !!!");
-                            }
-                        });
-                        dialog.dismiss();
+                    ProgressDialog progressDialog = new ProgressDialog(ForgetPassword.this);
+                    progressDialog.show();
+                    progressDialog.setContentView(R.layout.progress_bar);
+                    progressDialog.setCancelable(false);
+                    progressDialog.getWindow().setBackgroundDrawableResource(
+                            android.R.color.transparent
+                    );
 
-                    }
+                    forgotCall.enqueue(new Callback<HashMap<String, String>>() {
+                        @Override
+                        public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                            progressDialog.dismiss();
+                            if (response.body().get("response").contentEquals("success")) {
+                                Intent intent = new Intent(getApplicationContext(), VerifyOtp.class);
+                                intent.putExtra("Email", ((TextInputLayout) findViewById(R.id.login_username)).getEditText().getText().toString());
+                                intent.putExtra("class", "forgetpassword");
+                                startActivity(intent);
+                            } else if (response.body().get("response").contentEquals("No User Found")) {
+                                Toast.makeText(getApplicationContext(), "User Not Found", Toast.LENGTH_LONG);
+                            } else if (response.body().get("response").contentEquals("Connetion Error !!")) {
+                                Toast.makeText(getApplicationContext(), "Connection Error Retry", Toast.LENGTH_LONG);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                            progressDialog.dismiss();
+                            System.out.println("Connection Error !!!");
+                        }
+                    });
+                }
             }
         });
 
